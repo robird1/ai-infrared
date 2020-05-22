@@ -93,6 +93,7 @@ class ScanActivity : AppCompatActivity() {
             }
             .setNegativeButton("Cancel"
             ) { dialog, whichButton ->
+                isAskingName = false
                 dialog.dismiss()
             }
             .create()
