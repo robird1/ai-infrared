@@ -8,6 +8,7 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.View
 import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.vision.CameraSource
@@ -90,9 +91,13 @@ class ScanActivity : AppCompatActivity() {
             .setPositiveButton("Save"
             ) { dialog, whichButton ->
                 val deviceName = input.text.toString()
-                saveDevice(qrCode, deviceName, qrCode)
-                AppPreference(getSharedPreferences("app", Context.MODE_PRIVATE)).setOnceCreateFirstDevice()
-                goMain()
+                if (deviceName.isEmpty()) {
+                    Toast.makeText(ctx, "請輸入裝置名稱!", Toast.LENGTH_SHORT).show()
+                } else {
+                    saveDevice(qrCode, deviceName, qrCode)
+                    AppPreference(getSharedPreferences("app", Context.MODE_PRIVATE)).setOnceCreateFirstDevice()
+                    goMain()
+                }
             }
             .setNegativeButton("Cancel"
             ) { dialog, whichButton ->
