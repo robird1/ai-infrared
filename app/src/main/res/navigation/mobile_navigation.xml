@@ -7,9 +7,9 @@
 
     <fragment
         android:id="@+id/navigation_home"
-        android:name="com.ulsee.thermalapp.ui.home.HomeFragment"
+        android:name="com.ulsee.thermalapp.ui.device.ListFragment"
         android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_device_list" />
 
     <fragment
         android:id="@+id/navigation_dashboard"
