@@ -1,5 +1,6 @@
 package com.ulsee.thermalapp.ui.device
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -15,6 +16,7 @@ import com.google.android.gms.vision.barcode.Barcode
 import com.google.android.gms.vision.barcode.BarcodeDetector
 import com.ulsee.thermalapp.MainActivity
 import com.ulsee.thermalapp.R
+import com.ulsee.thermalapp.data.AppPreference
 import com.ulsee.thermalapp.data.model.Device
 import io.realm.Realm
 import io.realm.kotlin.where
@@ -89,6 +91,7 @@ class ScanActivity : AppCompatActivity() {
             ) { dialog, whichButton ->
                 val deviceName = input.text.toString()
                 saveDevice(qrCode, deviceName, qrCode)
+                AppPreference(getSharedPreferences("app", Context.MODE_PRIVATE)).setOnceCreateFirstDevice()
                 goMain()
             }
             .setNegativeButton("Cancel"
