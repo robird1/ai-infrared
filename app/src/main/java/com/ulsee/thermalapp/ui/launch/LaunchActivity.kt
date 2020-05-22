@@ -13,6 +13,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.ulsee.thermalapp.MainActivity
 import com.ulsee.thermalapp.R
+import com.ulsee.thermalapp.data.AppPreference
+import com.ulsee.thermalapp.ui.device.ScanActivity
 import com.ulsee.thermalapp.utils.PermissionAskPreference
 import java.util.*
 
@@ -20,7 +22,8 @@ class LaunchActivity : AppCompatActivity() {
 
     val NEEDED_PERMISSIONS = arrayOf<String>(
         android.Manifest.permission.READ_EXTERNAL_STORAGE,
-        android.Manifest.permission.INTERNET
+        android.Manifest.permission.INTERNET,
+        android.Manifest.permission.CAMERA
     )
 
     val REQUEST_CODE_PERMISSION = 11111;
@@ -32,7 +35,7 @@ class LaunchActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_launch)
 
-        permissionAskPreference = PermissionAskPreference(getSharedPreferences("", Context.MODE_PRIVATE))
+        permissionAskPreference = PermissionAskPreference(getSharedPreferences("permission", Context.MODE_PRIVATE))
 
         // permission
         validatePermissions()
@@ -40,7 +43,7 @@ class LaunchActivity : AppCompatActivity() {
 
     private fun validatePermissions() {
         if (isPermissionsAllGranted()) {
-            goMain()
+            goNextPage()
         } else if (isUserRequestNeverAskPermissionAgain()) {
             Toast.makeText(
                 this,
@@ -54,8 +57,13 @@ class LaunchActivity : AppCompatActivity() {
     }
 
 
-    private fun goMain() {
-        startActivity(Intent(this, MainActivity::class.java))
+    private fun goNextPage() {
+        val appPreference = AppPreference(getSharedPreferences("app", Context.MODE_PRIVATE))
+        if (appPreference.isOnceCreateFirstDevice()) {
+            startActivity(Intent(this, MainActivity::class.java))
+        } else {
+            startActivity(Intent(this, ScanActivity::class.java))
+        }
         finish()
     }
 
