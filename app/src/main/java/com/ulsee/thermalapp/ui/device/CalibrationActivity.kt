@@ -1,0 +1,154 @@
+package com.ulsee.thermalapp.ui.device
+
+import android.graphics.Point
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
+import android.os.Bundle
+import android.util.Log
+import android.util.Size
+import android.view.MotionEvent
+import android.view.ScaleGestureDetector
+import android.view.View
+import android.widget.ImageView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
+import com.ulsee.thermalapp.R
+import kotlin.math.max
+import kotlin.math.min
+
+
+class CalibrationActivity : AppCompatActivity() {
+
+    val Tag = "CalibrationActivity"
+
+    lateinit var rgbIV : ImageView
+    lateinit var thermalIV : ImageView
+
+    var rgbLoaded = false
+    var thermalLoaded = false
+    var rgbSize = Size(0, 0)
+    var thermalSize = Size(0, 0)
+    var mInitThermalIVSize = Size(0, 0)
+
+    // drag
+    var lastPoint = Point()
+
+    // scale
+    private var mScaleFactor = 1f
+
+    private val scaleListener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+        override fun onScale(detector: ScaleGestureDetector): Boolean {
+            mScaleFactor *= detector.scaleFactor
+//            Log.i(Tag, "onScale = "+(detector.scaleFactor) +", new factor="+mScaleFactor)
+            mScaleFactor = max(0.3f, min(mScaleFactor, 5.0f))
+
+            val layoutParams = thermalIV.layoutParams
+            layoutParams.width = (mInitThermalIVSize.width * mScaleFactor).toInt()
+            layoutParams.height = (mInitThermalIVSize.height * mScaleFactor).toInt()
+            thermalIV.layoutParams = layoutParams
+            return true
+        }
+    }
+    private lateinit var mScaleDetector : ScaleGestureDetector
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_device_calibration)
+
+        rgbIV = findViewById(R.id.imageView_rgb)
+        thermalIV = findViewById(R.id.imageView_thermal)
+
+        mScaleDetector = ScaleGestureDetector(this, scaleListener)
+
+        loadImages()
+        initThermalTouchListener()
+    }
+
+    private fun loadImages () {
+        Glide.with(this).load("http://192.168.11.155:8080/file/rgb.jpg")
+            .listener(object : RequestListener<Drawable> {
+                override fun onLoadFailed(p0: GlideException?, p1: Any?, p2: Target<Drawable>?, p3: Boolean): Boolean {
+                    Toast.makeText(this@CalibrationActivity, "載入 rgb 圖片異常!", Toast.LENGTH_LONG).show()
+                    this@CalibrationActivity.finish()
+                    return false
+                }
+                override fun onResourceReady(p0: Drawable?, p1: Any?, p2: Target<Drawable>, p3: DataSource?, p4: Boolean): Boolean {
+                    rgbLoaded = true
+                    rgbSize = Size((p0 as BitmapDrawable).bitmap.width, p0.bitmap.height)
+                    if (rgbLoaded and thermalLoaded) alignImage()
+                    return false
+                }
+            }).into(rgbIV)
+        Glide.with(this).load("http://192.168.11.155:8080/file/thermal.jpg")
+            .listener(object : RequestListener<Drawable> {
+                override fun onLoadFailed(p0: GlideException?, p1: Any?, p2: Target<Drawable>?, p3: Boolean): Boolean {
+                    Toast.makeText(this@CalibrationActivity, "載入 thermal 圖片異常!", Toast.LENGTH_LONG).show()
+                    this@CalibrationActivity.finish()
+                    return false
+                }
+                override fun onResourceReady(p0: Drawable?, p1: Any?, p2: Target<Drawable>, p3: DataSource?, p4: Boolean): Boolean {
+                    thermalLoaded = true
+                    thermalSize = Size((p0 as BitmapDrawable).bitmap.width, p0.bitmap.height)
+                    if (rgbLoaded and thermalLoaded) alignImage()
+                    return false
+                }
+            }).into(thermalIV)
+    }
+
+    private fun alignImage () {
+
+        val screenWidth = thermalIV.measuredWidth
+        val thermalHeight = thermalSize.height
+
+        val initScale = 0.5
+        // 1. 設定thermal圖片寬度是 rgb的一半，高度維持比例
+        mInitThermalIVSize = Size((screenWidth*initScale).toInt(), (thermalHeight*initScale).toInt())
+        val layoutParams = thermalIV.layoutParams
+        layoutParams.width = mInitThermalIVSize.width
+        layoutParams.height = mInitThermalIVSize.height
+        thermalIV.layoutParams = layoutParams
+        // 2. 設定xy 置中
+        thermalIV.x = ((screenWidth - mInitThermalIVSize.width)/2).toFloat()
+        thermalIV.y = ((rgbSize.height - mInitThermalIVSize.height)/2).toFloat()
+    }
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        return mScaleDetector.onTouchEvent(event)
+    }
+
+    private fun initThermalTouchListener () {
+
+        thermalIV.setOnTouchListener(object: View.OnTouchListener{
+            override fun onTouch(view: View?, event: MotionEvent?): Boolean {
+
+                val point = Point(event!!.rawX.toInt(), event!!.rawY.toInt())
+
+                when (event!!.action and MotionEvent.ACTION_MASK) {
+
+                    MotionEvent.ACTION_DOWN ->                 // 2. record the last touch point
+                        lastPoint = point
+                    MotionEvent.ACTION_UP -> {
+                    }
+                    MotionEvent.ACTION_POINTER_DOWN -> {
+                    }
+                    MotionEvent.ACTION_POINTER_UP -> {
+                    }
+                    MotionEvent.ACTION_MOVE -> {
+                        // 3. get the move offset
+                        val offset = Point(point.x - lastPoint.x, point.y - lastPoint.y)
+                        thermalIV.x = thermalIV.x + offset.x
+                        thermalIV.y = thermalIV.y + offset.y
+                        // 4. record the last touch point
+                        lastPoint = point
+                    }
+                }
+                return true
+            }
+        })
+    }
+}
