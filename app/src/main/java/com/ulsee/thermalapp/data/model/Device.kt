@@ -27,4 +27,12 @@ open class Device : RealmObject() {
      open fun getName(): String {
           return mName
      }
+
+     private var mCreatedAt: Long = 0
+     open fun setCreatedAt(value: Long) {
+          mCreatedAt = value
+     }
+     open fun getCreatedAt(): Long {
+          return mCreatedAt
+     }
 }
