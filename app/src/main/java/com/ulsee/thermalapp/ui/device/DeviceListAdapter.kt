@@ -1,6 +1,5 @@
 package com.ulsee.thermalapp.ui.device
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.model.Device
 
-class DeviceListAdapter() : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
+class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
 
     var deviceList : List<Device> = ArrayList()
     fun setList(list: List<Device>) {

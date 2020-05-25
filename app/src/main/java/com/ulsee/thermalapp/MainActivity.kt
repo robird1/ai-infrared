@@ -18,7 +18,6 @@ import com.ulsee.thermalapp.data.model.People
 import com.ulsee.thermalapp.data.model.Settings
 import java.io.InputStream
 
-
 val MainActivityTag = "MainActivity"
 
 class MainActivity : AppCompatActivity() {
@@ -34,20 +33,15 @@ class MainActivity : AppCompatActivity() {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(setOf(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications))
+                R.id.navigation_device, R.id.navigation_people, R.id.navigation_settings))
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
         updateTemperatureUnit("C")
         fetchSettings()
 
-        getPeople()
-        deletePeople(1)
-        // addPeople()
-        // updatePeople()
-
         // 1. pick image
-        pickImage()
+        //pickImage()
     }
 
     fun pickImage () {
@@ -128,27 +122,6 @@ class MainActivity : AppCompatActivity() {
             })
     }
 
-    // people
-    private fun getPeople () {
-        Service.shared.people.getAll()
-            .subscribe({ peopleList: List<People> ->
-                print(peopleList)
-                true
-            }, { error: Throwable ->
-                Log.d(MainActivityTag, error.localizedMessage)
-                Toast.makeText(this, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
-            })
-    }
-    private fun deletePeople (id: Int) {
-        Service.shared.people.delete(id)
-            .subscribe({ _ ->
-                print("delete ok")
-                true
-            }, { error: Throwable ->
-                Log.d(MainActivityTag, error.localizedMessage)
-                Toast.makeText(this, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
-            })
-    }
     private fun addPeople (people: People) {
         Service.shared.people.create(people)
             .subscribe({ newPeople ->
