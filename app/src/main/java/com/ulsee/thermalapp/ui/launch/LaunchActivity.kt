@@ -14,8 +14,12 @@ import androidx.core.content.ContextCompat
 import com.ulsee.thermalapp.MainActivity
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.AppPreference
+import com.ulsee.thermalapp.data.model.Device
 import com.ulsee.thermalapp.ui.device.ScanActivity
+import com.ulsee.thermalapp.ui.device.StarterActivity
 import com.ulsee.thermalapp.utils.PermissionAskPreference
+import io.realm.Realm
+import io.realm.kotlin.where
 import java.util.*
 
 class LaunchActivity : AppCompatActivity() {
@@ -56,13 +60,13 @@ class LaunchActivity : AppCompatActivity() {
         }
     }
 
-
     private fun goNextPage() {
         val appPreference = AppPreference(getSharedPreferences("app", Context.MODE_PRIVATE))
-        if (appPreference.isOnceCreateFirstDevice()) {
+        val hasDevice = Realm.getDefaultInstance().where<Device>().findAll().size > 0
+        if (appPreference.isOnceCreateFirstDevice() && hasDevice ) {
             startActivity(Intent(this, MainActivity::class.java))
         } else {
-            startActivity(Intent(this, ScanActivity::class.java))
+            startActivity(Intent(this, StarterActivity::class.java))
         }
         finish()
     }

@@ -29,6 +29,10 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".ui.device.StarterActivity"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity"></activity>
+        <activity
             android:name=".ui.device.ScanActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"></activity>
