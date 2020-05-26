@@ -1,6 +1,7 @@
 package com.ulsee.thermalapp.data.api
 
 import com.ulsee.thermalapp.data.model.People
+import io.reactivex.Completable
 import io.reactivex.Observable
 import retrofit2.Response
 import retrofit2.http.*
@@ -16,8 +17,8 @@ interface PeopleAPI {
 
     @Headers("Content-Type: application/json","Accept: application/json")
     @PUT("api/people/{id}")
-    fun update(@Path("id") id: Int, @Body value: People) : Observable<Void>
+    fun update(@Path("id") id: Int, @Body value: People) : Completable
 
     @DELETE("api/people/{id}")
-    fun delete(@Path("id") id: Int) : Observable<Void>
+    fun delete(@Path("id") id: Int) : Completable
 }

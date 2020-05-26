@@ -175,7 +175,7 @@ class ScanActivity : AppCompatActivity() {
     // 每3秒傳送廣播，如果掃到qrcode,無法匹配，跳出progress表示無法連線，並改為每1秒傳送
     private fun keepSendUDPBroadcast() {
         // TODO: 討論傳送的訊息
-        val message = "ULSEE-Thermal-finding"
+        val message = "ULSEE-Thermal-Searching"
         val BROADCAST_PORT = 8829
 
         mUDPSocket.broadcast = true

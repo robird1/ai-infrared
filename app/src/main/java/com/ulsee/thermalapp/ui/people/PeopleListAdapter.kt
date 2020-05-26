@@ -17,6 +17,9 @@ class PeopleListAdapter: RecyclerView.Adapter<PeopleListAdapter.ViewHolder>() {
         peopleList = list
         notifyDataSetChanged()
     }
+    fun getList():List<People> {
+        return peopleList
+    }
 
     override fun getItemCount(): Int = this.peopleList.size
 

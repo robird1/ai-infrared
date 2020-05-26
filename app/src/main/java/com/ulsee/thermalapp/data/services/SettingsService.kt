@@ -2,6 +2,7 @@ package com.ulsee.thermalapp.data.services
 
 import com.ulsee.thermalapp.data.model.Settings
 import com.ulsee.thermalapp.data.api.SettingsAPI
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -23,34 +24,34 @@ class SettingsService {
             .subscribeOn(Schedulers.io());
     }
 
-    fun update(settings: Settings) : Observable<Void> {
+    fun update(settings: Settings) : Completable {
         return client.update(settings)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io());
     }
 
-    fun updateTemperatureUnit(value: String) : Observable<Void> {
+    fun updateTemperatureUnit(value: String) : Completable {
         var settings = Settings(value, 0.0, 0.0, false)
         return client.updateTemperatureUnit(settings)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io());
     }
 
-    fun updateAlarmThreshold(value: Double) : Observable<Void> {
+    fun updateAlarmThreshold(value: Double) : Completable {
         var settings = Settings("", value, 0.0, false)
         return client.updateAlarmThreshold(settings)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io());
     }
 
-    fun updateTemperatureOffset(value: Double) : Observable<Void> {
+    fun updateTemperatureOffset(value: Double) : Completable {
         var settings = Settings("", 0.0, value, false)
         return client.updateTemperatureOffset(settings)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io());
     }
 
-    fun updateFlipHorizontal(value: Boolean) : Observable<Void> {
+    fun updateFlipHorizontal(value: Boolean) : Completable {
         var settings = Settings("", 0.0, 0.0, value)
         return client.updateFlipHorizontal(settings)
             .observeOn(AndroidSchedulers.mainThread())
