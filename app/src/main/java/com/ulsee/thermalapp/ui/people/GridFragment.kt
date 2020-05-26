@@ -8,9 +8,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.ulsee.thermalapp.MainActivity
 import com.ulsee.thermalapp.MainActivityTag
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
@@ -34,14 +36,16 @@ class GridFragment : Fragment() {
         recyclerView.layoutManager = GridLayoutManager(context, 3)
 
         val support: RecyclerViewItemClickSupport = RecyclerViewItemClickSupport.addTo(recyclerView)
-        support.setOnItemClickListener({ recyclerView, position, view ->
+        support.setOnItemClickListener { recyclerView, position, view ->
             val people = (recyclerView.adapter as PeopleListAdapter).getList()[position]
             openEditor(people)
-        })
+        }
 
         loadPeopleList();
 
         root.findViewById<View>(R.id.fab).setOnClickListener { openEditor() }
+
+        (activity as MainActivity).setTitle("People Management")
 
         return root
     }

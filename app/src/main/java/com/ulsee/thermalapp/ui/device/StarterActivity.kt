@@ -4,17 +4,18 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
-import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.ulsee.thermalapp.R
 
 class StarterActivity : AppCompatActivity() {
 
+    var isInitiatingScanner = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_device_starter)
 
-        findViewById<Button>(R.id.button).setOnClickListener { startScan() }
+        findViewById<View>(R.id.button).setOnClickListener { startScan() }
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -23,6 +24,8 @@ class StarterActivity : AppCompatActivity() {
     }
 
     fun startScan () {
+        if (isInitiatingScanner) return
+        isInitiatingScanner = true
         startActivity(Intent(this, ScanActivity::class.java))
         finish()
     }

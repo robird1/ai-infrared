@@ -9,6 +9,7 @@ buildscript {
         maven {
             url 'http://oss.jfrog.org/artifactory/oss-snapshot-local'
         }
+        maven { url "https://jitpack.io" }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.6.3'
@@ -27,6 +28,7 @@ allprojects {
         maven {
             url 'http://oss.jfrog.org/artifactory/oss-snapshot-local'
         }
+        maven { url "https://jitpack.io" }
     }
 }
 
