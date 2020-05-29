@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.ulsee.thermalapp.R
 
@@ -21,6 +22,23 @@ class SettingsNumberPadFragment : Fragment() {
         val root = inflater.inflate(R.layout.fragment_settings_numberpad, container, false)
         input = root.findViewById(R.id.editText)
         if (!initValue.isEmpty()) input!!.setText(initValue)
+
+        root.findViewById<View>(R.id.imageButton_up).setOnClickListener {
+            var value = 0.0
+            try {
+                value = getValue()
+            } catch (e: Exception) {
+            }
+            setValue(value + 0.1)
+        }
+        root.findViewById<View>(R.id.imageButton_down).setOnClickListener {
+            var value = 0.0
+            try {
+                value = getValue()
+            } catch (e: Exception) {
+            }
+            setValue(value - 0.1)
+        }
         return root
     }
 
@@ -29,10 +47,11 @@ class SettingsNumberPadFragment : Fragment() {
     }
 
     fun setValue (value: Double) {
+        // 避免小樹過多......
         if (input == null) {
-            initValue = value.toString()
+            initValue = "%.1f".format(value)
         } else {
-            input!!.setText(value.toString())
+            input!!.setText("%.1f".format(value))
         }
     }
 }
