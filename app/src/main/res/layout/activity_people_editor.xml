@@ -63,7 +63,7 @@
             android:id="@+id/imageView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/gray">
+            android:background="#ccc">
         </ImageView>
 
         <ImageButton
@@ -101,7 +101,7 @@
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:textColor="#fff"
-        android:background="@drawable/shape_bg_button">
+        android:background="#40C4F6">
 
     </Button>
 
