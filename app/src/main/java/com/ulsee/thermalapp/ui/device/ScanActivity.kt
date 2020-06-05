@@ -17,6 +17,7 @@ import com.google.android.gms.vision.CameraSource
 import com.google.android.gms.vision.Detector
 import com.google.android.gms.vision.barcode.Barcode
 import com.google.android.gms.vision.barcode.BarcodeDetector
+import com.google.zxing.integration.android.IntentIntegrator
 import com.ulsee.thermalapp.MainActivity
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.AppPreference
@@ -48,10 +49,45 @@ class ScanActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_device_scan)
 
-        val surfaceView = findViewById<View>(R.id.surfaceView) as SurfaceView
-
         mSearchingDeviceProgressDialog = ProgressDialog(this)
         mSearchingDeviceProgressDialog.setMessage("無法與此裝置連線...請確認裝置網路狀況...")
+
+        initZxingScanner()
+        // initQRCodeScanner()
+
+        keepSendUDPBroadcast()
+    }
+
+    override fun onDestroy() {
+        if (!mUDPSocket.isClosed)mUDPSocket.close()
+        super.onDestroy()
+    }
+
+    private fun initZxingScanner () {
+        IntentIntegrator(this).initiateScan()
+    }
+
+    // Get the results:
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
+        val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
+        if (result != null) {
+            if (result.contents == null) {
+                Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show()
+                initZxingScanner()
+            } else {
+                processQRCode(result.contents)
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
+
+    private fun initQRCodeScanner () {
+        val surfaceView = findViewById<View>(R.id.surfaceView) as SurfaceView
 
         barcodeDetector = BarcodeDetector.Builder(this)
             .setBarcodeFormats(Barcode.QR_CODE).build()
@@ -85,36 +121,51 @@ class ScanActivity : AppCompatActivity() {
                 val qrCodeList = detections?.detectedItems
                 if (qrCodeList != null && qrCodeList.size() != 0) {
                     val qrCode = qrCodeList.valueAt(0)?.displayValue
-                    Log.i(TAG, "qrcode scanned: "+qrCode)
-
-                    val isValidQRCode = qrCode?.startsWith("ULSEE")
-                    if(!isValidQRCode!!) {
-                        this@ScanActivity.runOnUiThread { Toast.makeText(this@ScanActivity, "此QRCode無效!!", Toast.LENGTH_SHORT).show() }
-                        return
-                    }
-
-                    val deviceID = qrCode.substring(5)
-                    val idx = mScannedDeviceList.indexOfFirst { it.getID().equals(deviceID) }
-                    val isDeviceAlreadyScanned = idx >= 0
-                    if (isDeviceAlreadyScanned) {
-                        mStatus = Status.askingName
-                        this@ScanActivity.runOnUiThread { askDeviceName(mScannedDeviceList[idx]) }
-                    } else {
-                        this@ScanActivity.runOnUiThread { mSearchingDeviceProgressDialog.show() }
-                        mSearchingDeviceID = deviceID
-                        mBroadcaseSendInterval = 1
-                        mStatus = Status.searchingDevice
-                    }
+                    processQRCode(qrCode!!)
+//                    Log.i(TAG, "qrcode scanned: "+qrCode)
+//
+//                    val isValidQRCode = qrCode?.startsWith("ULSEE")
+//                    if(!isValidQRCode!!) {
+//                        this@ScanActivity.runOnUiThread { Toast.makeText(this@ScanActivity, "此QRCode無效!!", Toast.LENGTH_SHORT).show() }
+//                        return
+//                    }
+//
+//                    val deviceID = qrCode.substring(5)
+//                    val idx = mScannedDeviceList.indexOfFirst { it.getID().equals(deviceID) }
+//                    val isDeviceAlreadyScanned = idx >= 0
+//                    if (isDeviceAlreadyScanned) {
+//                        mStatus = Status.askingName
+//                        this@ScanActivity.runOnUiThread { askDeviceName(mScannedDeviceList[idx]) }
+//                    } else {
+//                        this@ScanActivity.runOnUiThread { mSearchingDeviceProgressDialog.show() }
+//                        mSearchingDeviceID = deviceID
+//                        mBroadcaseSendInterval = 1
+//                        mStatus = Status.searchingDevice
+//                    }
                 }
             }
         })
-
-        keepSendUDPBroadcast()
     }
 
-    override fun onDestroy() {
-        if (!mUDPSocket.isClosed)mUDPSocket.close()
-        super.onDestroy()
+    private fun processQRCode(qrCode: String) {
+        val isValidQRCode = qrCode?.startsWith("ULSEE")
+        if(!isValidQRCode!!) {
+            this@ScanActivity.runOnUiThread { Toast.makeText(this@ScanActivity, "此QRCode無效!!", Toast.LENGTH_SHORT).show() }
+            return
+        }
+
+        val deviceID = qrCode.substring(5)
+        val idx = mScannedDeviceList.indexOfFirst { it.getID().equals(deviceID) }
+        val isDeviceAlreadyScanned = idx >= 0
+        if (isDeviceAlreadyScanned) {
+            mStatus = Status.askingName
+            this@ScanActivity.runOnUiThread { askDeviceName(mScannedDeviceList[idx]) }
+        } else {
+            this@ScanActivity.runOnUiThread { mSearchingDeviceProgressDialog.show() }
+            mSearchingDeviceID = deviceID
+            mBroadcaseSendInterval = 1
+            mStatus = Status.searchingDevice
+        }
     }
 
     private fun askDeviceName (device: Device) {
