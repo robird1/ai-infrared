@@ -3,6 +3,7 @@ package com.ulsee.thermalapp.data.services
 import com.ulsee.thermalapp.data.model.Settings
 import com.ulsee.thermalapp.data.api.SettingsAPI
 import com.ulsee.thermalapp.data.request.UpdateCalibration
+import com.ulsee.thermalapp.data.response.TwoPicture
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -29,6 +30,10 @@ class SettingsServiceHTTP : ISettingsService {
         return client.update(settings)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io());
+    }
+
+    override fun getTwoPicture(): Observable<TwoPicture> {
+        TODO("Not yet implemented")
     }
 
     override fun calibration(calibration: UpdateCalibration): Completable {
