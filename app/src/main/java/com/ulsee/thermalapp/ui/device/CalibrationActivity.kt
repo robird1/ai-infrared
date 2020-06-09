@@ -17,7 +17,11 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.ulsee.thermalapp.MainActivityTag
 import com.ulsee.thermalapp.R
+import com.ulsee.thermalapp.data.Service
+import com.ulsee.thermalapp.data.request.UpdateCalibration
+import com.ulsee.thermalapp.data.services.SettingsServiceTCP
 import kotlin.math.max
 import kotlin.math.min
 
@@ -28,9 +32,12 @@ class CalibrationActivity : AppCompatActivity() {
 
     lateinit var rgbIV : ImageView
     lateinit var thermalIV : ImageView
+    lateinit var deviceID : String
 
     var rgbLoaded = false
     var thermalLoaded = false
+    var rgbOriginalImageSize  = Size(1000, 1011)
+    var thermalOriginalImageSize  = Size(537, 352)
     var rgbSize = Size(0, 0)
     var thermalSize = Size(0, 0)
     var mInitThermalIVSize = Size(0, 0)
@@ -60,8 +67,22 @@ class CalibrationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_device_calibration)
 
+        deviceID = intent.getStringExtra("device")
+        val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
+        if (deviceManager == null) {
+            Toast.makeText(this, "Error: device not found", Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
+        if (deviceManager.settings == null) {
+            Toast.makeText(this, "Error: device setting not found", Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
+
         rgbIV = findViewById(R.id.imageView_rgb)
         thermalIV = findViewById(R.id.imageView_thermal)
+        findViewById<View>(R.id.button_save).setOnClickListener { save() }
 
         mScaleDetector = ScaleGestureDetector(this, scaleListener)
 
@@ -150,5 +171,29 @@ class CalibrationActivity : AppCompatActivity() {
                 return true
             }
         })
+    }
+
+    private fun save () {
+        // 1. 取得圖片的位置
+        val w = (thermalIV.layoutParams.width) * rgbOriginalImageSize.width / rgbIV.measuredWidth
+        val h = (thermalIV.layoutParams.height) * rgbOriginalImageSize.height / rgbIV.measuredHeight
+        val x = (thermalIV.x) * rgbOriginalImageSize.width / rgbIV.measuredWidth
+        val y = (thermalIV.y) * rgbOriginalImageSize.height / rgbIV.measuredHeight
+        updateCalibration(x.toInt(), y.toInt(), w, h)
+    }
+
+    private fun updateCalibration (x: Int, y: Int, w: Int, h: Int) {
+        val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
+        SettingsServiceTCP(deviceManager!!.tcpClient).calibration(UpdateCalibration(x, y, w, h))
+            .subscribe({
+                Toast.makeText(this, "更新成功!", Toast.LENGTH_LONG).show()
+                // finish()
+                true
+            }, { error: Throwable ->
+                error.printStackTrace()
+                Log.d(MainActivityTag, error.localizedMessage)
+                Toast.makeText(this, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
+                finish()
+            })
     }
 }
