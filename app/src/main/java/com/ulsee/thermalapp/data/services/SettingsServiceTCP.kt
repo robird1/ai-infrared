@@ -1,19 +1,18 @@
 package com.ulsee.thermalapp.data.services
 
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.ulsee.thermalapp.data.model.Settings
+import com.ulsee.thermalapp.data.request.UpdateSettings
 import io.reactivex.Completable
+import io.reactivex.CompletableOnSubscribe
 import io.reactivex.Observable
-import io.reactivex.ObservableOnSubscribe
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import java.lang.Exception
-import java.lang.StringBuilder
 
-class SettingsServiceTCP : ISettingsService {
+class SettingsServiceTCP(apiClient: TCPClient) : ISettingsService {
 
-    var apiClient : TCPClient? = null
+    var apiClient : TCPClient? = apiClient
     val gson = Gson()
 
     override fun get(): Observable<Settings> {
@@ -21,6 +20,13 @@ class SettingsServiceTCP : ISettingsService {
     }
 
     override fun update(settings: Settings): Completable {
-        TODO("Not yet implemented")
+        val handler: CompletableOnSubscribe = CompletableOnSubscribe { emitter ->
+            if (apiClient == null) throw Exception("error: target not specified")
+            if (apiClient?.isConnected() != true) throw Exception("error: target not connected")
+            apiClient?.send(gson.toJson(UpdateSettings(settings)))
+            emitter.onComplete()
+        }
+        return Completable.create(handler).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
     }
 }

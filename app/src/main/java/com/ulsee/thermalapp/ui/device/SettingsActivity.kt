@@ -13,10 +13,12 @@ import com.ulsee.thermalapp.MainActivityTag
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Settings
+import com.ulsee.thermalapp.data.services.SettingsServiceTCP
 
 class SettingsActivity : AppCompatActivity() {
 
     var settings: Settings? = null
+    lateinit var deviceID : String
     lateinit var segmentedButtonGroup : SegmentedButtonGroup
     lateinit var settingsNumberPadAdapter : SettingsNumberPadAdapter
 
@@ -29,7 +31,7 @@ class SettingsActivity : AppCompatActivity() {
             finish()
             return
         }
-        val deviceID = intent.getStringExtra("device")
+        deviceID = intent.getStringExtra("device")
         val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
         if (deviceManager == null) {
             Toast.makeText(this, "Error: device not found", Toast.LENGTH_LONG).show()
@@ -76,6 +78,7 @@ class SettingsActivity : AppCompatActivity() {
         try {
             settings!!.AlarmThreshold = settingsNumberPadAdapter.fragments[0].getValue()
         } catch (e: Exception) {
+            e.printStackTrace()
             Toast.makeText(this, "數字錯誤!", Toast.LENGTH_SHORT).show()
             segmentedButtonGroup.setPosition(0, true)
             return
@@ -83,6 +86,7 @@ class SettingsActivity : AppCompatActivity() {
         try {
             settings!!.Deviation = settingsNumberPadAdapter.fragments[1].getValue()
         } catch (e: Exception) {
+            e.printStackTrace()
             Toast.makeText(this, "數字錯誤!", Toast.LENGTH_SHORT).show()
             segmentedButtonGroup.setPosition(1, true)
             return
@@ -106,7 +110,8 @@ class SettingsActivity : AppCompatActivity() {
 //    }
 
     private fun updateSettings (settings: Settings) {
-        Service.shared.settings.update(settings)
+        val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
+        SettingsServiceTCP(deviceManager!!.tcpClient).update(settings)
             .subscribe({
                 Toast.makeText(this, "更新成功!", Toast.LENGTH_LONG).show()
                 // finish()
