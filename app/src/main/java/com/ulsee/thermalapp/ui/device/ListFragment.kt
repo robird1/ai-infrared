@@ -6,15 +6,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ulsee.thermalapp.MainActivity
 import com.ulsee.thermalapp.R
-import com.ulsee.thermalapp.data.model.Device
-import io.realm.Realm
-import io.realm.kotlin.where
+import com.ulsee.thermalapp.data.Service
 
 class ListFragment : Fragment() {
 
@@ -31,9 +28,7 @@ class ListFragment : Fragment() {
         recyclerView.adapter = DeviceListAdapter()
         recyclerView.layoutManager = LinearLayoutManager(context)
 
-        val realm = Realm.getDefaultInstance()
-        val results = realm.where<Device>().findAll()
-        (recyclerView.adapter as DeviceListAdapter).setList(results)
+        loadDevices()
 
         root.findViewById<View>(R.id.fab).setOnClickListener { openScanner() }
 
@@ -45,12 +40,15 @@ class ListFragment : Fragment() {
         startActivityForResult(Intent(context, ScanActivity::class.java), REQUEST_CODE_ACTIVITY_SCAN)
     }
 
+    private fun loadDevices() {
+        val results = Service.shared.getDeviceList()
+        (recyclerView.adapter as DeviceListAdapter).setList(results)
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_CODE_ACTIVITY_SCAN) {
             if (resultCode == RESULT_OK) {
-                val realm = Realm.getDefaultInstance()
-                val results = realm.where<Device>().findAll()
-                (recyclerView.adapter as DeviceListAdapter).setList(results)
+                loadDevices()
             }
             return
         }

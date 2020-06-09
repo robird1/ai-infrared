@@ -1,0 +1,7 @@
+package com.ulsee.thermalapp.data.request
+
+import com.ulsee.thermalapp.data.model.Settings
+
+class UpdateSettings : Settings() {
+    val action = 0
+}

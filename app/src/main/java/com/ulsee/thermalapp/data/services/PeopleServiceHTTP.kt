@@ -14,8 +14,7 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import java.lang.Exception
 
-
-class PeopleService {
+class PeopleServiceHTTP : IPeopleService {
 
     private val gson = Gson()
     private val client = Retrofit.Builder()
@@ -24,13 +23,13 @@ class PeopleService {
         .addConverterFactory(GsonConverterFactory.create())
         .build().create(PeopleAPI::class.java)
 
-    fun getAll(): Observable<List<People>> {
+    override fun getAll(): Observable<List<People>> {
         return client.getAll()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io());
     }
 
-    fun create(people: People): Observable<People> {
+    override fun create(people: People): Observable<People> {
         return client.create(people)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io())
@@ -44,13 +43,13 @@ class PeopleService {
             };
     }
 
-    fun update(people: People): Completable {
+    override fun update(people: People): Completable {
         return client.update(people.ID, people)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io());
     }
 
-    fun delete(id: Int): Completable {
+    override fun delete(id: Int): Completable {
         return client.delete(id)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io());

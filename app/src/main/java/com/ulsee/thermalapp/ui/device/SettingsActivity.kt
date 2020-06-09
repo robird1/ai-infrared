@@ -24,6 +24,25 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_device_settings)
 
+        if(!intent.hasExtra("device")) {
+            Toast.makeText(this, "Error: no specified device", Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
+        val deviceID = intent.getStringExtra("device")
+        val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
+        if (deviceManager == null) {
+            Toast.makeText(this, "Error: device not found", Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
+        if (deviceManager.settings == null) {
+            Toast.makeText(this, "Error: device setting not found", Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
+        this.settings = deviceManager.settings
+
         segmentedButtonGroup = findViewById<SegmentedButtonGroup>(R.id.segmentedButton)
 
         val tabLayout = findViewById<TabLayout>(R.id.tabLayout)
@@ -40,18 +59,20 @@ class SettingsActivity : AppCompatActivity() {
 
         findViewById<View>(R.id.button_save).setOnClickListener { save() }
 
-        fetchSettings()
+//        fetchSettings()
+
+        showSettings()
     }
 
     private fun showSettings () {
-        val segmentPosition = if(settings!!.TemperatureUnit == "C") 0 else 1
+        val segmentPosition = if(settings!!.TemperationUnit == 0) 0 else 1
         segmentedButtonGroup.setPosition(segmentPosition, false)
         settingsNumberPadAdapter.fragments[0].setValue(settings!!.AlarmThreshold)
-        settingsNumberPadAdapter.fragments[1].setValue(settings!!.TemperatureOffset)
+        settingsNumberPadAdapter.fragments[1].setValue(settings!!.Deviation)
     }
 
     private fun save () {
-        settings!!.TemperatureUnit = if(segmentedButtonGroup.position == 0) "C" else "F"
+        settings!!.TemperationUnit = if(segmentedButtonGroup.position == 0) 0 else 1
         try {
             settings!!.AlarmThreshold = settingsNumberPadAdapter.fragments[0].getValue()
         } catch (e: Exception) {
@@ -60,7 +81,7 @@ class SettingsActivity : AppCompatActivity() {
             return
         }
         try {
-            settings!!.TemperatureOffset = settingsNumberPadAdapter.fragments[1].getValue()
+            settings!!.Deviation = settingsNumberPadAdapter.fragments[1].getValue()
         } catch (e: Exception) {
             Toast.makeText(this, "數字錯誤!", Toast.LENGTH_SHORT).show()
             segmentedButtonGroup.setPosition(1, true)
@@ -70,19 +91,19 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     // settings
-    private fun fetchSettings () {
-        Service.shared.settings.get()
-            .subscribe({ settings: Settings ->
-                this.settings = settings
-                showSettings()
-                true
-            }, { error: Throwable ->
-                error.printStackTrace()
-                Log.d(MainActivityTag, error.localizedMessage)
-                Toast.makeText(this, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
-                finish()
-            })
-    }
+//    private fun fetchSettings () {
+//        Service.shared.settings.get()
+//            .subscribe({ settings: Settings ->
+//                this.settings = settings
+//                showSettings()
+//                true
+//            }, { error: Throwable ->
+//                error.printStackTrace()
+//                Log.d(MainActivityTag, error.localizedMessage)
+//                Toast.makeText(this, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
+//                finish()
+//            })
+//    }
 
     private fun updateSettings (settings: Settings) {
         Service.shared.settings.update(settings)
@@ -95,17 +116,6 @@ class SettingsActivity : AppCompatActivity() {
                 Log.d(MainActivityTag, error.localizedMessage)
                 Toast.makeText(this, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
                 finish()
-            })
-    }
-
-    private fun updateTemperatureUnit (value: String) {
-        Service.shared.settings.updateTemperatureUnit(value)
-            .subscribe({
-                true
-            }, { error: Throwable ->
-                error.printStackTrace()
-                Log.d(MainActivityTag, error.localizedMessage)
-                Toast.makeText(this, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
             })
     }
 }
