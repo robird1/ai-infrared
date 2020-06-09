@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.ulsee.thermalapp.data.model.People
 import com.ulsee.thermalapp.data.request.GetFaceList
+import com.ulsee.thermalapp.data.response.FaceList
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.ObservableOnSubscribe
@@ -28,11 +29,13 @@ class PeopleServiceTCP(apiClient: TCPClient) : IPeopleService {
                 override fun onData(data: CharArray, size: Int) {
                     stringBuilder.append(data, 0, size)
 
+                    if (!stringBuilder.endsWith("}")) return;
+
                     val responseString = stringBuilder.toString()
-                    val itemType = object : TypeToken<List<People>>() {}.type
-                    val peopleList = gson.fromJson<List<People>>(responseString, itemType)
+                    val itemType = object : TypeToken<FaceList>() {}.type
+                    val faceList = gson.fromJson<FaceList>(responseString, itemType)
                     apiClient?.setOnReceivedDataListener(null)
-                    emitter.onNext(peopleList)
+                    emitter.onNext(faceList.facelist)
                     emitter.onComplete()
                 }
             })

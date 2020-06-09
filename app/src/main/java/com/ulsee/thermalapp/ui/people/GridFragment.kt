@@ -16,6 +16,9 @@ import com.ulsee.thermalapp.MainActivityTag
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.People
+import com.ulsee.thermalapp.data.services.DeviceManager
+import com.ulsee.thermalapp.data.services.PeopleServiceTCP
+import com.ulsee.thermalapp.data.services.TCPClient
 import com.ulsee.thermalapp.utils.RecyclerViewItemClickSupport
 import java.io.Serializable
 
@@ -67,7 +70,19 @@ class GridFragment : Fragment() {
     }
 
     private fun loadPeopleList () {
-        Service.shared.people.getAll()
+        // find first connected device
+        var selectedTCPClient : TCPClient? = null
+        for (deviceManager in Service.shared.deviceManagerList) {
+            if (deviceManager.tcpClient.isConnected() && deviceManager.status == DeviceManager.Status.connected) {
+                selectedTCPClient = deviceManager.tcpClient
+                break
+            }
+        }
+        if (selectedTCPClient == null) {
+            Toast.makeText(context, "no connected device", Toast.LENGTH_LONG).show()
+            return
+        }
+        PeopleServiceTCP(selectedTCPClient).getAll()
             .subscribe({ peopleList: List<People> ->
                 (recyclerView.adapter as PeopleListAdapter).setList(peopleList)
             }, { error: Throwable ->

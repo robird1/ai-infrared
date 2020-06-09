@@ -1,5 +1,6 @@
 package com.ulsee.thermalapp.ui.people
 
+import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -39,7 +40,8 @@ class PeopleListAdapter: RecyclerView.Adapter<PeopleListAdapter.ViewHolder>() {
 
         fun bind(people: People) {
             nameTV?.text = people.Name
-            Glide.with(itemView.context).load(people.AvatarURL).into(iv);
+//            Glide.with(itemView.context).load(people.AvatarURL).into(iv);
+            Glide.with(itemView.context).asBitmap().load(Base64.decode(people.AvatarURL, Base64.DEFAULT)).into(iv);
         }
     }
 }
