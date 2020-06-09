@@ -3,9 +3,12 @@ package com.ulsee.thermalapp.data.services
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.ulsee.thermalapp.data.model.People
+import com.ulsee.thermalapp.data.request.ChangePeople
 import com.ulsee.thermalapp.data.request.GetFaceList
+import com.ulsee.thermalapp.data.request.UpdateSettings
 import com.ulsee.thermalapp.data.response.FaceList
 import io.reactivex.Completable
+import io.reactivex.CompletableOnSubscribe
 import io.reactivex.Observable
 import io.reactivex.ObservableOnSubscribe
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -47,14 +50,37 @@ class PeopleServiceTCP(apiClient: TCPClient) : IPeopleService {
     }
 
     override fun create(people: People): Observable<People> {
-        TODO("Not yet implemented")
+        val handler: ObservableOnSubscribe<People> = ObservableOnSubscribe { emitter ->
+            if (apiClient == null) throw Exception("error: target not specified")
+            if (apiClient?.isConnected() != true) throw Exception("error: target not connected")
+            apiClient?.send(gson.toJson(ChangePeople(people, null, ChangePeople.ChangeType.create)))
+            val empty = People(0,"","", null)
+            emitter.onNext(empty)
+            emitter.onComplete()
+        }
+        return Observable.create(handler).subscribeOn(Schedulers.newThread())
+            .observeOn(AndroidSchedulers.mainThread())
     }
 
     override fun update(people: People): Completable {
-        TODO("Not yet implemented")
+        val handler: CompletableOnSubscribe = CompletableOnSubscribe { emitter ->
+            if (apiClient == null) throw Exception("error: target not specified")
+            if (apiClient?.isConnected() != true) throw Exception("error: target not connected")
+            apiClient?.send(gson.toJson(ChangePeople(people, people.oldName, ChangePeople.ChangeType.update)))
+            emitter.onComplete()
+        }
+        return Completable.create(handler).subscribeOn(Schedulers.newThread())
+            .observeOn(AndroidSchedulers.mainThread())
     }
 
-    override fun delete(id: Int): Completable {
-        TODO("Not yet implemented")
+    override fun delete(people: People): Completable {
+        val handler: CompletableOnSubscribe = CompletableOnSubscribe { emitter ->
+            if (apiClient == null) throw Exception("error: target not specified")
+            if (apiClient?.isConnected() != true) throw Exception("error: target not connected")
+            apiClient?.send(gson.toJson(ChangePeople(people, null, ChangePeople.ChangeType.delete)))
+            emitter.onComplete()
+        }
+        return Completable.create(handler).subscribeOn(Schedulers.newThread())
+            .observeOn(AndroidSchedulers.mainThread())
     }
 }

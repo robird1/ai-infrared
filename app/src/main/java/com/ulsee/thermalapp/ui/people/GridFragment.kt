@@ -70,14 +70,7 @@ class GridFragment : Fragment() {
     }
 
     private fun loadPeopleList () {
-        // find first connected device
-        var selectedTCPClient : TCPClient? = null
-        for (deviceManager in Service.shared.deviceManagerList) {
-            if (deviceManager.tcpClient.isConnected() && deviceManager.status == DeviceManager.Status.connected) {
-                selectedTCPClient = deviceManager.tcpClient
-                break
-            }
-        }
+        val selectedTCPClient = getFirstConnectedClient()
         if (selectedTCPClient == null) {
             Toast.makeText(context, "no connected device", Toast.LENGTH_LONG).show()
             return
@@ -90,4 +83,16 @@ class GridFragment : Fragment() {
                 Toast.makeText(context, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
             })
     }
+
+    private fun getFirstConnectedClient():TCPClient? {
+        var selectedTCPClient : TCPClient? = null
+        for (deviceManager in Service.shared.deviceManagerList) {
+            if (deviceManager.tcpClient.isConnected() && deviceManager.status == DeviceManager.Status.connected) {
+                selectedTCPClient = deviceManager.tcpClient
+                break
+            }
+        }
+        return selectedTCPClient
+    }
+
 }

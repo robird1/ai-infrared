@@ -15,10 +15,12 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.bumptech.glide.Glide
-import com.ulsee.thermalapp.MainActivityTag
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.People
+import com.ulsee.thermalapp.data.services.DeviceManager
+import com.ulsee.thermalapp.data.services.PeopleServiceTCP
+import com.ulsee.thermalapp.data.services.TCPClient
 import java.io.InputStream
 
 class EditorActivity : AppCompatActivity() {
@@ -53,7 +55,7 @@ class EditorActivity : AppCompatActivity() {
             findViewById<TextView>(R.id.textView_toolbar_title).text = "Edit People"
             findViewById<View>(R.id.button_delete).visibility = View.VISIBLE
             nameInput.setText(oldValue!!.Name)
-            Glide.with(this).load(oldValue!!.AvatarURL).into(imageView)
+            Glide.with(this).load(Base64.decode(oldValue!!.AvatarURL, Base64.DEFAULT)).into(imageView);
         }
     }
 
@@ -121,34 +123,46 @@ class EditorActivity : AppCompatActivity() {
         val name = nameInput.text.toString()
         if (oldValue != null) {
             val base64 : String? = if(imageBase64 == null)  null else imageBase64
-            val people = People(oldValue!!.ID, name, base64)
+            val people = People(oldValue!!.ID, name, base64, oldValue!!.Name)
             editPeople(people)
         } else {
-            val people = People(0, name, imageBase64!!)
+            val people = People(0, name, imageBase64!!, null)
             addPeople(people)
         }
     }
 
     private fun addPeople (people: People) {
-        Service.shared.people.create(people)
+        val selectedTCPClient = getFirstConnectedClient()
+        if (selectedTCPClient == null) {
+            Toast.makeText(this, "no connected device", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        PeopleServiceTCP(selectedTCPClient).create(people)
             .subscribe({ newPeople ->
                 Toast.makeText(this, "新增成功!!", Toast.LENGTH_LONG).show()
                 setResult(RESULT_OK)
                 finish()
             }, { error: Throwable ->
-                Log.d(MainActivityTag, error.localizedMessage)
+                Log.d(javaClass.name, error.localizedMessage)
                 Toast.makeText(this, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
             })
     }
 
     private fun editPeople (people: People) {
-        Service.shared.people.update(people)
+        val selectedTCPClient = getFirstConnectedClient()
+        if (selectedTCPClient == null) {
+            Toast.makeText(this, "no connected device", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        PeopleServiceTCP(selectedTCPClient).update(people)
             .subscribe({
                 Toast.makeText(this, "編輯成功!!", Toast.LENGTH_LONG).show()
                 setResult(RESULT_OK)
                 finish()
             }, { error: Throwable ->
-                Log.d(MainActivityTag, error.localizedMessage)
+                Log.d(javaClass.name, error.localizedMessage)
                 Toast.makeText(this, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
             })
     }
@@ -160,7 +174,7 @@ class EditorActivity : AppCompatActivity() {
             .setMessage("確定要刪除此筆資料?")
             .setPositiveButton("刪除"
             ) { dialog, whichButton ->
-               deletePeople(oldValue!!.ID)
+               deletePeople(oldValue!!)
             }
             .setNegativeButton("取消"
             ) { dialog, whichButton ->
@@ -170,16 +184,33 @@ class EditorActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun deletePeople (id: Int) {
-        Service.shared.people.delete(id)
+    private fun deletePeople (people: People) {
+        val selectedTCPClient = getFirstConnectedClient()
+        if (selectedTCPClient == null) {
+            Toast.makeText(this, "no connected device", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        PeopleServiceTCP(selectedTCPClient).delete(people)
             .subscribe({
                 Toast.makeText(this, "刪除成功!!", Toast.LENGTH_LONG).show()
                 setResult(RESULT_OK)
                 finish()
             }, { error: Throwable ->
                 error.printStackTrace()
-                Log.d(MainActivityTag, error.localizedMessage)
+                Log.d(javaClass.name, error.localizedMessage)
                 Toast.makeText(this, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
             })
+    }
+
+    private fun getFirstConnectedClient(): TCPClient? {
+        var selectedTCPClient : TCPClient? = null
+        for (deviceManager in Service.shared.deviceManagerList) {
+            if (deviceManager.tcpClient.isConnected() && deviceManager.status == DeviceManager.Status.connected) {
+                selectedTCPClient = deviceManager.tcpClient
+                break
+            }
+        }
+        return selectedTCPClient
     }
 }

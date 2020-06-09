@@ -49,8 +49,8 @@ class PeopleServiceHTTP : IPeopleService {
             .subscribeOn(Schedulers.io());
     }
 
-    override fun delete(id: Int): Completable {
-        return client.delete(id)
+    override fun delete(people: People): Completable {
+        return client.delete(people.ID)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io());
     }

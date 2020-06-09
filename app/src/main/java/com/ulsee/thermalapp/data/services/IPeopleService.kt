@@ -8,5 +8,5 @@ interface IPeopleService {
     fun getAll(): Observable<List<People>>
     fun create(people: People): Observable<People>
     fun update(people: People): Completable
-    fun delete(id: Int): Completable
+    fun delete(people: People): Completable
 }
