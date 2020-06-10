@@ -122,10 +122,10 @@ class SettingsServiceTCP(apiClient: TCPClient) : ISettingsService {
 
     override fun closeRGBStream(): Completable {
         val handler: CompletableOnSubscribe = CompletableOnSubscribe { emitter ->
+            apiClient?.setOnReceivedDataListener(null)
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
 //            if (apiClient?.isConnected() != true) apiClient?.reconnect()
-            apiClient?.setOnReceivedDataListener(null)
             apiClient?.send(gson.toJson(SetVideo(SetVideo.VideoStatus.closeRGB)))
         }
 
@@ -181,6 +181,7 @@ class SettingsServiceTCP(apiClient: TCPClient) : ISettingsService {
 
     override fun closeThermaltream(): Completable {
         val handler: CompletableOnSubscribe = CompletableOnSubscribe { emitter ->
+            apiClient?.setOnReceivedDataListener(null)
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
 //            if (apiClient?.isConnected() != true) apiClient?.reconnect()

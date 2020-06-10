@@ -40,6 +40,7 @@ class TCPClient(ip: String, port: Int) {
                 if (readLen == -1) {
                     Log.i(javaClass.name, "readLen-1, close socket")
                     TCPClientSocket?.close()
+                    onReceivedDataListener = null
                     break
                 }
                 onReceivedDataListener?.onData(buffer, readLen)

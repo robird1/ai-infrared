@@ -65,9 +65,9 @@ class StreamingActivity : AppCompatActivity() {
     override fun finish() {
         val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
         if (streamType == StreamType.RGB) {
-            SettingsServiceTCP(deviceManager!!.tcpClient).closeRGBStream().subscribe({})
+            SettingsServiceTCP(deviceManager!!.tcpClient).closeRGBStream().subscribe({}, {})
         } else  {
-            SettingsServiceTCP(deviceManager!!.tcpClient).closeThermaltream().subscribe({})
+            SettingsServiceTCP(deviceManager!!.tcpClient).closeThermaltream().subscribe({}, {})
         }
         disposable?.dispose()
         super.finish()
