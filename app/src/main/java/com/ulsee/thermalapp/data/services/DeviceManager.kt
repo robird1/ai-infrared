@@ -1,5 +1,6 @@
 package com.ulsee.thermalapp.data.services
 
+import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.ulsee.thermalapp.data.model.Device
@@ -46,6 +47,7 @@ class DeviceManager(device: Device) {
         Thread(Runnable {
             connectUntilSuccess()
             while(true) {
+                // Log.i(javaClass.name, "isConnected: "+(if(tcpClient.isConnected())"Y" else "N"))
                 if (!tcpClient.isConnected()) connectUntilSuccess()
                 Thread.sleep(1000)
             }

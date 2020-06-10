@@ -37,6 +37,11 @@ class TCPClient(ip: String, port: Int) {
                     bufferedReader = BufferedReader(InputStreamReader(TCPClientSocket?.getInputStream()))
                 }
                 readLen = bufferedReader.read(buffer, 0, buffer.size)
+                if (readLen == -1) {
+                    Log.i(javaClass.name, "readLen-1, close socket")
+                    TCPClientSocket?.close()
+                    break
+                }
                 onReceivedDataListener?.onData(buffer, readLen)
                 if (onReceivedDataListener == null) Log.e(javaClass.name, "Error: TCPClient receive message, but onReceivedDataListener is null");
             }
@@ -44,7 +49,7 @@ class TCPClient(ip: String, port: Int) {
     }
 
     fun isConnected():Boolean {
-        return TCPClientSocket?.isConnected == true
+        return TCPClientSocket?.isClosed == false && TCPClientSocket?.isConnected == true
     }
 
     fun reconnect () {
