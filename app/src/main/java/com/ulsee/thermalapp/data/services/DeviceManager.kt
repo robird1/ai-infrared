@@ -22,10 +22,7 @@ class DeviceManager(device: Device) {
     val tcpClient = TCPClient(device.getIP(), 13888)
 
     init {
-        // 1. 建立連線
-        Thread(Runnable {
-            tcpClient.connect()
-        }).start()
+        keepConnection()
 
         // 2. 取得設定
         val gson = Gson()
@@ -42,9 +39,29 @@ class DeviceManager(device: Device) {
                 tcpClient.setOnReceivedDataListener(null)
             }
         })
+    }
 
-        // 3. 斷線自動重連
-        // todo 斷線自動重連
+    fun keepConnection () {
+
+        // 1. 建立連線
+        Thread(Runnable {
+            connectUntilSuccess()
+            while(true) {
+                if (!tcpClient.isConnected()) connectUntilSuccess()
+                Thread.sleep(1000)
+            }
+        }).start()
+    }
+
+    fun connectUntilSuccess () {
+        while(true) {
+            try {
+                tcpClient.connect()
+                break;
+            } catch(e:Exception) {
+                Thread.sleep(1000)
+            }
+        }
     }
 
     fun setOnStatusChangedListener(listener: OnStatusChangedListener?) {
