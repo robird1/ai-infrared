@@ -15,20 +15,4 @@ interface SettingsAPI {
     @Headers("Content-Type: application/json","Accept: application/json")
     @PUT("api/settings")
     fun update(@Body value: Settings) : Completable
-
-    @Headers("Content-Type: application/json","Accept: application/json")
-    @PUT("api/settings/temperature-unit")
-    fun updateTemperatureUnit(@Body value: Settings) : Completable
-
-    @Headers("Content-Type: application/json","Accept: application/json")
-    @PUT("api/settings/alarm-threshold")
-    fun updateAlarmThreshold(@Body value: Settings) : Completable
-
-    @Headers("Content-Type: application/json","Accept: application/json")
-    @PUT("api/settings/temperature-offset")
-    fun updateTemperatureOffset(@Body value: Settings) : Completable
-
-    @Headers("Content-Type: application/json","Accept: application/json")
-    @PUT("api/settings/is-flip-horizontal")
-    fun updateFlipHorizontal(@Body value: Settings) : Completable
 }

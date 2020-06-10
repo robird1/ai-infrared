@@ -43,6 +43,7 @@ class SettingsNumberPadFragment : Fragment() {
     }
 
     fun getValue () : Double {
+        if (input == null) return initValue.toDouble()
         return input!!.text.toString().toDouble()
     }
 

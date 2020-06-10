@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,6 +16,9 @@ import com.ulsee.thermalapp.MainActivityTag
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.People
+import com.ulsee.thermalapp.data.services.DeviceManager
+import com.ulsee.thermalapp.data.services.PeopleServiceTCP
+import com.ulsee.thermalapp.data.services.TCPClient
 import com.ulsee.thermalapp.utils.RecyclerViewItemClickSupport
 import java.io.Serializable
 
@@ -68,7 +70,12 @@ class GridFragment : Fragment() {
     }
 
     private fun loadPeopleList () {
-        Service.shared.people.getAll()
+        val selectedTCPClient = getFirstConnectedClient()
+        if (selectedTCPClient == null) {
+            Toast.makeText(context, "no connected device", Toast.LENGTH_LONG).show()
+            return
+        }
+        PeopleServiceTCP(selectedTCPClient).getAll()
             .subscribe({ peopleList: List<People> ->
                 (recyclerView.adapter as PeopleListAdapter).setList(peopleList)
             }, { error: Throwable ->
@@ -76,4 +83,16 @@ class GridFragment : Fragment() {
                 Toast.makeText(context, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
             })
     }
+
+    private fun getFirstConnectedClient():TCPClient? {
+        var selectedTCPClient : TCPClient? = null
+        for (deviceManager in Service.shared.deviceManagerList) {
+            if (deviceManager.tcpClient.isConnected() && deviceManager.status == DeviceManager.Status.connected) {
+                selectedTCPClient = deviceManager.tcpClient
+                break
+            }
+        }
+        return selectedTCPClient
+    }
+
 }

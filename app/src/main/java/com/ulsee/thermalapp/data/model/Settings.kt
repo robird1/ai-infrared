@@ -1,8 +1,7 @@
 package com.ulsee.thermalapp.data.model
 
-data class Settings(
-    var TemperatureUnit : String,
-    var AlarmThreshold : Double,
-    var TemperatureOffset : Double,
-    val IsFlipHorizontal : Boolean
-)
+open class Settings {
+    var TemperationUnit = 0
+    var AlarmThreshold : Double = 0.0
+    var Deviation : Double = 0.0
+}
