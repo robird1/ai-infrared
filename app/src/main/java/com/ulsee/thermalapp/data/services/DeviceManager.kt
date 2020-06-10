@@ -22,9 +22,6 @@ class DeviceManager(device: Device) {
     val tcpClient = TCPClient(device.getIP(), 13888)
 
     init {
-        keepConnection()
-
-        // 2. 取得設定
         val gson = Gson()
         val stringBuilder = StringBuilder();
         tcpClient.setOnReceivedDataListener(object: TCPClient.OnReceivedDataListener{
@@ -39,6 +36,8 @@ class DeviceManager(device: Device) {
                 tcpClient.setOnReceivedDataListener(null)
             }
         })
+
+        keepConnection()
     }
 
     fun keepConnection () {
