@@ -86,11 +86,20 @@ class SettingsServiceTCP(apiClient: TCPClient) : ISettingsService {
                 override fun onData(data: CharArray, size: Int) {
                     stringBuilder.append(data, 0, size)
 
-                    // 年包................
-                    if (!stringBuilder.endsWith("}")) return;
+                    if (!stringBuilder.startsWith("{")) {
+                        Log.e(javaClass.name, "response not start with {, error, drop...")
+                        stringBuilder.clear()
+                        return
+                    }
 
-                    val responseString = stringBuilder.toString()
-                    stringBuilder.clear()
+                    if (!stringBuilder.endsWith("}")) return
+
+                    var responseString = stringBuilder.toString()
+                    val len = parseStickyPacketFirstPacketLength(responseString)
+                    if(len == -1) return
+                    responseString = responseString.substring(0, len)
+                    stringBuilder.removeRange(0, len)
+//                    stringBuilder.clear()
                     val itemType = object : TypeToken<VideoFrame>() {}.type
                     try {
                         val videoFrame = gson.fromJson<VideoFrame>(responseString, itemType)
@@ -135,13 +144,31 @@ class SettingsServiceTCP(apiClient: TCPClient) : ISettingsService {
                 override fun onData(data: CharArray, size: Int) {
                     stringBuilder.append(data, 0, size)
 
-                    if (!stringBuilder.endsWith("}")) return;
+                    if (!stringBuilder.startsWith("{")) {
+                        Log.e(javaClass.name, "response not start with {, error, drop...")
+                        stringBuilder.clear()
+                        return
+                    }
 
-                    val responseString = stringBuilder.toString()
+                    if (!stringBuilder.endsWith("}")) return
+
+                    var responseString = stringBuilder.toString()
+                    val len = parseStickyPacketFirstPacketLength(responseString)
+                    if(len == -1) return
+                    responseString = responseString.substring(0, len)
+                    stringBuilder.removeRange(0, len)
+//                    stringBuilder.clear()
+
                     val itemType = object : TypeToken<VideoFrame>() {}.type
-                    val videoFrame = gson.fromJson<VideoFrame>(responseString, itemType)
+                    try {
+                        val videoFrame = gson.fromJson<VideoFrame>(responseString, itemType)
+                        emitter.onNext(videoFrame)
+                        Log.i(javaClass.name, "got video frame")
+                    } catch(e:Exception) {
+                        Log.e(javaClass.name, responseString)
+                        e.printStackTrace()
+                    }
 //                    apiClient?.setOnReceivedDataListener(null)
-                    emitter.onNext(videoFrame)
 //                    emitter.onComplete()
                 }
             })
@@ -162,5 +189,18 @@ class SettingsServiceTCP(apiClient: TCPClient) : ISettingsService {
 
         return Completable.create(handler).subscribeOn(Schedulers.newThread())
             .observeOn(AndroidSchedulers.mainThread())
+    }
+
+    private fun parseStickyPacketFirstPacketLength(content: String) : Int {
+        var leftBigParanthesesCount = 0
+        var rightBigParanthesesCount = 0
+        for(i in 0 until content.length-1) {
+            if(content[i] == '{')leftBigParanthesesCount +=1
+            if(content[i] == '}')rightBigParanthesesCount +=1
+            if (leftBigParanthesesCount>0 && leftBigParanthesesCount==rightBigParanthesesCount) {
+                return i+1
+            }
+        }
+        return -1
     }
 }
