@@ -1,7 +1,15 @@
 package com.ulsee.thermalapp.ui.device
 
+import android.content.Context
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.os.Bundle
 import android.util.Base64
+import android.view.SurfaceHolder
+import android.view.SurfaceView
+import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -10,6 +18,7 @@ import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.services.SettingsServiceTCP
 import io.reactivex.disposables.Disposable
+
 
 class StreamingActivity : AppCompatActivity() {
     enum class StreamType() {
@@ -45,8 +54,11 @@ class StreamingActivity : AppCompatActivity() {
             return
         }
 
+        // keep draw
+        val surfaceView = findViewById<StreamingSurfaceView>(R.id.surfaceView) as StreamingSurfaceView
         disposable = SettingsServiceTCP(deviceManager.tcpClient).openRGBStream().subscribe({
-            Glide.with(this).load(Base64.decode(it.data, Base64.DEFAULT)).into(imageView)
+            surfaceView.draw(it.data)
+//                Glide.with(this).load(Base64.decode(it.data, Base64.DEFAULT)).into(imageView)
         })
     }
 
@@ -61,3 +73,4 @@ class StreamingActivity : AppCompatActivity() {
         super.finish()
     }
 }
+
