@@ -11,26 +11,26 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
-import com.ulsee.thermalapp.data.model.People
+import com.ulsee.thermalapp.data.model.Face
 import com.ulsee.thermalapp.data.services.DeviceManager
 import com.ulsee.thermalapp.data.services.PeopleServiceTCP
 import io.reactivex.disposables.Disposable
 
 class PeopleListAdapter: RecyclerView.Adapter<PeopleListAdapter.ViewHolder>() {
 
-    var peopleList: List<People> = ArrayList()
-    fun setList(list: List<People>) {
-        peopleList = list
+    var faceList: List<Face> = ArrayList()
+    fun setList(list: List<Face>) {
+        faceList = list
         notifyDataSetChanged()
     }
-    fun getList():List<People> {
-        return peopleList
+    fun getList():List<Face> {
+        return faceList
     }
 
-    override fun getItemCount(): Int = this.peopleList.size
+    override fun getItemCount(): Int = this.faceList.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder?.bind(peopleList[position])
+        holder?.bind(faceList[position])
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -43,13 +43,13 @@ class PeopleListAdapter: RecyclerView.Adapter<PeopleListAdapter.ViewHolder>() {
         private val nameTV = itemView?.findViewById<TextView>(R.id.textView_peopleName)
         private val iv = itemView?.findViewById<ImageView>(R.id.imageView)
         private var disposable: Disposable? = null
-        private var mPeople: People? = null
+        private var mFace: Face? = null
 
-        fun bind(people: People) {
-            mPeople = people
+        fun bind(face: Face) {
+            mFace = face
             disposable?.dispose()
 
-            nameTV?.text = people.Name
+            nameTV?.text = face.Name
 //            Glide.with(itemView.context).load(people.AvatarURL).into(iv);
 
             val deviceManager = getFirstConnectedDeviceManager()
@@ -58,12 +58,12 @@ class PeopleListAdapter: RecyclerView.Adapter<PeopleListAdapter.ViewHolder>() {
                 return
             }
 
-            if (people.Image.isNullOrEmpty() == false) {
-                Glide.with(itemView.context).load(Base64.decode(people.Image, Base64.DEFAULT)).into(iv);
+            if (face.Image.isNullOrEmpty() == false) {
+                Glide.with(itemView.context).load(Base64.decode(face.Image, Base64.DEFAULT)).into(iv);
             } else {
-                disposable = PeopleServiceTCP(getFirstConnectedDeviceManager()!!).getSingleFace(people.Name).subscribe{
+                disposable = PeopleServiceTCP(getFirstConnectedDeviceManager()!!).getSingleFace(face.Name).subscribe{
                     disposable = null
-                    people.Image = it
+                    face.Image = it
                     Glide.with(itemView.context).load(Base64.decode(it, Base64.DEFAULT)).into(iv);
                 }
             }

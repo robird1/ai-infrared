@@ -15,7 +15,7 @@ import com.ulsee.thermalapp.MainActivity
 import com.ulsee.thermalapp.MainActivityTag
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
-import com.ulsee.thermalapp.data.model.People
+import com.ulsee.thermalapp.data.model.Face
 import com.ulsee.thermalapp.data.services.DeviceManager
 import com.ulsee.thermalapp.data.services.PeopleServiceTCP
 import com.ulsee.thermalapp.data.services.TCPClient
@@ -52,10 +52,10 @@ class GridFragment : Fragment() {
         return root
     }
 
-    private fun openEditor (people: People? = null) {
+    private fun openEditor (face: Face? = null) {
         val intent = Intent(context, EditorActivity::class.java)
-        if (people != null) {
-            intent.putExtra("people", people!! as Serializable)
+        if (face != null) {
+            intent.putExtra("people", face!! as Serializable)
         }
         startActivityForResult(intent, REQUEST_CODE_ACTIVITY_EDITOR)
     }
@@ -76,8 +76,8 @@ class GridFragment : Fragment() {
             return
         }
         PeopleServiceTCP(selectedTCPClient).getAll()
-            .subscribe({ peopleList: List<People> ->
-                (recyclerView.adapter as PeopleListAdapter).setList(peopleList)
+            .subscribe({ faceList: List<Face> ->
+                (recyclerView.adapter as PeopleListAdapter).setList(faceList)
             }, { error: Throwable ->
                 Log.d(MainActivityTag, error.localizedMessage)
                 Toast.makeText(context, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()

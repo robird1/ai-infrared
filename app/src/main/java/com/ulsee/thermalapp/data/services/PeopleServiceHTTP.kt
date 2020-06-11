@@ -3,7 +3,7 @@ package com.ulsee.thermalapp.data.services
 import com.google.gson.Gson
 import com.ulsee.thermalapp.data.api.PeopleAPI
 import com.ulsee.thermalapp.data.model.ErrorResponse
-import com.ulsee.thermalapp.data.model.People
+import com.ulsee.thermalapp.data.model.Face
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -23,17 +23,17 @@ class PeopleServiceHTTP : IPeopleService {
         .addConverterFactory(GsonConverterFactory.create())
         .build().create(PeopleAPI::class.java)
 
-    override fun getAll(): Observable<List<People>> {
+    override fun getAll(): Observable<List<Face>> {
         return client.getAll()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io());
     }
 
-    override fun create(people: People): Observable<People> {
-        return client.create(people)
+    override fun create(face: Face): Observable<Face> {
+        return client.create(face)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io())
-            .flatMap { response: Response<People> ->
+            .flatMap { response: Response<Face> ->
                 if (response.isSuccessful) {
                     Observable.just(response.body());
                 } else {
@@ -43,14 +43,14 @@ class PeopleServiceHTTP : IPeopleService {
             };
     }
 
-    override fun update(people: People): Completable {
-        return client.update(people.ID, people)
+    override fun update(face: Face): Completable {
+        return client.update(face.ID, face)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io());
     }
 
-    override fun delete(people: People): Completable {
-        return client.delete(people.ID)
+    override fun delete(face: Face): Completable {
+        return client.delete(face.ID)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io());
     }

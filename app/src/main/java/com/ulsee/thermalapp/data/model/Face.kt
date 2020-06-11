@@ -2,7 +2,7 @@ package com.ulsee.thermalapp.data.model
 
 import java.io.Serializable
 
-class People: Serializable {
+open class Face: Serializable {
 
     var ID : Int = 0
     var Name : String = ""

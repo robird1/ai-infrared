@@ -1,13 +1,9 @@
 package com.ulsee.thermalapp.data.services
 
-import android.util.Log
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import com.ulsee.thermalapp.data.model.People
 import com.ulsee.thermalapp.data.model.Settings
 import com.ulsee.thermalapp.data.request.*
 import com.ulsee.thermalapp.data.response.TwoPicture
-import com.ulsee.thermalapp.data.response.VideoFrame
 import io.reactivex.Completable
 import io.reactivex.CompletableOnSubscribe
 import io.reactivex.Observable

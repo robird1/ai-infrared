@@ -4,7 +4,6 @@ import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.ulsee.thermalapp.data.model.Device
-import com.ulsee.thermalapp.data.model.People
 import com.ulsee.thermalapp.data.model.Settings
 import com.ulsee.thermalapp.data.response.Face
 import com.ulsee.thermalapp.data.response.FaceList
@@ -12,7 +11,6 @@ import com.ulsee.thermalapp.data.response.TwoPicture
 import com.ulsee.thermalapp.data.response.VideoFrame
 import org.json.JSONObject
 import java.lang.StringBuilder
-import java.util.concurrent.locks.Lock
 
 class DeviceManager(device: Device) {
     enum class Status {
@@ -37,7 +35,7 @@ class DeviceManager(device: Device) {
     private val mLock = Object()
 
     interface OnGotFaceListListener{
-        fun onGotFaceList(falceList: List<People>)
+        fun onGotFaceList(falceList: List<com.ulsee.thermalapp.data.model.Face>)
     }
     var mOnGotFaceListListener : OnGotFaceListListener? = null
     fun setOnGotFaceListListener(listener: OnGotFaceListListener?) {
@@ -192,7 +190,7 @@ class DeviceManager(device: Device) {
                             if (mOnGotFaceListListener == null) {
                                 Log.e(javaClass.name, "Error no listener of action "+action)
                             }
-                            mOnGotFaceListListener?.onGotFaceList(faceList.FaceList)
+                            mOnGotFaceListListener?.onGotFaceList(faceList.faceList)
                         } catch(e: java.lang.Exception) {
                             Log.e(javaClass.name, "Error parse action "+action)
                             e.printStackTrace()

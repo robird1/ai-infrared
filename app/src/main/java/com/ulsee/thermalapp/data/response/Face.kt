@@ -1,7 +1,8 @@
 package com.ulsee.thermalapp.data.response
 
-class Face {
+import com.ulsee.thermalapp.data.model.Face
+
+class Face : Face() {
     val Action = 10
     var Data = ""
-    var Name = ""
 }

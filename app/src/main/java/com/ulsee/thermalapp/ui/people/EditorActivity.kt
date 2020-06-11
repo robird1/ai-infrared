@@ -17,7 +17,7 @@ import androidx.appcompat.widget.Toolbar
 import com.bumptech.glide.Glide
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
-import com.ulsee.thermalapp.data.model.People
+import com.ulsee.thermalapp.data.model.Face
 import com.ulsee.thermalapp.data.services.DeviceManager
 import com.ulsee.thermalapp.data.services.PeopleServiceTCP
 import com.ulsee.thermalapp.data.services.TCPClient
@@ -27,7 +27,7 @@ class EditorActivity : AppCompatActivity() {
 
     var REAQUEST_CODE_PICK_IMAGE = 1234
 
-    var oldValue : People? = null
+    var oldValue : Face? = null
     var imageBase64 : String? = null
     lateinit var imageView : ImageView
     lateinit var nameInput : EditText
@@ -41,7 +41,7 @@ class EditorActivity : AppCompatActivity() {
         setSupportActionBar(toolbar);
 
         if (intent.hasExtra("people")) {
-            oldValue = intent.getSerializableExtra("people") as People
+            oldValue = intent.getSerializableExtra("people") as Face
         }
 
         imageView = findViewById<ImageView>(R.id.imageView)
@@ -132,14 +132,14 @@ class EditorActivity : AppCompatActivity() {
         val name = nameInput.text.toString()
         if (oldValue != null) {
             val base64 : String? = if(imageBase64 == null)  null else imageBase64
-            val people = People()
+            val people = Face()
             people.ID = oldValue!!.ID
             people.Name = name
             people.Image = base64
             people.oldName = oldValue!!.Name
             editPeople(people)
         } else {
-            val people = People()
+            val people = Face()
             people.ID = 0
             people.Name = name
             people.Image = imageBase64!!
@@ -147,14 +147,14 @@ class EditorActivity : AppCompatActivity() {
         }
     }
 
-    private fun addPeople (people: People) {
+    private fun addPeople (face: Face) {
         val selectedTCPClient = getFirstConnectedDeviceManager()
         if (selectedTCPClient == null) {
             Toast.makeText(this, "no connected device", Toast.LENGTH_LONG).show()
             return
         }
 
-        PeopleServiceTCP(selectedTCPClient).create(people)
+        PeopleServiceTCP(selectedTCPClient).create(face)
             .subscribe({ newPeople ->
                 Toast.makeText(this, "新增成功!!", Toast.LENGTH_LONG).show()
                 setResult(RESULT_OK)
@@ -165,14 +165,14 @@ class EditorActivity : AppCompatActivity() {
             })
     }
 
-    private fun editPeople (people: People) {
+    private fun editPeople (face: Face) {
         val selectedTCPClient = getFirstConnectedDeviceManager()
         if (selectedTCPClient == null) {
             Toast.makeText(this, "no connected device", Toast.LENGTH_LONG).show()
             return
         }
 
-        PeopleServiceTCP(selectedTCPClient).update(people)
+        PeopleServiceTCP(selectedTCPClient).update(face)
             .subscribe({
                 Toast.makeText(this, "編輯成功!!", Toast.LENGTH_LONG).show()
                 setResult(RESULT_OK)
@@ -200,14 +200,14 @@ class EditorActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun deletePeople (people: People) {
+    private fun deletePeople (face: Face) {
         val selectedTCPClient = getFirstConnectedDeviceManager()
         if (selectedTCPClient == null) {
             Toast.makeText(this, "no connected device", Toast.LENGTH_LONG).show()
             return
         }
 
-        PeopleServiceTCP(selectedTCPClient).delete(people)
+        PeopleServiceTCP(selectedTCPClient).delete(face)
             .subscribe({
                 Toast.makeText(this, "刪除成功!!", Toast.LENGTH_LONG).show()
                 setResult(RESULT_OK)
