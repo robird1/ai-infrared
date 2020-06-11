@@ -41,7 +41,8 @@ class PeopleListAdapter: RecyclerView.Adapter<PeopleListAdapter.ViewHolder>() {
         fun bind(people: People) {
             nameTV?.text = people.Name
 //            Glide.with(itemView.context).load(people.AvatarURL).into(iv);
-            Glide.with(itemView.context).load(Base64.decode(people.AvatarURL, Base64.DEFAULT)).into(iv);
+            // todo: load face
+            //Glide.with(itemView.context).load(Base64.decode(people.AvatarURL, Base64.DEFAULT)).into(iv);
         }
     }
 }

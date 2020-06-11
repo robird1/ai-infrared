@@ -55,7 +55,8 @@ class EditorActivity : AppCompatActivity() {
             findViewById<TextView>(R.id.textView_toolbar_title).text = "Edit People"
             findViewById<View>(R.id.button_delete).visibility = View.VISIBLE
             nameInput.setText(oldValue!!.Name)
-            Glide.with(this).load(Base64.decode(oldValue!!.AvatarURL, Base64.DEFAULT)).into(imageView);
+            // todo load face
+            //Glide.with(this).load(Base64.decode(oldValue!!.AvatarURL, Base64.DEFAULT)).into(imageView);
         }
     }
 
