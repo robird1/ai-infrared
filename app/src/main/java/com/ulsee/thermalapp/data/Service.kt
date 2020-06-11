@@ -28,7 +28,7 @@ class Service {
             for (deviceManager in deviceManagerList) {
                 if (deviceManager.device.getID().equals(device.getID())) {
                     isDeviceManagerExists = true
-                    break
+                    continue
                 }
             }
             if (!isDeviceManagerExists) {
