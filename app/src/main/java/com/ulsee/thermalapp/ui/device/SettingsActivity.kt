@@ -111,7 +111,7 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun updateSettings (settings: Settings) {
         val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
-        SettingsServiceTCP(deviceManager!!.tcpClient).update(settings)
+        SettingsServiceTCP(deviceManager!!).update(settings)
             .subscribe({
                 Toast.makeText(this, "更新成功!", Toast.LENGTH_LONG).show()
                 // finish()

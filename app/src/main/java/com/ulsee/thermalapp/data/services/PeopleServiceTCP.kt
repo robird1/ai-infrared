@@ -1,12 +1,10 @@
 package com.ulsee.thermalapp.data.services
 
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import com.ulsee.thermalapp.data.model.People
 import com.ulsee.thermalapp.data.request.ChangePeople
+import com.ulsee.thermalapp.data.request.GetFace
 import com.ulsee.thermalapp.data.request.GetFaceList
-import com.ulsee.thermalapp.data.request.UpdateSettings
-import com.ulsee.thermalapp.data.response.FaceList
+import com.ulsee.thermalapp.data.response.Face
 import io.reactivex.Completable
 import io.reactivex.CompletableOnSubscribe
 import io.reactivex.Observable
@@ -14,31 +12,23 @@ import io.reactivex.ObservableOnSubscribe
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import java.lang.Exception
-import java.lang.StringBuilder
 
-class PeopleServiceTCP(apiClient: TCPClient) : IPeopleService {
+class PeopleServiceTCP(deviceManager: DeviceManager) : IPeopleService {
 
-    var apiClient : TCPClient? = apiClient
+    val deviceManager = deviceManager
+    var apiClient : TCPClient? = deviceManager.tcpClient
     val gson = Gson()
 
-    override fun getAll(): Observable<List<People>> {
-        val handler: ObservableOnSubscribe<List<People>> = ObservableOnSubscribe<List<People>> { emitter ->
+    override fun getAll(): Observable<List<com.ulsee.thermalapp.data.model.Face>> {
+        val handler: ObservableOnSubscribe<List<com.ulsee.thermalapp.data.model.Face>> = ObservableOnSubscribe<List<com.ulsee.thermalapp.data.model.Face>> { emitter ->
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
 //            if (apiClient?.isConnected() != true) apiClient?.reconnect()
-            val stringBuilder = StringBuilder()
 
-            apiClient?.setOnReceivedDataListener(object: TCPClient.OnReceivedDataListener{
-                override fun onData(data: CharArray, size: Int) {
-                    stringBuilder.append(data, 0, size)
-
-                    if (!stringBuilder.endsWith("}")) return;
-
-                    val responseString = stringBuilder.toString()
-                    val itemType = object : TypeToken<FaceList>() {}.type
-                    val faceList = gson.fromJson<FaceList>(responseString, itemType)
-                    apiClient?.setOnReceivedDataListener(null)
-                    emitter.onNext(faceList.facelist)
+            deviceManager.setOnGotFaceListListener(object: DeviceManager.OnGotFaceListListener{
+                override fun onGotFaceList(falceList: List<com.ulsee.thermalapp.data.model.Face>) {
+                    deviceManager.setOnGotFaceListListener(null)
+                    emitter.onNext(falceList)
                     emitter.onComplete()
                 }
             })
@@ -49,12 +39,36 @@ class PeopleServiceTCP(apiClient: TCPClient) : IPeopleService {
             .observeOn(AndroidSchedulers.mainThread())
     }
 
-    override fun create(people: People): Observable<People> {
-        val handler: ObservableOnSubscribe<People> = ObservableOnSubscribe { emitter ->
+    fun getSingleFace(name: String): Observable<String> {
+        val handler: ObservableOnSubscribe<String> = ObservableOnSubscribe<String> { emitter ->
+            if (apiClient == null) throw Exception("error: target not specified")
+            if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
+//            if (apiClient?.isConnected() != true) apiClient?.reconnect()
+
+            val listener = object: DeviceManager.OnGotFaceListener{
+                override fun onFace(face: Face) {
+                    if (face.Name == name) {
+                        deviceManager.removeOnGotFaceListener(this)
+                        emitter.onNext(face.Data!!)
+                        emitter.onComplete()
+                    }
+                }
+            }
+
+            deviceManager.addOnGotFaceListener(listener)
+            apiClient?.send(gson.toJson(GetFace(name)))
+        }
+
+        return Observable.create(handler).subscribeOn(Schedulers.newThread())
+            .observeOn(AndroidSchedulers.mainThread())
+    }
+
+    override fun create(face: com.ulsee.thermalapp.data.model.Face): Observable<com.ulsee.thermalapp.data.model.Face> {
+        val handler: ObservableOnSubscribe<com.ulsee.thermalapp.data.model.Face> = ObservableOnSubscribe { emitter ->
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true) throw Exception("error: target not connected")
-            apiClient?.send(gson.toJson(ChangePeople(people, null, ChangePeople.ChangeType.create)))
-            val empty = People(0,"","", null)
+            apiClient?.send(gson.toJson(ChangePeople(face, null, ChangePeople.ChangeType.create)))
+            val empty = com.ulsee.thermalapp.data.model.Face()
             emitter.onNext(empty)
             emitter.onComplete()
         }
@@ -62,22 +76,22 @@ class PeopleServiceTCP(apiClient: TCPClient) : IPeopleService {
             .observeOn(AndroidSchedulers.mainThread())
     }
 
-    override fun update(people: People): Completable {
+    override fun update(face: com.ulsee.thermalapp.data.model.Face): Completable {
         val handler: CompletableOnSubscribe = CompletableOnSubscribe { emitter ->
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true) throw Exception("error: target not connected")
-            apiClient?.send(gson.toJson(ChangePeople(people, people.oldName, ChangePeople.ChangeType.update)))
+            apiClient?.send(gson.toJson(ChangePeople(face, face.oldName, ChangePeople.ChangeType.update)))
             emitter.onComplete()
         }
         return Completable.create(handler).subscribeOn(Schedulers.newThread())
             .observeOn(AndroidSchedulers.mainThread())
     }
 
-    override fun delete(people: People): Completable {
+    override fun delete(face: com.ulsee.thermalapp.data.model.Face): Completable {
         val handler: CompletableOnSubscribe = CompletableOnSubscribe { emitter ->
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true) throw Exception("error: target not connected")
-            apiClient?.send(gson.toJson(ChangePeople(people, null, ChangePeople.ChangeType.delete)))
+            apiClient?.send(gson.toJson(ChangePeople(face, null, ChangePeople.ChangeType.delete)))
             emitter.onComplete()
         }
         return Completable.create(handler).subscribeOn(Schedulers.newThread())
