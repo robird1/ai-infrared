@@ -11,6 +11,6 @@ class ChangePeople(people: People, oldName: String?, changeType: ChangeType) {
     }
 
     val Name = if(oldName != null && changeType==ChangeType.update && oldName.equals(people.Name)==false) arrayOf(oldName, people.Name) else arrayOf(people.Name)
-    val data = people.AvatarURL
-    val flag = changeType.flag
+    val Data = people.Data
+    val Flag = changeType.flag
 }
