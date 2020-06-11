@@ -12,6 +12,7 @@ import com.ulsee.thermalapp.data.response.TwoPicture
 import com.ulsee.thermalapp.data.response.VideoFrame
 import org.json.JSONObject
 import java.lang.StringBuilder
+import java.util.concurrent.locks.Lock
 
 class DeviceManager(device: Device) {
     enum class Status {
@@ -32,6 +33,8 @@ class DeviceManager(device: Device) {
         faceResponse,
         modifyWifi,
     }
+
+    private val mLock = Object()
 
     interface OnGotFaceListListener{
         fun onGotFaceList(falceList: List<People>)
@@ -61,12 +64,24 @@ class DeviceManager(device: Device) {
     }
 
     interface OnGotFaceListener{
-        fun onFace(image: String)
+        fun onFace(face: Face)
     }
     var mOnGotFaceListener : OnGotFaceListener? = null
     fun setOnGotFaceListener(listener: OnGotFaceListener?) {
         if(listener != null && mOnGotFaceListener != null) Log.e(javaClass.name, "error set listener but already exists: setOnGotFaceListener")
         mOnGotFaceListener = listener
+    }
+
+    var mOnGotFaceListenerList = ArrayList<OnGotFaceListener>()
+    fun addOnGotFaceListener(listener: OnGotFaceListener) {
+        synchronized(mLock) {
+            mOnGotFaceListenerList.add(listener)
+        }
+    }
+    fun removeOnGotFaceListener(listener: OnGotFaceListener) {
+        synchronized(mLock) {
+            mOnGotFaceListenerList.remove(listener)
+        }
     }
 
     interface OnStatusChangedListener {
@@ -98,8 +113,11 @@ class DeviceManager(device: Device) {
         while(true) {
             try {
                 tcpClient.connect()
+                Log.i(javaClass.name, "device connected!!!:"+tcpClient.ip)
                 break;
             } catch(e:Exception) {
+//                Log.e(javaClass.name, "connectUntilSuccess error:"+tcpClient.ip)
+//                e.printStackTrace()
                 Thread.sleep(1000)
             }
         }
@@ -114,6 +132,8 @@ class DeviceManager(device: Device) {
                 stringBuilder.append(data, 0, size)
 
                 Log.i(javaClass.name, "onData, size = "+size)
+
+                while(stringBuilder.startsWith("\n"))stringBuilder.delete(0, 1)
 
                 // 1. parse packet
                 if (!stringBuilder.startsWith("{")) {
@@ -209,10 +229,16 @@ class DeviceManager(device: Device) {
                         val itemType = object : TypeToken<Face>() {}.type
                         try {
                             val response = gson.fromJson<Face>(responseString, itemType)
-                            if (mOnGotFaceListener== null) {
+//                            if (mOnGotFaceListener== null) {
+//                                Log.e(javaClass.name, "Error no listener of action "+action)
+//                            }
+//                            mOnGotFaceListener?.onFace(response)
+                            if (mOnGotFaceListenerList.size == 0) {
                                 Log.e(javaClass.name, "Error no listener of action "+action)
                             }
-                            mOnGotFaceListener?.onFace(response.data)
+                            synchronized(mLock) {
+                                for (listener in mOnGotFaceListenerList) listener.onFace(response)
+                            }
                         } catch(e: java.lang.Exception) {
                             Log.e(javaClass.name, "Error parse action "+action)
                             e.printStackTrace()

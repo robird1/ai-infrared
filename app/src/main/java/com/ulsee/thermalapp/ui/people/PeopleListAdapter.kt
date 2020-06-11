@@ -6,10 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.ulsee.thermalapp.R
+import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.People
+import com.ulsee.thermalapp.data.services.DeviceManager
+import com.ulsee.thermalapp.data.services.PeopleServiceTCP
+import io.reactivex.disposables.Disposable
 
 class PeopleListAdapter: RecyclerView.Adapter<PeopleListAdapter.ViewHolder>() {
 
@@ -37,12 +42,36 @@ class PeopleListAdapter: RecyclerView.Adapter<PeopleListAdapter.ViewHolder>() {
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val nameTV = itemView?.findViewById<TextView>(R.id.textView_peopleName)
         private val iv = itemView?.findViewById<ImageView>(R.id.imageView)
+        private var disposable: Disposable? = null
 
         fun bind(people: People) {
+            disposable?.dispose()
+
             nameTV?.text = people.Name
 //            Glide.with(itemView.context).load(people.AvatarURL).into(iv);
-            // todo: load face
+
+            val deviceManager = getFirstConnectedDeviceManager()
+            if (deviceManager == null) {
+                Toast.makeText(itemView.context, "Error: no device connected", Toast.LENGTH_SHORT).show()
+                return
+            }
+            disposable = PeopleServiceTCP(getFirstConnectedDeviceManager()!!).getSingleFace(people.Name).subscribe{
+                disposable = null
+                Glide.with(itemView.context).load(Base64.decode(it, Base64.DEFAULT)).into(iv);
+            }
+
             //Glide.with(itemView.context).load(Base64.decode(people.AvatarURL, Base64.DEFAULT)).into(iv);
         }
+    }
+
+    private fun getFirstConnectedDeviceManager(): DeviceManager? {
+        var result : DeviceManager? = null
+        for (deviceManager in Service.shared.deviceManagerList) {
+            if (deviceManager.tcpClient.isConnected() && deviceManager.status == DeviceManager.Status.connected) {
+                result = deviceManager
+                break
+            }
+        }
+        return result
     }
 }
