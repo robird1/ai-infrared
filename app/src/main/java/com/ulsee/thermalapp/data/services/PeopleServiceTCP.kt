@@ -69,7 +69,7 @@ class PeopleServiceTCP(deviceManager: DeviceManager) : IPeopleService {
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true) throw Exception("error: target not connected")
             apiClient?.send(gson.toJson(ChangePeople(people, null, ChangePeople.ChangeType.create)))
-            val empty = People(0,"","", null)
+            val empty = People()
             emitter.onNext(empty)
             emitter.onComplete()
         }

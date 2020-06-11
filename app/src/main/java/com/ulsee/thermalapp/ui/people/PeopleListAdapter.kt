@@ -43,8 +43,10 @@ class PeopleListAdapter: RecyclerView.Adapter<PeopleListAdapter.ViewHolder>() {
         private val nameTV = itemView?.findViewById<TextView>(R.id.textView_peopleName)
         private val iv = itemView?.findViewById<ImageView>(R.id.imageView)
         private var disposable: Disposable? = null
+        private var mPeople: People? = null
 
         fun bind(people: People) {
+            mPeople = people
             disposable?.dispose()
 
             nameTV?.text = people.Name
@@ -55,9 +57,15 @@ class PeopleListAdapter: RecyclerView.Adapter<PeopleListAdapter.ViewHolder>() {
                 Toast.makeText(itemView.context, "Error: no device connected", Toast.LENGTH_SHORT).show()
                 return
             }
-            disposable = PeopleServiceTCP(getFirstConnectedDeviceManager()!!).getSingleFace(people.Name).subscribe{
-                disposable = null
-                Glide.with(itemView.context).load(Base64.decode(it, Base64.DEFAULT)).into(iv);
+
+            if (people.Image.isNullOrEmpty() == false) {
+                Glide.with(itemView.context).load(Base64.decode(people.Image, Base64.DEFAULT)).into(iv);
+            } else {
+                disposable = PeopleServiceTCP(getFirstConnectedDeviceManager()!!).getSingleFace(people.Name).subscribe{
+                    disposable = null
+                    people.Image = it
+                    Glide.with(itemView.context).load(Base64.decode(it, Base64.DEFAULT)).into(iv);
+                }
             }
 
             //Glide.with(itemView.context).load(Base64.decode(people.AvatarURL, Base64.DEFAULT)).into(iv);

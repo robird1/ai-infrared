@@ -55,7 +55,15 @@ class EditorActivity : AppCompatActivity() {
             findViewById<TextView>(R.id.textView_toolbar_title).text = "Edit People"
             findViewById<View>(R.id.button_delete).visibility = View.VISIBLE
             nameInput.setText(oldValue!!.Name)
-            // todo load face
+
+            if (oldValue!!.Image.isNullOrEmpty() == false) {
+                Glide.with(this).load(Base64.decode(oldValue!!.Image, Base64.DEFAULT)).into(imageView);
+            } else {
+                PeopleServiceTCP(getFirstConnectedDeviceManager()!!).getSingleFace(oldValue!!.Name).subscribe{
+                    oldValue!!.Image = it
+                    Glide.with(this).load(Base64.decode(it, Base64.DEFAULT)).into(imageView);
+                }
+            }
             //Glide.with(this).load(Base64.decode(oldValue!!.AvatarURL, Base64.DEFAULT)).into(imageView);
         }
     }
@@ -124,10 +132,17 @@ class EditorActivity : AppCompatActivity() {
         val name = nameInput.text.toString()
         if (oldValue != null) {
             val base64 : String? = if(imageBase64 == null)  null else imageBase64
-            val people = People(oldValue!!.ID, name, base64, oldValue!!.Name)
+            val people = People()
+            people.ID = oldValue!!.ID
+            people.Name = name
+            people.Image = base64
+            people.oldName = oldValue!!.Name
             editPeople(people)
         } else {
-            val people = People(0, name, imageBase64!!, null)
+            val people = People()
+            people.ID = 0
+            people.Name = name
+            people.Image = imageBase64!!
             addPeople(people)
         }
     }
