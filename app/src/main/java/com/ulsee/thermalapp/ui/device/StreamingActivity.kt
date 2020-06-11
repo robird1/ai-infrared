@@ -56,8 +56,8 @@ class StreamingActivity : AppCompatActivity() {
 
         // keep draw
         val surfaceView = findViewById<StreamingSurfaceView>(R.id.surfaceView) as StreamingSurfaceView
-        disposable = SettingsServiceTCP(deviceManager.tcpClient).openRGBStream().subscribe({
-            surfaceView.draw(it.data)
+        disposable = SettingsServiceTCP(deviceManager).openRGBStream().subscribe({
+            surfaceView.draw(it)
 //                Glide.with(this).load(Base64.decode(it.data, Base64.DEFAULT)).into(imageView)
         })
     }
@@ -65,9 +65,9 @@ class StreamingActivity : AppCompatActivity() {
     override fun finish() {
         val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
         if (streamType == StreamType.RGB) {
-            SettingsServiceTCP(deviceManager!!.tcpClient).closeRGBStream().subscribe({}, {})
+            SettingsServiceTCP(deviceManager!!).closeRGBStream().subscribe({}, {})
         } else  {
-            SettingsServiceTCP(deviceManager!!.tcpClient).closeThermaltream().subscribe({}, {})
+            SettingsServiceTCP(deviceManager!!).closeThermaltream().subscribe({}, {})
         }
         disposable?.dispose()
         super.finish()

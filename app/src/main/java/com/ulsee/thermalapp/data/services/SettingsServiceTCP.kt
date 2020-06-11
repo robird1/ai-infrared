@@ -3,6 +3,7 @@ package com.ulsee.thermalapp.data.services
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.ulsee.thermalapp.data.model.People
 import com.ulsee.thermalapp.data.model.Settings
 import com.ulsee.thermalapp.data.request.*
 import com.ulsee.thermalapp.data.response.TwoPicture
@@ -16,9 +17,10 @@ import io.reactivex.schedulers.Schedulers
 import java.lang.Exception
 import java.lang.StringBuilder
 
-class SettingsServiceTCP(apiClient: TCPClient) : ISettingsService {
+class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
 
-    var apiClient : TCPClient? = apiClient
+    val deviceManager = deviceManager
+    var apiClient : TCPClient? = deviceManager.tcpClient
     val gson = Gson()
 
     override fun get(): Observable<Settings> {
@@ -41,19 +43,11 @@ class SettingsServiceTCP(apiClient: TCPClient) : ISettingsService {
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
 //            if (apiClient?.isConnected() != true) apiClient?.reconnect()
-            val stringBuilder = StringBuilder()
 
-            apiClient?.setOnReceivedDataListener(object: TCPClient.OnReceivedDataListener{
-                override fun onData(data: CharArray, size: Int) {
-                    stringBuilder.append(data, 0, size)
-
-                    if (!stringBuilder.endsWith("}")) return;
-
-                    val responseString = stringBuilder.toString()
-                    val itemType = object : TypeToken<TwoPicture>() {}.type
-                    val twoPicture = gson.fromJson<TwoPicture>(responseString, itemType)
-                    apiClient?.setOnReceivedDataListener(null)
-                    emitter.onNext(twoPicture)
+            deviceManager.setOnGotTwoPictureListListener(object: DeviceManager.OnGotTwoPictureListListener{
+                override fun onGotTwoPictureList(rgb: String, thermal: String) {
+                    deviceManager.setOnGotTwoPictureListListener(null)
+                    emitter.onNext(TwoPicture(0,rgb,thermal))
                     emitter.onComplete()
                 }
             })
@@ -75,42 +69,15 @@ class SettingsServiceTCP(apiClient: TCPClient) : ISettingsService {
             .observeOn(AndroidSchedulers.mainThread())
     }
 
-    override fun openRGBStream(): Observable<VideoFrame> {
-        val handler: ObservableOnSubscribe<VideoFrame> = ObservableOnSubscribe<VideoFrame> { emitter ->
+    override fun openRGBStream(): Observable<String> {
+        val handler: ObservableOnSubscribe<String> = ObservableOnSubscribe<String> { emitter ->
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
 //            if (apiClient?.isConnected() != true) apiClient?.reconnect()
-            val stringBuilder = StringBuilder()
 
-            apiClient?.setOnReceivedDataListener(object: TCPClient.OnReceivedDataListener{
-                override fun onData(data: CharArray, size: Int) {
-                    stringBuilder.append(data, 0, size)
-
-                    if (!stringBuilder.startsWith("{")) {
-                        Log.e(javaClass.name, "response not start with {, error, drop...")
-                        stringBuilder.clear()
-                        return
-                    }
-
-                    if (!stringBuilder.endsWith("}")) return
-
-                    var responseString = stringBuilder.toString()
-                    val len = parseStickyPacketFirstPacketLength(responseString)
-                    if(len == -1) return
-                    responseString = responseString.substring(0, len)
-                    stringBuilder.removeRange(0, len)
-//                    stringBuilder.clear()
-                    val itemType = object : TypeToken<VideoFrame>() {}.type
-                    try {
-                        val videoFrame = gson.fromJson<VideoFrame>(responseString, itemType)
-                        emitter.onNext(videoFrame)
-                        Log.i(javaClass.name, "got video frame")
-                    } catch(e:Exception) {
-                        Log.e(javaClass.name, responseString)
-                        e.printStackTrace()
-                    }
-//                    apiClient?.setOnReceivedDataListener(null)
-//                    emitter.onComplete()
+            deviceManager.setOnGotVideoFrameListener(object: DeviceManager.OnGotVideoFrameListener{
+                override fun onVideoFrame(frame: String) {
+                    emitter.onNext(frame)
                 }
             })
             apiClient?.send(gson.toJson(SetVideo(SetVideo.VideoStatus.openRGB)))
@@ -126,6 +93,7 @@ class SettingsServiceTCP(apiClient: TCPClient) : ISettingsService {
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
 //            if (apiClient?.isConnected() != true) apiClient?.reconnect()
+            deviceManager.setOnGotVideoFrameListener(null)
             apiClient?.send(gson.toJson(SetVideo(SetVideo.VideoStatus.closeRGB)))
         }
 
@@ -133,43 +101,16 @@ class SettingsServiceTCP(apiClient: TCPClient) : ISettingsService {
             .observeOn(AndroidSchedulers.mainThread())
     }
 
-    override fun openThermaltream(): Observable<VideoFrame> {
-        val handler: ObservableOnSubscribe<VideoFrame> = ObservableOnSubscribe<VideoFrame> { emitter ->
+    override fun openThermaltream(): Observable<String> {
+        val handler: ObservableOnSubscribe<String> = ObservableOnSubscribe<String> { emitter ->
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
 //            if (apiClient?.isConnected() != true) apiClient?.reconnect()
             val stringBuilder = StringBuilder()
 
-            apiClient?.setOnReceivedDataListener(object: TCPClient.OnReceivedDataListener{
-                override fun onData(data: CharArray, size: Int) {
-                    stringBuilder.append(data, 0, size)
-
-                    if (!stringBuilder.startsWith("{")) {
-                        Log.e(javaClass.name, "response not start with {, error, drop...")
-                        stringBuilder.clear()
-                        return
-                    }
-
-                    if (!stringBuilder.endsWith("}")) return
-
-                    var responseString = stringBuilder.toString()
-                    val len = parseStickyPacketFirstPacketLength(responseString)
-                    if(len == -1) return
-                    responseString = responseString.substring(0, len)
-                    stringBuilder.removeRange(0, len)
-//                    stringBuilder.clear()
-
-                    val itemType = object : TypeToken<VideoFrame>() {}.type
-                    try {
-                        val videoFrame = gson.fromJson<VideoFrame>(responseString, itemType)
-                        emitter.onNext(videoFrame)
-                        Log.i(javaClass.name, "got video frame")
-                    } catch(e:Exception) {
-                        Log.e(javaClass.name, responseString)
-                        e.printStackTrace()
-                    }
-//                    apiClient?.setOnReceivedDataListener(null)
-//                    emitter.onComplete()
+            deviceManager.setOnGotVideoFrameListener(object: DeviceManager.OnGotVideoFrameListener{
+                override fun onVideoFrame(frame: String) {
+                    emitter.onNext(frame)
                 }
             })
             apiClient?.send(gson.toJson(SetVideo(SetVideo.VideoStatus.openThermal)))
@@ -185,23 +126,11 @@ class SettingsServiceTCP(apiClient: TCPClient) : ISettingsService {
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
 //            if (apiClient?.isConnected() != true) apiClient?.reconnect()
+            deviceManager.setOnGotVideoFrameListener(null)
             apiClient?.send(gson.toJson(SetVideo(SetVideo.VideoStatus.closeThermal)))
         }
 
         return Completable.create(handler).subscribeOn(Schedulers.newThread())
             .observeOn(AndroidSchedulers.mainThread())
-    }
-
-    private fun parseStickyPacketFirstPacketLength(content: String) : Int {
-        var leftBigParanthesesCount = 0
-        var rightBigParanthesesCount = 0
-        for(i in 0 until content.length-1) {
-            if(content[i] == '{')leftBigParanthesesCount +=1
-            if(content[i] == '}')rightBigParanthesesCount +=1
-            if (leftBigParanthesesCount>0 && leftBigParanthesesCount==rightBigParanthesesCount) {
-                return i+1
-            }
-        }
-        return -1
     }
 }

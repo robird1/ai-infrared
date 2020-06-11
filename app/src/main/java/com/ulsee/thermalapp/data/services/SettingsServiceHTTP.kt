@@ -41,7 +41,7 @@ class SettingsServiceHTTP : ISettingsService {
         TODO("Not yet implemented")
     }
 
-    override fun openRGBStream(): Observable<VideoFrame> {
+    override fun openRGBStream(): Observable<String> {
         TODO("Not yet implemented")
     }
 
@@ -49,7 +49,7 @@ class SettingsServiceHTTP : ISettingsService {
         TODO("Not yet implemented")
     }
 
-    override fun openThermaltream(): Observable<VideoFrame> {
+    override fun openThermaltream(): Observable<String> {
         TODO("Not yet implemented")
     }
 

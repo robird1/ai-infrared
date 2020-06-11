@@ -13,8 +13,8 @@ interface ISettingsService {
     fun update(settings: Settings) : Completable
     fun getTwoPicture() : Observable<TwoPicture>
     fun calibration(calibration: UpdateCalibration) : Completable
-    fun openRGBStream() :  Observable<VideoFrame>
+    fun openRGBStream() :  Observable<String>
     fun closeRGBStream() : Completable
-    fun openThermaltream() :  Observable<VideoFrame>
+    fun openThermaltream() :  Observable<String>
     fun closeThermaltream() : Completable
 }

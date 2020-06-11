@@ -96,7 +96,7 @@ class CalibrationActivity : AppCompatActivity() {
 
     private fun loadImages () {
         val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
-        SettingsServiceTCP(deviceManager!!.tcpClient).getTwoPicture().subscribe({
+        SettingsServiceTCP(deviceManager!!).getTwoPicture().subscribe({
 
             val decodedByte = Base64.decode(it.RGB, 0);
             val btm: Bitmap? = BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.size)
@@ -208,7 +208,7 @@ class CalibrationActivity : AppCompatActivity() {
 
     private fun updateCalibration (x: Int, y: Int, w: Int, h: Int) {
         val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
-        SettingsServiceTCP(deviceManager!!.tcpClient).calibration(UpdateCalibration(x, y, w, h))
+        SettingsServiceTCP(deviceManager!!).calibration(UpdateCalibration(x, y, w, h))
             .subscribe({
                 Toast.makeText(this, "更新成功!", Toast.LENGTH_LONG).show()
                 // finish()

@@ -40,6 +40,8 @@ class TCPClient(ip: String, port: Int) {
                 if (readLen == -1) {
                     Log.i(javaClass.name, "readLen-1, close socket")
                     TCPClientSocket?.close()
+                    bufferedReader = null
+                    bufferedWriter = null
                     onReceivedDataListener = null
                     break
                 }
@@ -73,7 +75,10 @@ class TCPClient(ip: String, port: Int) {
 
     fun send(str: String) {
         if (TCPClientSocket?.isConnected == false) {
-            throw Exception("error socket not connected")
+            throw Exception("error send: socket not connected")
+        }
+        if (TCPClientSocket?.isClosed != false) {
+            throw Exception("error send: socket closed")
         }
         if (bufferedWriter == null) {
             bufferedWriter = BufferedWriter(OutputStreamWriter(TCPClientSocket?.getOutputStream()));
