@@ -89,7 +89,7 @@ class DeviceManager(device: Device) {
 
     val device = device
     var settings : Settings? = null
-    val tcpClient = TCPClient(device.getIP(), 13888)
+    var tcpClient = TCPClient(device.getIP(), 13888)
 
     init {
         listenData()
