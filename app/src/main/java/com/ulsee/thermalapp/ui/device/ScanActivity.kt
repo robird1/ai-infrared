@@ -78,7 +78,8 @@ class ScanActivity : AppCompatActivity() {
         if (result != null) {
             if (result.contents == null) {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show()
-                initZxingScanner()
+                finish()
+                //initZxingScanner()
             } else {
                 processQRCode(result.contents)
             }
