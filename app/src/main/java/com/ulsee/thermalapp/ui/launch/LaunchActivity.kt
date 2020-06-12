@@ -28,7 +28,9 @@ class LaunchActivity : AppCompatActivity() {
         android.Manifest.permission.READ_EXTERNAL_STORAGE,
         android.Manifest.permission.ACCESS_WIFI_STATE,
         android.Manifest.permission.INTERNET,
-        android.Manifest.permission.CAMERA
+        android.Manifest.permission.CAMERA,
+        android.Manifest.permission.ACCESS_FINE_LOCATION,
+        android.Manifest.permission.ACCESS_COARSE_LOCATION
     )
 
     val REQUEST_CODE_PERMISSION = 11111;
