@@ -126,6 +126,7 @@ class WIFIListActivity : AppCompatActivity() {
                             2 else if (difference >= 25) signalStrangth = 1
 
                     }
+                    if(result.SSID.isNullOrEmpty()) continue
                     var wifiInfo = WIFIInfo()
                     wifiInfo.ssid = result.SSID
 
