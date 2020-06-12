@@ -52,7 +52,7 @@ class PeopleListAdapter: RecyclerView.Adapter<PeopleListAdapter.ViewHolder>() {
             nameTV?.text = face.Name
 //            Glide.with(itemView.context).load(people.AvatarURL).into(iv);
 
-            val deviceManager = getFirstConnectedDeviceManager()
+            val deviceManager = Service.shared.getFirstConnectedDeviceManager()
             if (deviceManager == null) {
                 Toast.makeText(itemView.context, "Error: no device connected", Toast.LENGTH_SHORT).show()
                 return
@@ -61,7 +61,7 @@ class PeopleListAdapter: RecyclerView.Adapter<PeopleListAdapter.ViewHolder>() {
             if (face.Image.isNullOrEmpty() == false) {
                 Glide.with(itemView.context).load(Base64.decode(face.Image, Base64.DEFAULT)).into(iv);
             } else {
-                disposable = PeopleServiceTCP(getFirstConnectedDeviceManager()!!).getSingleFace(face.Name).subscribe{
+                disposable = PeopleServiceTCP(deviceManager!!).getSingleFace(face.Name).subscribe{
                     disposable = null
                     face.Image = it
                     Glide.with(itemView.context).load(Base64.decode(it, Base64.DEFAULT)).into(iv);
@@ -70,16 +70,5 @@ class PeopleListAdapter: RecyclerView.Adapter<PeopleListAdapter.ViewHolder>() {
 
             //Glide.with(itemView.context).load(Base64.decode(people.AvatarURL, Base64.DEFAULT)).into(iv);
         }
-    }
-
-    private fun getFirstConnectedDeviceManager(): DeviceManager? {
-        var result : DeviceManager? = null
-        for (deviceManager in Service.shared.deviceManagerList) {
-            if (deviceManager.tcpClient.isConnected() && deviceManager.status == DeviceManager.Status.connected) {
-                result = deviceManager
-                break
-            }
-        }
-        return result
     }
 }

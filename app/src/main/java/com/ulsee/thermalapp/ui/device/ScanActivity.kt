@@ -21,6 +21,7 @@ import com.google.zxing.integration.android.IntentIntegrator
 import com.ulsee.thermalapp.MainActivity
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.AppPreference
+import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Device
 import io.realm.Realm
 import java.net.DatagramPacket
@@ -77,7 +78,8 @@ class ScanActivity : AppCompatActivity() {
         if (result != null) {
             if (result.contents == null) {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show()
-                initZxingScanner()
+                finish()
+                //initZxingScanner()
             } else {
                 processQRCode(result.contents)
             }
@@ -170,11 +172,21 @@ class ScanActivity : AppCompatActivity() {
 
     private fun askDeviceName (device: Device) {
         val ctx = this
-
+        var message : String? = null
         val input = EditText(ctx)
 
+        val duplicatedDeviceIdx = Service.shared.getDeviceList().indexOfFirst { it.getID().equals(device.getID()) }
+        val isDuplicated = duplicatedDeviceIdx >= 0
+        val duplicatedDevice = Service.shared.getDeviceList().first { it.getID().equals(device.getID()) }
+
+        if(isDuplicated) {
+            message = "此裝置已掃描過，將複寫手機中的設定"
+            input.setText(duplicatedDevice.getName())
+        }
+
         AlertDialog.Builder(ctx)
-            .setMessage("請輸入裝置名稱")
+            .setTitle("請輸入裝置名稱")
+            .setMessage(message)
             .setView(input)
             .setPositiveButton("Save"
             ) { dialog, whichButton ->
@@ -183,7 +195,7 @@ class ScanActivity : AppCompatActivity() {
                     Toast.makeText(ctx, "請輸入裝置名稱!", Toast.LENGTH_SHORT).show()
                 } else {
                     device.setName(deviceName)
-                    saveDevice(device)
+                    saveDevice(device, isDuplicated)
                     AppPreference(getSharedPreferences("app", Context.MODE_PRIVATE)).setOnceCreateFirstDevice()
                     goMain()
                 }
@@ -197,10 +209,10 @@ class ScanActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun saveDevice (obj: Device) {
+    private fun saveDevice (obj: Device, isDuplicated: Boolean) {
         val realm = Realm.getDefaultInstance()
         realm.beginTransaction()
-        val device: Device = realm.createObject(Device::class.java)
+        val device: Device = if(isDuplicated) realm.where(Device::class.java).equalTo("mID", obj.getID()).findFirst()!! else realm.createObject(Device::class.java)
         device.setID(obj.getID())
         device.setName(obj.getName())
         device.setIP(obj.getIP())

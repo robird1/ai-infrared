@@ -10,7 +10,8 @@ class ChangePeople(face: Face, oldName: String?, changeType: ChangeType) {
         update(2)
     }
 
+    val Action = 2
     val Name = if(oldName != null && changeType==ChangeType.update && oldName.equals(face.Name)==false) arrayOf(oldName, face.Name) else arrayOf(face.Name)
-    val Data = face.Image
+    val Data : String? = if (changeType.flag == ChangeType.delete.flag) null else face.Image
     val Flag = changeType.flag
 }

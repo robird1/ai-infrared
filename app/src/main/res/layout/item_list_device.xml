@@ -23,10 +23,28 @@
                 android:layout_height="28dp">
                 <TextView
                     android:id="@+id/textView_deviceName"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:text="asdfdsaf"></TextView>
+                <View
+                    android:id="@+id/view_connected"
+                    android:visibility="gone"
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:layout_centerVertical="true"
+                    android:layout_toRightOf="@+id/textView_deviceName"
+                    android:layout_marginStart="8dp"
+                    android:background="@android:color/holo_green_light"></View>
+
+                <View
+                    android:id="@+id/view_not_connected"
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:layout_centerVertical="true"
+                    android:layout_toRightOf="@+id/textView_deviceName"
+                    android:layout_marginStart="8dp"
+                    android:background="@android:color/holo_red_dark"></View>
 
                 <ImageButton
                     android:id="@+id/btn_menu"
