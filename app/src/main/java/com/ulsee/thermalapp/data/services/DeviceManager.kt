@@ -62,7 +62,7 @@ class DeviceManager(device: Device) {
     }
 
     interface OnGotFaceListener{
-        fun onFace(face: Face)
+        fun onFace(face: Face) : Boolean
     }
     var mOnGotFaceListener : OnGotFaceListener? = null
     fun setOnGotFaceListener(listener: OnGotFaceListener?) {
@@ -187,10 +187,11 @@ class DeviceManager(device: Device) {
                         val itemType = object : TypeToken<FaceList>() {}.type
                         try {
                             val faceList = gson.fromJson<FaceList>(responseString, itemType)
+                            Log.i(javaClass.name, "got face list, size: "+faceList.FaceList.size)
                             if (mOnGotFaceListListener == null) {
                                 Log.e(javaClass.name, "Error no listener of action "+action)
                             }
-                            mOnGotFaceListListener?.onGotFaceList(faceList.faceList)
+                            mOnGotFaceListListener?.onGotFaceList(faceList.FaceList)
                         } catch(e: java.lang.Exception) {
                             Log.e(javaClass.name, "Error parse action "+action)
                             e.printStackTrace()
@@ -235,7 +236,14 @@ class DeviceManager(device: Device) {
                                 Log.e(javaClass.name, "Error no listener of action "+action)
                             }
                             synchronized(mLock) {
-                                for (listener in mOnGotFaceListenerList) listener.onFace(response)
+                                var result = false
+                                for(i in mOnGotFaceListenerList.indices) {
+                                    result = result || mOnGotFaceListenerList[i].onFace(response)
+                                }
+                                // for (listener in mOnGotFaceListenerList) result = result || listener.onFace(response)
+                                if (result == false) {
+                                    Log.e(javaClass.name, "Error got face image of "+response.Name+", but no one handle")
+                                }
                             }
                         } catch(e: java.lang.Exception) {
                             Log.e(javaClass.name, "Error parse action "+action)

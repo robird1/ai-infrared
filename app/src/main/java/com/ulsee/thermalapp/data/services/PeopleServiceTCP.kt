@@ -1,5 +1,6 @@
 package com.ulsee.thermalapp.data.services
 
+import android.util.Log
 import com.google.gson.Gson
 import com.ulsee.thermalapp.data.request.ChangePeople
 import com.ulsee.thermalapp.data.request.GetFace
@@ -46,12 +47,15 @@ class PeopleServiceTCP(deviceManager: DeviceManager) : IPeopleService {
 //            if (apiClient?.isConnected() != true) apiClient?.reconnect()
 
             val listener = object: DeviceManager.OnGotFaceListener{
-                override fun onFace(face: Face) {
+                override fun onFace(face: Face) : Boolean {
+                    Log.i(javaClass.name, "got single face, name = "+face.Name+", is got = "+(face.Name == name))
                     if (face.Name == name) {
                         deviceManager.removeOnGotFaceListener(this)
                         emitter.onNext(face.Data!!)
                         emitter.onComplete()
+                        return true
                     }
+                    return false
                 }
             }
 
