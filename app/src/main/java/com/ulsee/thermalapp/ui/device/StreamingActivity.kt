@@ -59,7 +59,7 @@ class StreamingActivity : AppCompatActivity() {
         disposable = SettingsServiceTCP(deviceManager).openRGBStream().subscribe({
             surfaceView.draw(it)
 //                Glide.with(this).load(Base64.decode(it.data, Base64.DEFAULT)).into(imageView)
-        })
+        }, {})
 
         if (Service.shared.tutorialDeviceID != null) {
             findViewById<View>(R.id.button_next).visibility = View.VISIBLE
