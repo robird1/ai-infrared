@@ -76,7 +76,14 @@ class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
                     emitter.onNext(frame)
                 }
             })
-            apiClient?.send(gson.toJson(SetVideo(SetVideo.VideoStatus.openRGB)))
+            try {
+                while(!emitter.isDisposed) {
+                    apiClient?.send(gson.toJson(SetVideo(SetVideo.VideoStatus.openRGB)))
+                    Thread.sleep(50) // 20 fps
+                }
+            } catch(e: Exception) {
+                emitter.onError(e)
+            }
         }
 
         return Observable.create(handler).subscribeOn(Schedulers.newThread())
@@ -108,7 +115,10 @@ class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
                     emitter.onNext(frame)
                 }
             })
-            apiClient?.send(gson.toJson(SetVideo(SetVideo.VideoStatus.openThermal)))
+            while(!emitter.isDisposed) {
+                apiClient?.send(gson.toJson(SetVideo(SetVideo.VideoStatus.openThermal)))
+                Thread.sleep(50) // 20 fps
+            }
         }
 
         return Observable.create(handler).subscribeOn(Schedulers.newThread())
