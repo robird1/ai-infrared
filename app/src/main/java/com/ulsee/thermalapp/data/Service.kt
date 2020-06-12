@@ -40,6 +40,17 @@ class Service {
         return results
     }
 
+    fun getFirstConnectedDeviceManager(): DeviceManager? {
+        var result : DeviceManager? = null
+        for (deviceManager in Service.shared.deviceManagerList) {
+            if (deviceManager.tcpClient.isConnected() && deviceManager.settings != null) {
+                result = deviceManager
+                break
+            }
+        }
+        return result
+    }
+
     fun getManagerOfDevice(device: Device) : DeviceManager? {
         return getManagerOfDeviceID(device.getID())
     }

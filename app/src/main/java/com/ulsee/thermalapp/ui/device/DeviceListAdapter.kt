@@ -12,6 +12,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Device
+import com.ulsee.thermalapp.data.services.DeviceManager
+import io.reactivex.disposables.Disposable
 
 class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
 
@@ -35,6 +37,8 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
 
     inner class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
         private val nameTV = itemView?.findViewById<TextView>(R.id.textView_deviceName)
+        private val connectedView = itemView?.findViewById<View>(R.id.view_connected)
+        private val notConnectedView = itemView?.findViewById<View>(R.id.view_not_connected)
         var device : Device? = null
         var deviceID = ""
         init {
@@ -88,10 +92,23 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
             })
         }
 
+        var disposable : Disposable? = null
+
         fun bind(device: Device) {
             this.device = device
+            disposable?.dispose()
             deviceID = device.getID()
             nameTV?.text = device.getName()
+
+            val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
+            disposable = deviceManager?.subscribeStatus()?.subscribe{
+                displayConnectionStatus(it == DeviceManager.Status.connected)
+            }
+        }
+
+        fun displayConnectionStatus(isConnected: Boolean) {
+            connectedView.visibility = if(isConnected) View.VISIBLE else View.GONE
+            notConnectedView.visibility = if(!isConnected) View.VISIBLE else View.GONE
         }
     }
 }

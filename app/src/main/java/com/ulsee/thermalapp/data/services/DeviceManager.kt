@@ -9,12 +9,17 @@ import com.ulsee.thermalapp.data.response.Face
 import com.ulsee.thermalapp.data.response.FaceList
 import com.ulsee.thermalapp.data.response.TwoPicture
 import com.ulsee.thermalapp.data.response.VideoFrame
+import io.reactivex.Observable
+import io.reactivex.ObservableOnSubscribe
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import org.json.JSONObject
 import java.lang.StringBuilder
+import kotlin.collections.ArrayList
 
 class DeviceManager(device: Device) {
-    enum class Status {
-        connecting, connected
+    enum class Status(status: Int) {
+        connecting(0), connected(1)
     }
     enum class Action {
         putSettings,
@@ -82,13 +87,8 @@ class DeviceManager(device: Device) {
         }
     }
 
-    interface OnStatusChangedListener {
-        fun onChanged(status: Status)
-    }
-    var status = Status.connecting
     val device = device
     var settings : Settings? = null
-    var mOnStatusChangedListener: OnStatusChangedListener? = null
     val tcpClient = TCPClient(device.getIP(), 13888)
 
     init {
@@ -172,8 +172,6 @@ class DeviceManager(device: Device) {
                 val itemType = object : TypeToken<Settings>() {}.type
                 try {
                     settings = gson.fromJson<Settings>(responseString, itemType)
-                    status = Status.connected
-                    mOnStatusChangedListener?.onChanged(status)
                 } catch(e: java.lang.Exception) {
                     Log.e(javaClass.name, "Error parse action "+action)
                     e.printStackTrace()
@@ -280,7 +278,20 @@ class DeviceManager(device: Device) {
         return -1
     }
 
-    fun setOnStatusChangedListener(listener: OnStatusChangedListener?) {
-        mOnStatusChangedListener = listener
+    fun subscribeStatus() : Observable<Status> {
+        val handler: ObservableOnSubscribe<Status> = ObservableOnSubscribe<Status> { emitter ->
+            var isConnected = tcpClient.isConnected()
+            emitter.onNext(if (isConnected) Status.connected else Status.connecting)
+            while(!emitter.isDisposed) {
+                if (tcpClient.isConnected() != isConnected) {
+                    isConnected = tcpClient.isConnected()
+                    emitter.onNext(if (isConnected) Status.connected else Status.connecting)
+                }
+                Thread.sleep(1000)
+            }
+        }
+
+        return io.reactivex.Observable.create(handler).subscribeOn(Schedulers.newThread())
+            .observeOn(AndroidSchedulers.mainThread())
     }
 }

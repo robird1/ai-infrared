@@ -59,7 +59,13 @@ class EditorActivity : AppCompatActivity() {
             if (oldValue!!.Image.isNullOrEmpty() == false) {
                 Glide.with(this).load(Base64.decode(oldValue!!.Image, Base64.DEFAULT)).into(imageView);
             } else {
-                PeopleServiceTCP(getFirstConnectedDeviceManager()!!).getSingleFace(oldValue!!.Name).subscribe{
+                val deviceManager = Service.shared.getFirstConnectedDeviceManager()
+                if (deviceManager == null) {
+                    Toast.makeText(this, "Error: no device connected", Toast.LENGTH_LONG).show()
+                    finish()
+                    return
+                }
+                PeopleServiceTCP(deviceManager!!).getSingleFace(oldValue!!.Name).subscribe{
                     oldValue!!.Image = it
                     Glide.with(this).load(Base64.decode(it, Base64.DEFAULT)).into(imageView);
                 }
@@ -148,7 +154,7 @@ class EditorActivity : AppCompatActivity() {
     }
 
     private fun addPeople (face: Face) {
-        val selectedTCPClient = getFirstConnectedDeviceManager()
+        val selectedTCPClient = Service.shared.getFirstConnectedDeviceManager()
         if (selectedTCPClient == null) {
             Toast.makeText(this, "no connected device", Toast.LENGTH_LONG).show()
             return
@@ -166,7 +172,7 @@ class EditorActivity : AppCompatActivity() {
     }
 
     private fun editPeople (face: Face) {
-        val selectedTCPClient = getFirstConnectedDeviceManager()
+        val selectedTCPClient = Service.shared.getFirstConnectedDeviceManager()
         if (selectedTCPClient == null) {
             Toast.makeText(this, "no connected device", Toast.LENGTH_LONG).show()
             return
@@ -201,7 +207,7 @@ class EditorActivity : AppCompatActivity() {
     }
 
     private fun deletePeople (face: Face) {
-        val selectedTCPClient = getFirstConnectedDeviceManager()
+        val selectedTCPClient = Service.shared.getFirstConnectedDeviceManager()
         if (selectedTCPClient == null) {
             Toast.makeText(this, "no connected device", Toast.LENGTH_LONG).show()
             return
@@ -217,27 +223,5 @@ class EditorActivity : AppCompatActivity() {
                 Log.d(javaClass.name, error.localizedMessage)
                 Toast.makeText(this, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
             })
-    }
-
-    private fun getFirstConnectedDeviceManager(): DeviceManager? {
-        var result : DeviceManager? = null
-        for (deviceManager in Service.shared.deviceManagerList) {
-            if (deviceManager.tcpClient.isConnected() && deviceManager.status == DeviceManager.Status.connected) {
-                result = deviceManager
-                break
-            }
-        }
-        return result
-    }
-
-    private fun getFirstConnectedClient(): TCPClient? {
-        var selectedTCPClient : TCPClient? = null
-        for (deviceManager in Service.shared.deviceManagerList) {
-            if (deviceManager.tcpClient.isConnected() && deviceManager.status == DeviceManager.Status.connected) {
-                selectedTCPClient = deviceManager.tcpClient
-                break
-            }
-        }
-        return selectedTCPClient
     }
 }
