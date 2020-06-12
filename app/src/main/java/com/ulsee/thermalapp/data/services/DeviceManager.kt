@@ -89,11 +89,15 @@ class DeviceManager(device: Device) {
     val device = device
     var settings : Settings? = null
     var mOnStatusChangedListener: OnStatusChangedListener? = null
-    val tcpClient = TCPClient(device.getIP(), 13888)
+    var tcpClient = TCPClient(device.getIP(), 13888)
 
     init {
         listenData()
         keepConnection()
+    }
+
+    fun resetIP(ip: String) {
+        tcpClient = TCPClient(ip, 13888)
     }
 
     fun keepConnection () {

@@ -9,5 +9,6 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         Realm.init(this)
+        Service.shared.udpBroadcastService.initialize(applicationContext)
     }
 }

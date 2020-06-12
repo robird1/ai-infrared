@@ -10,13 +10,32 @@ class Service {
     companion object {
         val shared = Service()
     }
+    
+    interface DeviceSearchedListener {
+        fun onNewDevice(device: Device)
+    }
 
-//    var settings = SettingsServiceHTTP()
-//    var people : IPeopleService = PeopleServiceHTTP()
     var deviceManagerList : ArrayList<DeviceManager> = ArrayList<DeviceManager>()
+    val udpBroadcastService = UDPBroadcastService()
+    var mDeviceSearchedListener : DeviceSearchedListener? = null
+    val isScanning: Boolean
+        get() = mDeviceSearchedListener != null
 
     init {
+        udpBroadcastService.subscribeSearchedDevice().subscribe{
+            // if device ip changed
+            for (deviceManager in deviceManagerList) {
+                if (!deviceManager.tcpClient.isConnected() && !deviceManager.device.getIP().equals(it.getIP())) {
+                    Log.i(javaClass.name, "found device ip changed, old ip: "+deviceManager.device.getIP()+", new ip: "+it.getIP())
+                    deviceManager.device.setIP(it.getIP())
+                    deviceManager.resetIP(it.getIP())
+                }
+            }
+            // if scanning
+            mDeviceSearchedListener?.onNewDevice(it)
+        }
         getDeviceList()
+        keepSearchingDevice()
     }
 
     // device
@@ -38,6 +57,22 @@ class Service {
             }
         }
         return results
+    }
+
+    fun keepSearchingDevice () {
+        var isAnyDeviceNotConnected : Boolean
+        Thread(Runnable {
+            while (true) {
+                try {
+                    isAnyDeviceNotConnected = deviceManagerList.indexOfFirst { !it.tcpClient.isConnected() } >= 0
+                    udpBroadcastService.shouldBroadcasting = isAnyDeviceNotConnected || isScanning
+                    Thread.sleep(1000)
+                } catch(e: Exception) {
+                    Log.e(javaClass.name, "Error: Service keepSearchingDevice:")
+                    e.printStackTrace()
+                }
+            }
+        }).start()
     }
 
     fun getManagerOfDevice(device: Device) : DeviceManager? {
