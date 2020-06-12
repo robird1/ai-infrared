@@ -129,7 +129,8 @@ class DeviceManager(device: Device) {
 
         // 1. parse packet
         if (!stringBuilder.startsWith("{")) {
-            Log.e(javaClass.name, "response not start with {, error, drop...")
+            Log.e(javaClass.name, "response not start with {, error, drop..."+stringBuilder.length)
+            Log.e(javaClass.name, stringBuilder.toString())
             stringBuilder.clear()
             return hasAtLeastOnePacket
         }
