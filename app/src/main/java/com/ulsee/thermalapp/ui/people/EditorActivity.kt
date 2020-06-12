@@ -1,5 +1,6 @@
 package com.ulsee.thermalapp.ui.people
 
+import android.app.ProgressDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -32,10 +33,13 @@ class EditorActivity : AppCompatActivity() {
     lateinit var imageView : ImageView
     lateinit var nameInput : EditText
     lateinit var toolbar : Toolbar
+    lateinit var mProgressDialog : ProgressDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_people_editor)
+
+        mProgressDialog = ProgressDialog(this)
 
         toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar);
@@ -160,14 +164,17 @@ class EditorActivity : AppCompatActivity() {
             return
         }
 
+        mProgressDialog.show()
         PeopleServiceTCP(selectedTCPClient).create(face)
             .subscribe({ newPeople ->
                 Toast.makeText(this, "新增成功!!", Toast.LENGTH_LONG).show()
                 setResult(RESULT_OK)
                 finish()
+                mProgressDialog.dismiss()
             }, { error: Throwable ->
                 Log.d(javaClass.name, error.localizedMessage)
                 Toast.makeText(this, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
+                mProgressDialog.dismiss()
             })
     }
 
@@ -178,14 +185,17 @@ class EditorActivity : AppCompatActivity() {
             return
         }
 
+        mProgressDialog.show()
         PeopleServiceTCP(selectedTCPClient).update(face)
             .subscribe({
                 Toast.makeText(this, "編輯成功!!", Toast.LENGTH_LONG).show()
                 setResult(RESULT_OK)
                 finish()
+                mProgressDialog.dismiss()
             }, { error: Throwable ->
                 Log.d(javaClass.name, error.localizedMessage)
                 Toast.makeText(this, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
+                mProgressDialog.dismiss()
             })
     }
 
@@ -213,15 +223,18 @@ class EditorActivity : AppCompatActivity() {
             return
         }
 
+        mProgressDialog.show()
         PeopleServiceTCP(selectedTCPClient).delete(face)
             .subscribe({
                 Toast.makeText(this, "刪除成功!!", Toast.LENGTH_LONG).show()
                 setResult(RESULT_OK)
                 finish()
+                mProgressDialog.dismiss()
             }, { error: Throwable ->
                 error.printStackTrace()
                 Log.d(javaClass.name, error.localizedMessage)
                 Toast.makeText(this, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
+                mProgressDialog.dismiss()
             })
     }
 }

@@ -84,13 +84,14 @@ class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
     }
 
     override fun closeRGBStream(): Completable {
-        val handler: CompletableOnSubscribe = CompletableOnSubscribe { emitter ->
+        val handler: CompletableOnSubscribe = CompletableOnSubscribe {
             apiClient?.setOnReceivedDataListener(null)
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
 //            if (apiClient?.isConnected() != true) apiClient?.reconnect()
             deviceManager.setOnGotVideoFrameListener(null)
             apiClient?.send(gson.toJson(SetVideo(SetVideo.VideoStatus.closeRGB)))
+            it.onComplete()
         }
 
         return Completable.create(handler).subscribeOn(Schedulers.newThread())
@@ -102,7 +103,6 @@ class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
 //            if (apiClient?.isConnected() != true) apiClient?.reconnect()
-            val stringBuilder = StringBuilder()
 
             deviceManager.setOnGotVideoFrameListener(object: DeviceManager.OnGotVideoFrameListener{
                 override fun onVideoFrame(frame: String) {
@@ -117,13 +117,14 @@ class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
     }
 
     override fun closeThermaltream(): Completable {
-        val handler: CompletableOnSubscribe = CompletableOnSubscribe { emitter ->
+        val handler: CompletableOnSubscribe = CompletableOnSubscribe {
             apiClient?.setOnReceivedDataListener(null)
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
 //            if (apiClient?.isConnected() != true) apiClient?.reconnect()
             deviceManager.setOnGotVideoFrameListener(null)
             apiClient?.send(gson.toJson(SetVideo(SetVideo.VideoStatus.closeThermal)))
+            it.onComplete()
         }
 
         return Completable.create(handler).subscribeOn(Schedulers.newThread())
