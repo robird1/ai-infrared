@@ -60,6 +60,11 @@ class StreamingActivity : AppCompatActivity() {
             surfaceView.draw(it)
 //                Glide.with(this).load(Base64.decode(it.data, Base64.DEFAULT)).into(imageView)
         })
+
+        if (Service.shared.tutorialDeviceID != null) {
+            findViewById<View>(R.id.button_next).visibility = View.VISIBLE
+            findViewById<View>(R.id.button_next).setOnClickListener{setResult(RESULT_OK);finish()}
+        }
     }
 
     override fun finish() {

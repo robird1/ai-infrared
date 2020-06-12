@@ -15,6 +15,9 @@ class Service {
 //    var people : IPeopleService = PeopleServiceHTTP()
     var deviceManagerList : ArrayList<DeviceManager> = ArrayList<DeviceManager>()
 
+    // tutorial
+    var tutorialDeviceID : String? = "-123"
+
     init {
         getDeviceList()
     }

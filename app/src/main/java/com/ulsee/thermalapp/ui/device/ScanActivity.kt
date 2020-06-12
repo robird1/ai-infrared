@@ -195,6 +195,8 @@ class ScanActivity : AppCompatActivity() {
                     Toast.makeText(ctx, "請輸入裝置名稱!", Toast.LENGTH_SHORT).show()
                 } else {
                     device.setName(deviceName)
+                    // todo: check device setted
+                    Service.shared.tutorialDeviceID = device.getID()
                     saveDevice(device, isDuplicated)
                     AppPreference(getSharedPreferences("app", Context.MODE_PRIVATE)).setOnceCreateFirstDevice()
                     goMain()

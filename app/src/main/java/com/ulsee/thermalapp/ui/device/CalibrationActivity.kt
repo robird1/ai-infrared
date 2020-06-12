@@ -211,6 +211,7 @@ class CalibrationActivity : AppCompatActivity() {
         SettingsServiceTCP(deviceManager!!).calibration(UpdateCalibration(x, y, w, h))
             .subscribe({
                 Toast.makeText(this, "更新成功!", Toast.LENGTH_LONG).show()
+                setResult(RESULT_OK)
                 // finish()
                 true
             }, { error: Throwable ->

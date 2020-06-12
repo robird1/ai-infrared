@@ -1,5 +1,6 @@
 package com.ulsee.thermalapp
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -9,6 +10,8 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.ulsee.thermalapp.data.Service
+import com.ulsee.thermalapp.ui.tutorial.TutorialStep1Activity
 
 val MainActivityTag = "MainActivity"
 
@@ -17,6 +20,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        if (Service.shared.tutorialDeviceID != null) {
+            startActivity(Intent(this, TutorialStep1Activity::class.java))
+        }
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar);
