@@ -41,7 +41,7 @@ class GridFragment : Fragment() {
         recyclerView.layoutManager = GridLayoutManager(context, 3)
 
         val support: RecyclerViewItemClickSupport = RecyclerViewItemClickSupport.addTo(recyclerView)
-        support.setOnItemClickListener { recyclerView, position, view ->
+        support.setOnItemClickListener { recyclerView, position, _ ->
             val people = (recyclerView.adapter as PeopleListAdapter).getList()[position]
             openEditor(people)
         }
@@ -58,7 +58,7 @@ class GridFragment : Fragment() {
     private fun openEditor (face: Face? = null) {
         val intent = Intent(context, EditorActivity::class.java)
         if (face != null) {
-            intent.putExtra("people", face!! as Serializable)
+            intent.putExtra("people", face as Serializable)
         }
         startActivityForResult(intent, REQUEST_CODE_ACTIVITY_EDITOR)
     }
