@@ -16,6 +16,11 @@ class WIFIInfo : Serializable {
     var signal = "100"
     var bars = "▂▄▆█"
     var security = "WPA2" // [WPA2] [--] [WPA1 WPA2]
+
+    // [WPA2-PSK-CCMP][ESS]
+    // [WPA2-PSK-CCMP][ESS][WPS]
+    // [ESS]
+    var capabilities = "WPA2"
     var password : String? = null
 
     val passwordRequired: Boolean
@@ -23,9 +28,13 @@ class WIFIInfo : Serializable {
 
     val wifiType: WIFIType
         get() = when {
-            security.contains("WPA") -> WIFIType.wpa
-            security.equals("--") -> WIFIType.open
+            capabilities.toLowerCase().contains("wpa") -> WIFIType.wpa
+            capabilities.toLowerCase().contains("wep") -> WIFIType.wep
+            capabilities.toLowerCase().equals("[ess]") -> WIFIType.open
             else -> WIFIType.unknown
+//            security.contains("WPA") -> WIFIType.wpa
+//            security.equals("--") -> WIFIType.open
+//            else -> WIFIType.unknown
         }
 
     fun test () {

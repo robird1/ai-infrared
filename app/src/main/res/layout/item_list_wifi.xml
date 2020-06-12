@@ -35,7 +35,7 @@
             android:layout_marginStart="16dp"
             android:textColor="#40C4F6"
             android:text="ULSEE"
-            android:textSize="24sp">
+            android:textSize="18sp">
         </TextView>
 
     </RelativeLayout>

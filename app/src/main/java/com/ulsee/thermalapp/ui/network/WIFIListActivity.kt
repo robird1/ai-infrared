@@ -2,9 +2,13 @@ package com.ulsee.thermalapp.ui.network
 
 import android.app.Activity
 import android.app.ProgressDialog
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.net.wifi.WifiManager
 import android.os.Bundle
+import android.util.Log
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -13,10 +17,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ulsee.thermalapp.MainActivity
 import com.ulsee.thermalapp.R
-import com.ulsee.thermalapp.data.AppPreference
 import com.ulsee.thermalapp.data.model.WIFIInfo
-import com.ulsee.thermalapp.ui.device.ScanActivity
 import com.ulsee.thermalapp.utils.RecyclerViewItemClickSupport
+
 
 class WIFIListActivity : AppCompatActivity() {
 
@@ -105,10 +108,58 @@ class WIFIListActivity : AppCompatActivity() {
             .show()
     }
 
+    val wifiScanReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val success = intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false)
+            if (success) {
+                val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+                val results = wifiManager.scanResults
+                var wifiInfoList = ArrayList<WIFIInfo>()
+                for (result in results) {
+                    if (result.BSSID == wifiManager.connectionInfo.bssid) {
+                        val level = WifiManager.calculateSignalLevel(wifiManager.connectionInfo.rssi, result.level)
+                        val difference = level * 100 / result.level
+                        var signalStrangth = 0
+                        if (difference >= 100) signalStrangth =
+                            4 else if (difference >= 75) signalStrangth =
+                            3 else if (difference >= 50) signalStrangth =
+                            2 else if (difference >= 25) signalStrangth = 1
+
+                    }
+                    var wifiInfo = WIFIInfo()
+                    wifiInfo.ssid = result.SSID
+
+                    val level = WifiManager.calculateSignalLevel(result.level, 5)
+                    when(level) {
+                        0->wifiInfo.bars = "____"
+                        1->wifiInfo.bars = "▂___"
+                        2->wifiInfo.bars = "▂▄__"
+                        3->wifiInfo.bars = "▂▄▆_"
+                        4->wifiInfo.bars = "▂▄▆█"
+                        else->wifiInfo.bars = "____"
+                    }
+
+                    wifiInfo.capabilities = result.capabilities
+                    Log.i(javaClass.name, String.format("got wifi, ssid=%s, bssid=%s, capabilities=%s", result.SSID, result.BSSID, result.capabilities))
+                    wifiInfoList.add(wifiInfo)
+                }
+                (recyclerView.adapter as WIFIListAdapter).setList(wifiInfoList)
+            } else {
+                Toast.makeText(this@WIFIListActivity, "Failed to scan wifi", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
     private fun loadWIFIList() {
-        val results = ArrayList<WIFIInfo>()
-        val wifiInfo = WIFIInfo()
-        results.add(wifiInfo)
-        (recyclerView.adapter as WIFIListAdapter).setList(results)
+        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+
+        val intentFilter = IntentFilter()
+        intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
+        registerReceiver(wifiScanReceiver, intentFilter)
+
+        val success = wifiManager.startScan()
+        if (!success) {
+            Toast.makeText(this, "Failed to scan wifi", Toast.LENGTH_LONG).show()
+        }
     }
 }
