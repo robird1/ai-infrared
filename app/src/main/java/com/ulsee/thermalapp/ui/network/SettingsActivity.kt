@@ -1,12 +1,14 @@
 package com.ulsee.thermalapp.ui.network
 
+import android.app.Activity
 import android.content.Context
 import android.net.wifi.WifiConfiguration
 import android.net.wifi.WifiManager
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.ulsee.thermalapp.R
-
+import com.ulsee.thermalapp.data.model.WIFIInfo
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -14,33 +16,36 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_network_settings)
 
-        connect()
+        if (!intent.hasExtra("wifi")) {
+            Toast.makeText(this, "Error: no wifi specified", Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
+        val wifiInfo = intent.getSerializableExtra("wifi") as WIFIInfo
+
+        connect(wifiInfo)
     }
 
-    enum class WIFIType {
-        wep, wpa, open
-    }
-
-    fun connect () {
-        val networkSSID = "ULSEE"
-        val networkPass = "ulsee@168"
+    fun connect (wifiInfo: WIFIInfo) {
+        val networkSSID = wifiInfo.ssid
+        val networkPass = wifiInfo.password
 
         val conf = WifiConfiguration()
         conf.SSID = "\"" + networkSSID + "\""
 
-        val wifiType = WIFIType.wep
+        val wifiType = wifiInfo.wifiType
 
         when(wifiType) {
-            WIFIType.wep -> {
+            WIFIInfo.WIFIType.wep -> {
                 conf.wepKeys[0] = "\"" + networkPass + "\"";
                 conf.wepTxKeyIndex = 0;
                 conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
                 conf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
             }
-            WIFIType.wpa -> {
+            WIFIInfo.WIFIType.wpa -> {
                 conf.preSharedKey = "\""+ networkPass +"\"";
             }
-            WIFIType.open -> {
+            WIFIInfo.WIFIType.open -> {
                 conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
             }
         }
@@ -53,9 +58,15 @@ class SettingsActivity : AppCompatActivity() {
             if (i.SSID != null && i.SSID == "\"" + networkSSID + "\"") {
                 wifiManager.disconnect()
                 wifiManager.enableNetwork(i.networkId, true)
-                wifiManager.reconnect()
+                val result = wifiManager.reconnect()
+                if (result) {
+                    setResult(RESULT_OK)
+                } else {
+                    setResult(Activity.RESULT_FIRST_USER)
+                }
                 break
             }
         }
+        finish()
     }
 }

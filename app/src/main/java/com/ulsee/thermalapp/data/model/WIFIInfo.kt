@@ -1,6 +1,12 @@
 package com.ulsee.thermalapp.data.model
 
-class WIFIInfo {
+import java.io.Serializable
+
+class WIFIInfo : Serializable {
+
+    enum class WIFIType {
+        wep, wpa, open, unknown
+    }
 
     var inUsed = false
     var ssid = "ULSEE"
@@ -10,6 +16,17 @@ class WIFIInfo {
     var signal = "100"
     var bars = "▂▄▆█"
     var security = "WPA2" // [WPA2] [--] [WPA1 WPA2]
+    var password : String? = null
+
+    val passwordRequired: Boolean
+        get() = !security.equals("--")
+
+    val wifiType: WIFIType
+        get() = when {
+            security.contains("WPA") -> WIFIType.wpa
+            security.equals("--") -> WIFIType.open
+            else -> WIFIType.unknown
+        }
 
     fun test () {
         val responseString =

@@ -15,6 +15,9 @@ class WIFIListAdapter  : RecyclerView.Adapter<WIFIListAdapter.ViewHolder>() {
         wifiList = list
         notifyDataSetChanged()
     }
+    fun getList():List<WIFIInfo> {
+        return wifiList
+    }
 
     override fun getItemCount(): Int = this.wifiList.size
 
