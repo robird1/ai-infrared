@@ -33,20 +33,25 @@ class TCPClient(ip: String, port: Int) {
             var buffer = CharArray(4096)
             var readLen = 0
             while(isConnected()) {
-                if (bufferedReader == null) {
-                    bufferedReader = BufferedReader(InputStreamReader(TCPClientSocket?.getInputStream()))
+                try {
+                    if (bufferedReader == null) {
+                        bufferedReader = BufferedReader(InputStreamReader(TCPClientSocket?.getInputStream()))
+                    }
+                    readLen = bufferedReader.read(buffer, 0, buffer.size)
+                    if (readLen == -1) {
+                        Log.i(javaClass.name, "readLen-1, close socket")
+                        TCPClientSocket?.close()
+                        bufferedReader = null
+                        bufferedWriter = null
+                        onReceivedDataListener = null
+                        break
+                    }
+                    onReceivedDataListener?.onData(buffer, readLen)
+                    if (onReceivedDataListener == null) Log.e(javaClass.name, "Error: TCPClient receive message, but onReceivedDataListener is null");
+                } catch(e: Exception) {
+                    Log.e(javaClass.name, "Error: TCPClient read from socket exception");
+                    e.printStackTrace()
                 }
-                readLen = bufferedReader.read(buffer, 0, buffer.size)
-                if (readLen == -1) {
-                    Log.i(javaClass.name, "readLen-1, close socket")
-                    TCPClientSocket?.close()
-                    bufferedReader = null
-                    bufferedWriter = null
-                    onReceivedDataListener = null
-                    break
-                }
-                onReceivedDataListener?.onData(buffer, readLen)
-                if (onReceivedDataListener == null) Log.e(javaClass.name, "Error: TCPClient receive message, but onReceivedDataListener is null");
             }
         }).start()
     }

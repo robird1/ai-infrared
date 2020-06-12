@@ -129,7 +129,8 @@ class DeviceManager(device: Device) {
 
         // 1. parse packet
         if (!stringBuilder.startsWith("{")) {
-            Log.e(javaClass.name, "response not start with {, error, drop...")
+            Log.e(javaClass.name, "response not start with {, error, drop..."+stringBuilder.length)
+            Log.e(javaClass.name, stringBuilder.toString())
             stringBuilder.clear()
             return hasAtLeastOnePacket
         }
@@ -211,7 +212,7 @@ class DeviceManager(device: Device) {
                     if (mOnGotVideoFrameListener== null) {
                         Log.e(javaClass.name, "Error no listener of action "+action)
                     }
-                    mOnGotVideoFrameListener?.onVideoFrame(videoFrame.data)
+                    mOnGotVideoFrameListener?.onVideoFrame(videoFrame.Data)
                     Log.i(javaClass.name, "got video frame")
                 } catch(e: java.lang.Exception) {
                     Log.e(javaClass.name, "Error parse action "+action)
