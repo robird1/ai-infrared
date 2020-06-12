@@ -85,7 +85,6 @@ class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
 
     override fun closeRGBStream(): Completable {
         val handler: CompletableOnSubscribe = CompletableOnSubscribe {
-            apiClient?.setOnReceivedDataListener(null)
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
 //            if (apiClient?.isConnected() != true) apiClient?.reconnect()
@@ -118,7 +117,6 @@ class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
 
     override fun closeThermaltream(): Completable {
         val handler: CompletableOnSubscribe = CompletableOnSubscribe {
-            apiClient?.setOnReceivedDataListener(null)
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
 //            if (apiClient?.isConnected() != true) apiClient?.reconnect()
