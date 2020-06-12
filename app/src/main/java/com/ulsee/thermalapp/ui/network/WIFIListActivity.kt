@@ -15,6 +15,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ulsee.thermalapp.MainActivity
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.model.WIFIInfo
@@ -26,6 +27,7 @@ class WIFIListActivity : AppCompatActivity() {
     val REQUEST_CODE_SWITCH_WIFI = 1234
 
     lateinit var recyclerView : RecyclerView
+    lateinit var swipeRefreshLayout: SwipeRefreshLayout
     lateinit var mProgressDialog : ProgressDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,6 +42,9 @@ class WIFIListActivity : AppCompatActivity() {
     }
 
     private fun initRecyclerView () {
+        swipeRefreshLayout = findViewById<SwipeRefreshLayout>(R.id.swipeRefreshLayout)
+        swipeRefreshLayout.setOnRefreshListener { loadWIFIList() }
+
         recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
         recyclerView.adapter = WIFIListAdapter()
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -111,6 +116,7 @@ class WIFIListActivity : AppCompatActivity() {
     val wifiScanReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val success = intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false)
+            swipeRefreshLayout.isRefreshing = false
             if (success) {
                 val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
                 val results = wifiManager.scanResults
@@ -160,6 +166,7 @@ class WIFIListActivity : AppCompatActivity() {
 
         val success = wifiManager.startScan()
         if (!success) {
+            swipeRefreshLayout.isRefreshing = false
             Toast.makeText(this, "Failed to scan wifi", Toast.LENGTH_LONG).show()
         }
     }
