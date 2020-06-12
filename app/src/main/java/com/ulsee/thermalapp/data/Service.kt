@@ -16,7 +16,7 @@ class Service {
     var deviceManagerList : ArrayList<DeviceManager> = ArrayList<DeviceManager>()
 
     // tutorial
-    var tutorialDeviceID : String? = "-123"
+    var tutorialDeviceID : String? = null
 
     init {
         getDeviceList()

@@ -38,7 +38,8 @@ class TutorialStep2Activity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if(requestCode == REQUEST_CODE_DO_TUTORIAL) {
             if (resultCode == RESULT_OK) {
-
+                setResult(RESULT_OK)
+                finish()
             } else if (resultCode == Activity.RESULT_CANCELED) {
                 Toast.makeText(this, "Canceled", Toast.LENGTH_LONG).show()
             } else {
