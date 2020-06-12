@@ -121,139 +121,148 @@ class DeviceManager(device: Device) {
         }
     }
 
-    fun listenData () {
+    fun processBuffer (stringBuilder: StringBuilder) : Boolean {
+        var hasAtLeastOnePacket = false
+
         val gson = Gson()
+        while(stringBuilder.startsWith("\n"))stringBuilder.delete(0, 1)
+
+        // 1. parse packet
+        if (!stringBuilder.startsWith("{")) {
+            Log.e(javaClass.name, "response not start with {, error, drop...")
+            stringBuilder.clear()
+            return hasAtLeastOnePacket
+        }
+
+        if (!(stringBuilder.endsWith("}") || stringBuilder.endsWith("}\n"))) {
+            Log.i(javaClass.name, "onData, packet not end, continue...")
+            return hasAtLeastOnePacket
+        }
+
+        var responseString = stringBuilder.toString()
+        val len = parseStickyPacketFirstPacketLength(responseString)
+        if(len == -1) return hasAtLeastOnePacket
+        hasAtLeastOnePacket = true
+        Log.i(javaClass.name, "parseStickyPacketFirstPacketLength "+len)
+        responseString = responseString.substring(0, len)
+        stringBuilder.delete(0, len)
+
+
+        // 2. parse action
+        val obj = JSONObject(responseString)
+        if (!obj.has("Action")) {
+            Log.e(javaClass.name, "response did not contain key 'Action'")
+            return hasAtLeastOnePacket
+        }
+        val action = obj.getInt("Action")
+
+        Log.i(javaClass.name, "onData, got action"+action)
+
+        // 3. parse content
+        when(action) {
+            Action.putSettings.ordinal -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
+            Action.calibration.ordinal -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
+            Action.updateFace.ordinal -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
+            Action.requestTwoPicture.ordinal -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
+            Action.requestStreaming.ordinal -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
+            Action.requestFaceList.ordinal -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
+            Action.requestFace.ordinal -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
+            Action.modifyWifi.ordinal -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
+            Action.settingsResponse.ordinal -> {
+                val itemType = object : TypeToken<Settings>() {}.type
+                try {
+                    settings = gson.fromJson<Settings>(responseString, itemType)
+                    status = Status.connected
+                    mOnStatusChangedListener?.onChanged(status)
+                } catch(e: java.lang.Exception) {
+                    Log.e(javaClass.name, "Error parse action "+action)
+                    e.printStackTrace()
+                }
+            }
+            Action.faceListResponse.ordinal -> {
+                val itemType = object : TypeToken<FaceList>() {}.type
+                try {
+                    val faceList = gson.fromJson<FaceList>(responseString, itemType)
+                    Log.i(javaClass.name, "got face list, size: "+faceList.FaceList.size)
+                    if (mOnGotFaceListListener == null) {
+                        Log.e(javaClass.name, "Error no listener of action "+action)
+                    }
+                    mOnGotFaceListListener?.onGotFaceList(faceList.FaceList)
+                } catch(e: java.lang.Exception) {
+                    Log.e(javaClass.name, "Error parse action "+action)
+                    e.printStackTrace()
+                }
+            }
+            Action.pictureResponse.ordinal -> {
+                val itemType = object : TypeToken<TwoPicture>() {}.type
+                try {
+                    val twoPicture = gson.fromJson<TwoPicture>(responseString, itemType)
+                    if (mOnGotTwoPictureListListener== null) {
+                        Log.e(javaClass.name, "Error no listener of action "+action)
+                    }
+                    mOnGotTwoPictureListListener?.onGotTwoPictureList(twoPicture.RGB, twoPicture.The)
+                } catch(e: java.lang.Exception) {
+                    Log.e(javaClass.name, "Error parse action "+action)
+                    e.printStackTrace()
+                }
+            }
+            Action.streamResponse.ordinal -> {
+                val itemType = object : TypeToken<VideoFrame>() {}.type
+                try {
+                    val videoFrame = gson.fromJson<VideoFrame>(responseString, itemType)
+                    if (mOnGotVideoFrameListener== null) {
+                        Log.e(javaClass.name, "Error no listener of action "+action)
+                    }
+                    mOnGotVideoFrameListener?.onVideoFrame(videoFrame.data)
+                    Log.i(javaClass.name, "got video frame")
+                } catch(e: java.lang.Exception) {
+                    Log.e(javaClass.name, "Error parse action "+action)
+                    e.printStackTrace()
+                }
+            }
+            Action.faceResponse.ordinal -> {
+                val itemType = object : TypeToken<Face>() {}.type
+                try {
+                    val response = gson.fromJson<Face>(responseString, itemType)
+//                            if (mOnGotFaceListener== null) {
+//                                Log.e(javaClass.name, "Error no listener of action "+action)
+//                            }
+//                            mOnGotFaceListener?.onFace(response)
+                    if (mOnGotFaceListenerList.size == 0) {
+                        Log.e(javaClass.name, "Error no listener of action "+action)
+                    }
+                    synchronized(mLock) {
+                        var result = false
+                        for(i in mOnGotFaceListenerList.indices) {
+                            result = result || mOnGotFaceListenerList[i].onFace(response)
+                        }
+                        // for (listener in mOnGotFaceListenerList) result = result || listener.onFace(response)
+                        if (result == false) {
+                            Log.e(javaClass.name, "Error got face image of "+response.Name+", but no one handle")
+                        }
+                    }
+                } catch(e: java.lang.Exception) {
+                    Log.e(javaClass.name, "Error parse action "+action)
+                    e.printStackTrace()
+                }
+            }
+            else -> {
+                Log.e(javaClass.name, "unknown Action: "+action)
+            }
+        }
+
+        return true
+    }
+
+    fun listenData () {
         val stringBuilder = StringBuilder();
 
         tcpClient.setOnReceivedDataListener(object: TCPClient.OnReceivedDataListener{
             override fun onData(data: CharArray, size: Int) {
                 stringBuilder.append(data, 0, size)
-
                 Log.i(javaClass.name, "onData, size = "+size)
 
-                while(stringBuilder.startsWith("\n"))stringBuilder.delete(0, 1)
-
-                // 1. parse packet
-                if (!stringBuilder.startsWith("{")) {
-                    Log.e(javaClass.name, "response not start with {, error, drop...")
-                    stringBuilder.clear()
-                    return
-                }
-
-                if (!(stringBuilder.endsWith("}") || stringBuilder.endsWith("}\n"))) {
-                    Log.i(javaClass.name, "onData, packet not end, continue...")
-                    return
-                }
-
-                var responseString = stringBuilder.toString()
-                val len = parseStickyPacketFirstPacketLength(responseString)
-                if(len == -1) return
-                Log.i(javaClass.name, "parseStickyPacketFirstPacketLength "+len)
-                responseString = responseString.substring(0, len)
-                stringBuilder.delete(0, len)
-
-                // 2. parse action
-                val obj = JSONObject(responseString)
-                if (!obj.has("Action")) {
-                    Log.e(javaClass.name, "response did not contain key 'Action'")
-                    return
-                }
-                val action = obj.getInt("Action")
-
-                Log.i(javaClass.name, "onData, got action"+action)
-
-                // 3. parse content
-                when(action) {
-                    Action.putSettings.ordinal -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
-                    Action.calibration.ordinal -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
-                    Action.updateFace.ordinal -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
-                    Action.requestTwoPicture.ordinal -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
-                    Action.requestStreaming.ordinal -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
-                    Action.requestFaceList.ordinal -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
-                    Action.requestFace.ordinal -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
-                    Action.modifyWifi.ordinal -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
-                    Action.settingsResponse.ordinal -> {
-                        val itemType = object : TypeToken<Settings>() {}.type
-                        try {
-                            settings = gson.fromJson<Settings>(responseString, itemType)
-                            status = Status.connected
-                            mOnStatusChangedListener?.onChanged(status)
-                        } catch(e: java.lang.Exception) {
-                            Log.e(javaClass.name, "Error parse action "+action)
-                            e.printStackTrace()
-                        }
-                    }
-                    Action.faceListResponse.ordinal -> {
-                        val itemType = object : TypeToken<FaceList>() {}.type
-                        try {
-                            val faceList = gson.fromJson<FaceList>(responseString, itemType)
-                            Log.i(javaClass.name, "got face list, size: "+faceList.FaceList.size)
-                            if (mOnGotFaceListListener == null) {
-                                Log.e(javaClass.name, "Error no listener of action "+action)
-                            }
-                            mOnGotFaceListListener?.onGotFaceList(faceList.FaceList)
-                        } catch(e: java.lang.Exception) {
-                            Log.e(javaClass.name, "Error parse action "+action)
-                            e.printStackTrace()
-                        }
-                    }
-                    Action.pictureResponse.ordinal -> {
-                        val itemType = object : TypeToken<TwoPicture>() {}.type
-                        try {
-                            val twoPicture = gson.fromJson<TwoPicture>(responseString, itemType)
-                            if (mOnGotTwoPictureListListener== null) {
-                                Log.e(javaClass.name, "Error no listener of action "+action)
-                            }
-                            mOnGotTwoPictureListListener?.onGotTwoPictureList(twoPicture.RGB, twoPicture.The)
-                        } catch(e: java.lang.Exception) {
-                            Log.e(javaClass.name, "Error parse action "+action)
-                            e.printStackTrace()
-                        }
-                    }
-                    Action.streamResponse.ordinal -> {
-                        val itemType = object : TypeToken<VideoFrame>() {}.type
-                        try {
-                            val videoFrame = gson.fromJson<VideoFrame>(responseString, itemType)
-                            if (mOnGotVideoFrameListener== null) {
-                                Log.e(javaClass.name, "Error no listener of action "+action)
-                            }
-                            mOnGotVideoFrameListener?.onVideoFrame(videoFrame.data)
-                            Log.i(javaClass.name, "got video frame")
-                        } catch(e: java.lang.Exception) {
-                            Log.e(javaClass.name, "Error parse action "+action)
-                            e.printStackTrace()
-                        }
-                    }
-                    Action.faceResponse.ordinal -> {
-                        val itemType = object : TypeToken<Face>() {}.type
-                        try {
-                            val response = gson.fromJson<Face>(responseString, itemType)
-//                            if (mOnGotFaceListener== null) {
-//                                Log.e(javaClass.name, "Error no listener of action "+action)
-//                            }
-//                            mOnGotFaceListener?.onFace(response)
-                            if (mOnGotFaceListenerList.size == 0) {
-                                Log.e(javaClass.name, "Error no listener of action "+action)
-                            }
-                            synchronized(mLock) {
-                                var result = false
-                                for(i in mOnGotFaceListenerList.indices) {
-                                    result = result || mOnGotFaceListenerList[i].onFace(response)
-                                }
-                                // for (listener in mOnGotFaceListenerList) result = result || listener.onFace(response)
-                                if (result == false) {
-                                    Log.e(javaClass.name, "Error got face image of "+response.Name+", but no one handle")
-                                }
-                            }
-                        } catch(e: java.lang.Exception) {
-                            Log.e(javaClass.name, "Error parse action "+action)
-                            e.printStackTrace()
-                        }
-                    }
-                    else -> {
-                        Log.e(javaClass.name, "unknown Action: "+action)
-                    }
-                }
+                while (processBuffer(stringBuilder))continue
             }
         })
     }
