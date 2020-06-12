@@ -96,11 +96,16 @@ class DeviceManager(device: Device) {
         keepConnection()
     }
 
+    val isDebug = false
+    private fun log (str: String) {
+        if (isDebug) Log.i(javaClass.name, str)
+    }
+
     fun keepConnection () {
         Thread(Runnable {
             connectUntilSuccess()
             while(true) {
-                // Log.i(javaClass.name, "isConnected: "+(if(tcpClient.isConnected())"Y" else "N"))
+                // log("isConnected: "+(if(tcpClient.isConnected())"Y" else "N"))
                 if (!tcpClient.isConnected()) connectUntilSuccess()
                 Thread.sleep(1000)
             }
@@ -111,7 +116,7 @@ class DeviceManager(device: Device) {
         while(true) {
             try {
                 tcpClient.connect()
-                Log.i(javaClass.name, "device connected!!!:"+tcpClient.ip)
+                log("device connected!!!:"+tcpClient.ip)
                 break;
             } catch(e:Exception) {
 //                Log.e(javaClass.name, "connectUntilSuccess error:"+tcpClient.ip)
@@ -136,7 +141,7 @@ class DeviceManager(device: Device) {
         }
 
         if (!(stringBuilder.endsWith("}") || stringBuilder.endsWith("}\n"))) {
-            Log.i(javaClass.name, "onData, packet not end, continue...")
+            log("onData, packet not end, continue...")
             return hasAtLeastOnePacket
         }
 
@@ -144,7 +149,7 @@ class DeviceManager(device: Device) {
         val len = parseStickyPacketFirstPacketLength(responseString)
         if(len == -1) return hasAtLeastOnePacket
         hasAtLeastOnePacket = true
-        Log.i(javaClass.name, "parseStickyPacketFirstPacketLength "+len)
+        log("parseStickyPacketFirstPacketLength "+len)
         responseString = responseString.substring(0, len)
         stringBuilder.delete(0, len)
 
@@ -157,7 +162,7 @@ class DeviceManager(device: Device) {
         }
         val action = obj.getInt("Action")
 
-        Log.i(javaClass.name, "onData, got action"+action)
+        log("onData, got action"+action)
 
         // 3. parse content
         when(action) {
@@ -182,7 +187,7 @@ class DeviceManager(device: Device) {
                 val itemType = object : TypeToken<FaceList>() {}.type
                 try {
                     val faceList = gson.fromJson<FaceList>(responseString, itemType)
-                    Log.i(javaClass.name, "got face list, size: "+faceList.FaceList.size)
+                    log("got face list, size: "+faceList.FaceList.size)
                     if (mOnGotFaceListListener == null) {
                         Log.e(javaClass.name, "Error no listener of action "+action)
                     }
@@ -213,7 +218,7 @@ class DeviceManager(device: Device) {
                         Log.e(javaClass.name, "Error no listener of action "+action)
                     }
                     mOnGotVideoFrameListener?.onVideoFrame(videoFrame.Data)
-                    Log.i(javaClass.name, "got video frame")
+                    log("got video frame")
                 } catch(e: java.lang.Exception) {
                     Log.e(javaClass.name, "Error parse action "+action)
                     e.printStackTrace()
@@ -259,7 +264,7 @@ class DeviceManager(device: Device) {
         tcpClient.setOnReceivedDataListener(object: TCPClient.OnReceivedDataListener{
             override fun onData(data: CharArray, size: Int) {
                 stringBuilder.append(data, 0, size)
-                Log.i(javaClass.name, "onData, size = "+size)
+                log("onData, size = "+size)
 
                 while (processBuffer(stringBuilder))continue
             }
