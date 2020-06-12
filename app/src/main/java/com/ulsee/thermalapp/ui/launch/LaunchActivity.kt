@@ -64,7 +64,7 @@ class LaunchActivity : AppCompatActivity() {
     private fun goNextPage() {
         val appPreference = AppPreference(getSharedPreferences("app", Context.MODE_PRIVATE))
         val hasDevice = Realm.getDefaultInstance().where<Device>().findAll().size > 0
-        if (appPreference.isOnceCreateFirstDevice() && hasDevice ) {
+        if (appPreference.isOnceCreateFirstDevice() || hasDevice ) {
             startActivity(Intent(this, MainActivity::class.java))
         } else {
             startActivity(Intent(this, StarterActivity::class.java))
