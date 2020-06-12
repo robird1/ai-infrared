@@ -11,14 +11,13 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ulsee.thermalapp.MainActivity
 import com.ulsee.thermalapp.MainActivityTag
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Face
-import com.ulsee.thermalapp.data.services.DeviceManager
 import com.ulsee.thermalapp.data.services.PeopleServiceTCP
-import com.ulsee.thermalapp.data.services.TCPClient
 import com.ulsee.thermalapp.utils.RecyclerViewItemClickSupport
 import java.io.Serializable
 
@@ -27,12 +26,16 @@ class GridFragment : Fragment() {
     val REQUEST_CODE_ACTIVITY_EDITOR = 1234
 
     lateinit var recyclerView: RecyclerView
+    lateinit var swipeRefreshLayout: SwipeRefreshLayout
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_people_grid, container, false)
+
+        swipeRefreshLayout = root.findViewById<SwipeRefreshLayout>(R.id.swipeRefreshLayout)
+        swipeRefreshLayout.setOnRefreshListener { loadPeopleList() }
         recyclerView = root.findViewById<RecyclerView>(R.id.recyclerView)
         recyclerView.adapter = PeopleListAdapter()
         recyclerView.layoutManager = GridLayoutManager(context, 3)
@@ -78,9 +81,11 @@ class GridFragment : Fragment() {
         PeopleServiceTCP(selectedTCPClient).getAll()
             .subscribe({ faceList: List<Face> ->
                 (recyclerView.adapter as PeopleListAdapter).setList(faceList)
+                swipeRefreshLayout.isRefreshing = false
             }, { error: Throwable ->
                 Log.d(MainActivityTag, error.localizedMessage)
                 Toast.makeText(context, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
+                swipeRefreshLayout.isRefreshing = false
             })
     }
 
