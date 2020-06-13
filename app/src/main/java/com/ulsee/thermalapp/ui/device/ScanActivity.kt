@@ -35,6 +35,7 @@ class ScanActivity : AppCompatActivity() {
     lateinit var cameraSource: CameraSource
     lateinit var barcodeDetector : BarcodeDetector
     var mUDPSocket = DatagramSocket()
+    var mUDPServerSocket = DatagramSocket(2021)
     var mBroadcaseSendCounter = 1 // 數到0就送出
     var mBroadcaseSendInterval = 3 // 數幾下才送出，平常是3，已經掃到有效的QRCode時是1
     var mScannedDeviceList = ArrayList<Device>() // IP, ID, Timestamp
@@ -61,6 +62,7 @@ class ScanActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         if (!mUDPSocket.isClosed)mUDPSocket.close()
+        if (!mUDPServerSocket.isClosed)mUDPServerSocket.close()
         super.onDestroy()
     }
 
@@ -150,13 +152,13 @@ class ScanActivity : AppCompatActivity() {
     }
 
     private fun processQRCode(qrCode: String) {
-        val isValidQRCode = qrCode?.startsWith("ULSEE")
+        val isValidQRCode = qrCode?.startsWith("ULSEE-")
         if(!isValidQRCode!!) {
             this@ScanActivity.runOnUiThread { Toast.makeText(this@ScanActivity, "此QRCode無效!!", Toast.LENGTH_SHORT).show() }
             return
         }
 
-        val deviceID = qrCode.substring(5)
+        val deviceID = qrCode.substring(6)
         val idx = mScannedDeviceList.indexOfFirst { it.getID().equals(deviceID) }
         val isDeviceAlreadyScanned = idx >= 0
         if (isDeviceAlreadyScanned) {
@@ -177,9 +179,9 @@ class ScanActivity : AppCompatActivity() {
 
         val duplicatedDeviceIdx = Service.shared.getDeviceList().indexOfFirst { it.getID().equals(device.getID()) }
         val isDuplicated = duplicatedDeviceIdx >= 0
-        val duplicatedDevice = Service.shared.getDeviceList().first { it.getID().equals(device.getID()) }
 
         if(isDuplicated) {
+            val duplicatedDevice = Service.shared.getDeviceList()[duplicatedDeviceIdx]
             message = "此裝置已掃描過，將複寫手機中的設定"
             input.setText(duplicatedDevice.getName())
         }
@@ -239,47 +241,21 @@ class ScanActivity : AppCompatActivity() {
 
     // 每3秒傳送廣播，如果掃到qrcode,無法匹配，跳出progress表示無法連線，並改為每1秒傳送
     private fun keepSendUDPBroadcast() {
-        // TODO: 討論傳送的訊息
-        val message = "ULSEE-Thermal-Searching"
-        val BROADCAST_PORT = 8829
-
-        mUDPSocket.broadcast = true
-        val sendData: ByteArray = message.toByteArray()
-        val sendPacket = DatagramPacket(
-            sendData,
-            sendData.size,
-            getBroadcastAddress(),
-            BROADCAST_PORT
-        )
-
-        // 1. keep send
-        Thread(Runnable {
-            while (!mUDPSocket.isClosed and !isFinishing) {
-                try {
-                    if(--mBroadcaseSendCounter==0) {
-                        mUDPSocket.send(sendPacket)
-                        mBroadcaseSendCounter = mBroadcaseSendInterval
-                    }
-                    Thread.sleep(1000)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-        }).start()
 
         // 2. keep recv
         Thread(Runnable {
             val lMsg = ByteArray(4096)
             val dp = DatagramPacket(lMsg, lMsg.size)
             try {
-                while (!mUDPSocket.isClosed and !isFinishing) {
-                    mUDPSocket.receive(dp);
+                while (!mUDPServerSocket.isClosed and !isFinishing) {
+                    mUDPServerSocket.receive(dp);
                     val receivedMessage = String(lMsg, 0, dp.length)
-                    Log.i(javaClass.name, "got: "+receivedMessage)
+                    Log.i(javaClass.name, "got: "+receivedMessage+", from "+dp.address.hostAddress)
 
-                    val isValidDeviceResponse = receivedMessage.startsWith("ULSEE") // TODO: validate message
+                    val isValidDeviceResponse = receivedMessage.startsWith("ULSee:")
                     if (isValidDeviceResponse) {
-                        val deviceID = receivedMessage.substring(5)
+                        val deviceID = receivedMessage.substring(6)
+                        Log.i(javaClass.name, "parsed id: "+deviceID)
                         val idx = mScannedDeviceList.indexOfFirst { it.getID() == deviceID }
                         if (idx >= 0) {
                             mScannedDeviceList[idx].setCreatedAt(System.currentTimeMillis())
@@ -302,6 +278,35 @@ class ScanActivity : AppCompatActivity() {
                 Log.i(javaClass.name, "Broadcast packet sent to: " + getBroadcastAddress()?.hostAddress)
             } catch (e: Exception) {
                 e.printStackTrace()
+            }
+        }).start()
+
+
+
+        val message = "ULSee search"
+        val BROADCAST_PORT = 2020
+
+        mUDPSocket.broadcast = true
+        val sendData: ByteArray = message.toByteArray()
+        val sendPacket = DatagramPacket(
+            sendData,
+            sendData.size,
+            getBroadcastAddress(),
+            BROADCAST_PORT
+        )
+
+        // 1. keep send
+        Thread(Runnable {
+            while (!mUDPSocket.isClosed and !isFinishing) {
+                try {
+                    if(--mBroadcaseSendCounter==0) {
+                        mUDPSocket.send(sendPacket)
+                        mBroadcaseSendCounter = mBroadcaseSendInterval
+                    }
+                    Thread.sleep(1000)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         }).start()
     }
