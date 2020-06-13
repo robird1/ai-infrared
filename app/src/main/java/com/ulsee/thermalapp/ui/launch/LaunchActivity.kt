@@ -45,7 +45,7 @@ class LaunchActivity : AppCompatActivity() {
         // permission
         Timer().schedule(object: TimerTask() {
             override fun run() {
-                validatePermissions()
+                runOnUiThread { validatePermissions() }
             }
         }, 200)
     }
