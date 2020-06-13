@@ -103,7 +103,7 @@ class ScanActivity : AppCompatActivity() {
             .setBarcodeFormats(Barcode.QR_CODE).build()
         cameraSource = CameraSource.Builder(this, barcodeDetector)
             .setAutoFocusEnabled(true)
-            .setRequestedPreviewSize(1000, 1000).build()
+            .setRequestedPreviewSize(800, 800).build()
 
         surfaceView.holder.addCallback(object: SurfaceHolder.Callback {
             override fun surfaceChanged(holder: SurfaceHolder, format: Int,
@@ -211,6 +211,7 @@ class ScanActivity : AppCompatActivity() {
             ) { dialog, whichButton ->
                 mStatus = Status.scanningQRCode
                 dialog.dismiss()
+                initZxingScanner()
             }
             .create()
             .show()
