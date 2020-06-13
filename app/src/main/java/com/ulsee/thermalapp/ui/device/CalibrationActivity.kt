@@ -101,6 +101,7 @@ class CalibrationActivity : AppCompatActivity() {
             val btm: Bitmap? = BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.size)
             if (btm==null) {
                 Toast.makeText(this, "Error: can not get rgb image size", Toast.LENGTH_LONG).show()
+                finish()
             } else {
                 rgbOriginalImageSize = Size(btm!!.width, btm!!.height)
                 Glide.with(this).load(btm)
@@ -123,6 +124,7 @@ class CalibrationActivity : AppCompatActivity() {
             val theBitmap: Bitmap? = BitmapFactory.decodeByteArray(theDecodedByte, 0, theDecodedByte.size)
             if (theBitmap==null) {
                 Toast.makeText(this, "Error: can not get thermal image size", Toast.LENGTH_LONG).show()
+                finish()
             } else {
                 thermalOriginalImageSize = Size(theBitmap!!.width, theBitmap!!.height)
                 Glide.with(this).load(theBitmap)
