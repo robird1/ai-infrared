@@ -140,6 +140,10 @@ class EditorActivity : AppCompatActivity() {
         }
 
         val name = nameInput.text.toString()
+        if (name.contains(".", false) || name.contains("{", false) || name.contains("}", false)) {
+            Toast.makeText(this, "請勿輸入特殊符號如下:\n .{}", Toast.LENGTH_SHORT).show()
+            return
+        }
         if (oldValue != null) {
             val base64 : String? = if(imageBase64 == null)  null else imageBase64
             val people = Face()
