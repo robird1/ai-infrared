@@ -58,7 +58,7 @@ class EditorActivity : AppCompatActivity() {
         if (oldValue != null) {
             findViewById<TextView>(R.id.textView_toolbar_title).text = "Edit People"
             findViewById<View>(R.id.button_delete).visibility = View.VISIBLE
-            nameInput.setText(oldValue!!.Name)
+            nameInput.setText(oldValue!!.NameWihtoutFileType)
 
             if (oldValue!!.Image.isNullOrEmpty() == false) {
                 Glide.with(this).load(Base64.decode(oldValue!!.Image, Base64.DEFAULT)).into(imageView);
