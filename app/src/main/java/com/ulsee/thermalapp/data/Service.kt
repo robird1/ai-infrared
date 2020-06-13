@@ -21,6 +21,9 @@ class Service {
     val isScanning: Boolean
         get() = mDeviceSearchedListener != null
 
+    // tutorial
+    var tutorialDeviceID : String? = null
+
     init {
         udpBroadcastService.subscribeSearchedDevice().subscribe{
             // if device ip changed
@@ -60,19 +63,31 @@ class Service {
     }
 
     fun keepSearchingDevice () {
-        var isAnyDeviceNotConnected : Boolean
+        var isAnyDeviceNotConnected: Boolean
         Thread(Runnable {
             while (true) {
                 try {
-                    isAnyDeviceNotConnected = deviceManagerList.indexOfFirst { !it.tcpClient.isConnected() } >= 0
+                    isAnyDeviceNotConnected =
+                        deviceManagerList.indexOfFirst { !it.tcpClient.isConnected() } >= 0
                     udpBroadcastService.shouldBroadcasting = isAnyDeviceNotConnected || isScanning
                     Thread.sleep(1000)
-                } catch(e: Exception) {
+                } catch (e: Exception) {
                     Log.e(javaClass.name, "Error: Service keepSearchingDevice:")
                     e.printStackTrace()
                 }
             }
         }).start()
+    }
+
+    fun getFirstConnectedDeviceManager(): DeviceManager? {
+        var result : DeviceManager? = null
+        for (deviceManager in Service.shared.deviceManagerList) {
+            if (deviceManager.tcpClient.isConnected() && deviceManager.settings != null) {
+                result = deviceManager
+                break
+            }
+        }
+        return result
     }
 
     fun getManagerOfDevice(device: Device) : DeviceManager? {

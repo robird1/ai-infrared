@@ -1,5 +1,6 @@
 package com.ulsee.thermalapp.ui.people
 
+import android.app.ProgressDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -32,10 +33,13 @@ class EditorActivity : AppCompatActivity() {
     lateinit var imageView : ImageView
     lateinit var nameInput : EditText
     lateinit var toolbar : Toolbar
+    lateinit var mProgressDialog : ProgressDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_people_editor)
+
+        mProgressDialog = ProgressDialog(this)
 
         toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar);
@@ -59,7 +63,13 @@ class EditorActivity : AppCompatActivity() {
             if (oldValue!!.Image.isNullOrEmpty() == false) {
                 Glide.with(this).load(Base64.decode(oldValue!!.Image, Base64.DEFAULT)).into(imageView);
             } else {
-                PeopleServiceTCP(getFirstConnectedDeviceManager()!!).getSingleFace(oldValue!!.Name).subscribe{
+                val deviceManager = Service.shared.getFirstConnectedDeviceManager()
+                if (deviceManager == null) {
+                    Toast.makeText(this, "Error: no device connected", Toast.LENGTH_LONG).show()
+                    finish()
+                    return
+                }
+                PeopleServiceTCP(deviceManager!!).getSingleFace(oldValue!!.Name).subscribe{
                     oldValue!!.Image = it
                     Glide.with(this).load(Base64.decode(it, Base64.DEFAULT)).into(imageView);
                 }
@@ -148,38 +158,44 @@ class EditorActivity : AppCompatActivity() {
     }
 
     private fun addPeople (face: Face) {
-        val selectedTCPClient = getFirstConnectedDeviceManager()
+        val selectedTCPClient = Service.shared.getFirstConnectedDeviceManager()
         if (selectedTCPClient == null) {
             Toast.makeText(this, "no connected device", Toast.LENGTH_LONG).show()
             return
         }
 
+        mProgressDialog.show()
         PeopleServiceTCP(selectedTCPClient).create(face)
             .subscribe({ newPeople ->
                 Toast.makeText(this, "新增成功!!", Toast.LENGTH_LONG).show()
                 setResult(RESULT_OK)
                 finish()
+                mProgressDialog.dismiss()
             }, { error: Throwable ->
                 Log.d(javaClass.name, error.localizedMessage)
                 Toast.makeText(this, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
+                mProgressDialog.dismiss()
             })
     }
 
     private fun editPeople (face: Face) {
-        val selectedTCPClient = getFirstConnectedDeviceManager()
+        val selectedTCPClient = Service.shared.getFirstConnectedDeviceManager()
         if (selectedTCPClient == null) {
             Toast.makeText(this, "no connected device", Toast.LENGTH_LONG).show()
             return
         }
 
+        mProgressDialog.show()
         PeopleServiceTCP(selectedTCPClient).update(face)
             .subscribe({
                 Toast.makeText(this, "編輯成功!!", Toast.LENGTH_LONG).show()
                 setResult(RESULT_OK)
                 finish()
+                mProgressDialog.dismiss()
             }, { error: Throwable ->
                 Log.d(javaClass.name, error.localizedMessage)
                 Toast.makeText(this, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
+                mProgressDialog.dismiss()
             })
     }
 
@@ -201,43 +217,24 @@ class EditorActivity : AppCompatActivity() {
     }
 
     private fun deletePeople (face: Face) {
-        val selectedTCPClient = getFirstConnectedDeviceManager()
+        val selectedTCPClient = Service.shared.getFirstConnectedDeviceManager()
         if (selectedTCPClient == null) {
             Toast.makeText(this, "no connected device", Toast.LENGTH_LONG).show()
             return
         }
 
+        mProgressDialog.show()
         PeopleServiceTCP(selectedTCPClient).delete(face)
             .subscribe({
                 Toast.makeText(this, "刪除成功!!", Toast.LENGTH_LONG).show()
                 setResult(RESULT_OK)
                 finish()
+                mProgressDialog.dismiss()
             }, { error: Throwable ->
                 error.printStackTrace()
                 Log.d(javaClass.name, error.localizedMessage)
                 Toast.makeText(this, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
+                mProgressDialog.dismiss()
             })
-    }
-
-    private fun getFirstConnectedDeviceManager(): DeviceManager? {
-        var result : DeviceManager? = null
-        for (deviceManager in Service.shared.deviceManagerList) {
-            if (deviceManager.tcpClient.isConnected() && deviceManager.status == DeviceManager.Status.connected) {
-                result = deviceManager
-                break
-            }
-        }
-        return result
-    }
-
-    private fun getFirstConnectedClient(): TCPClient? {
-        var selectedTCPClient : TCPClient? = null
-        for (deviceManager in Service.shared.deviceManagerList) {
-            if (deviceManager.tcpClient.isConnected() && deviceManager.status == DeviceManager.Status.connected) {
-                selectedTCPClient = deviceManager.tcpClient
-                break
-            }
-        }
-        return selectedTCPClient
     }
 }

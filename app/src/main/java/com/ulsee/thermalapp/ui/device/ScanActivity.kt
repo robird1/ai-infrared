@@ -88,7 +88,8 @@ class ScanActivity : AppCompatActivity() {
         if (result != null) {
             if (result.contents == null) {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show()
-                initZxingScanner()
+                finish()
+                //initZxingScanner()
             } else {
                 processQRCode(result.contents)
             }
@@ -159,13 +160,13 @@ class ScanActivity : AppCompatActivity() {
     }
 
     private fun processQRCode(qrCode: String) {
-        val isValidQRCode = qrCode?.startsWith("ULSEE")
+        val isValidQRCode = qrCode?.startsWith("ULSEE-")
         if(!isValidQRCode!!) {
             this@ScanActivity.runOnUiThread { Toast.makeText(this@ScanActivity, "此QRCode無效!!", Toast.LENGTH_SHORT).show() }
             return
         }
 
-        val deviceID = qrCode.substring(5)
+        val deviceID = qrCode.substring(6)
         val idx = mScannedDeviceList.indexOfFirst { it.getID().equals(deviceID) }
         val isDeviceAlreadyScanned = idx >= 0
         if (isDeviceAlreadyScanned) {
@@ -185,9 +186,9 @@ class ScanActivity : AppCompatActivity() {
 
         val duplicatedDeviceIdx = Service.shared.getDeviceList().indexOfFirst { it.getID().equals(device.getID()) }
         val isDuplicated = duplicatedDeviceIdx >= 0
-        val duplicatedDevice = Service.shared.getDeviceList().first { it.getID().equals(device.getID()) }
 
         if(isDuplicated) {
+            val duplicatedDevice = Service.shared.getDeviceList()[duplicatedDeviceIdx]
             message = "此裝置已掃描過，將複寫手機中的設定"
             input.setText(duplicatedDevice.getName())
         }
@@ -203,6 +204,8 @@ class ScanActivity : AppCompatActivity() {
                     Toast.makeText(ctx, "請輸入裝置名稱!", Toast.LENGTH_SHORT).show()
                 } else {
                     device.setName(deviceName)
+                    // todo: check device setted
+                    Service.shared.tutorialDeviceID = device.getID()
                     saveDevice(device, isDuplicated)
                     AppPreference(getSharedPreferences("app", Context.MODE_PRIVATE)).setOnceCreateFirstDevice()
                     goMain()

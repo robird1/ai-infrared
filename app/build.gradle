@@ -70,4 +70,7 @@ dependencies {
 
     // segment button
     implementation 'com.github.addisonelliott:SegmentedButton:3.1.8'
+
+    // swipe refresh
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
 }

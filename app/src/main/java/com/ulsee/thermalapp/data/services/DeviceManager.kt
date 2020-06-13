@@ -9,12 +9,17 @@ import com.ulsee.thermalapp.data.response.Face
 import com.ulsee.thermalapp.data.response.FaceList
 import com.ulsee.thermalapp.data.response.TwoPicture
 import com.ulsee.thermalapp.data.response.VideoFrame
+import io.reactivex.Observable
+import io.reactivex.ObservableOnSubscribe
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import org.json.JSONObject
 import java.lang.StringBuilder
+import kotlin.collections.ArrayList
 
 class DeviceManager(device: Device) {
-    enum class Status {
-        connecting, connected
+    enum class Status(status: Int) {
+        connecting(0), connected(1)
     }
     enum class Action {
         putSettings,
@@ -82,13 +87,8 @@ class DeviceManager(device: Device) {
         }
     }
 
-    interface OnStatusChangedListener {
-        fun onChanged(status: Status)
-    }
-    var status = Status.connecting
     val device = device
     var settings : Settings? = null
-    var mOnStatusChangedListener: OnStatusChangedListener? = null
     var tcpClient = TCPClient(device.getIP(), 13888)
 
     init {
@@ -99,12 +99,16 @@ class DeviceManager(device: Device) {
     fun resetIP(ip: String) {
         tcpClient = TCPClient(ip, 13888)
     }
+    val isDebug = false
+    private fun log (str: String) {
+        if (isDebug) Log.i(javaClass.name, str)
+    }
 
     fun keepConnection () {
         Thread(Runnable {
             connectUntilSuccess()
             while(true) {
-                // Log.i(javaClass.name, "isConnected: "+(if(tcpClient.isConnected())"Y" else "N"))
+                // log("isConnected: "+(if(tcpClient.isConnected())"Y" else "N"))
                 if (!tcpClient.isConnected()) connectUntilSuccess()
                 Thread.sleep(1000)
             }
@@ -115,7 +119,7 @@ class DeviceManager(device: Device) {
         while(true) {
             try {
                 tcpClient.connect()
-                Log.i(javaClass.name, "device connected!!!:"+tcpClient.ip)
+                log("device connected!!!:"+tcpClient.ip)
                 break;
             } catch(e:Exception) {
 //                Log.e(javaClass.name, "connectUntilSuccess error:"+tcpClient.ip)
@@ -133,13 +137,14 @@ class DeviceManager(device: Device) {
 
         // 1. parse packet
         if (!stringBuilder.startsWith("{")) {
-            Log.e(javaClass.name, "response not start with {, error, drop...")
+            Log.e(javaClass.name, "response not start with {, error, drop..."+stringBuilder.length)
+            Log.e(javaClass.name, stringBuilder.toString())
             stringBuilder.clear()
             return hasAtLeastOnePacket
         }
 
         if (!(stringBuilder.endsWith("}") || stringBuilder.endsWith("}\n"))) {
-            Log.i(javaClass.name, "onData, packet not end, continue...")
+            log("onData, packet not end, continue...")
             return hasAtLeastOnePacket
         }
 
@@ -147,7 +152,7 @@ class DeviceManager(device: Device) {
         val len = parseStickyPacketFirstPacketLength(responseString)
         if(len == -1) return hasAtLeastOnePacket
         hasAtLeastOnePacket = true
-        Log.i(javaClass.name, "parseStickyPacketFirstPacketLength "+len)
+        log("parseStickyPacketFirstPacketLength "+len)
         responseString = responseString.substring(0, len)
         stringBuilder.delete(0, len)
 
@@ -160,7 +165,7 @@ class DeviceManager(device: Device) {
         }
         val action = obj.getInt("Action")
 
-        Log.i(javaClass.name, "onData, got action"+action)
+        log("onData, got action"+action)
 
         // 3. parse content
         when(action) {
@@ -176,8 +181,6 @@ class DeviceManager(device: Device) {
                 val itemType = object : TypeToken<Settings>() {}.type
                 try {
                     settings = gson.fromJson<Settings>(responseString, itemType)
-                    status = Status.connected
-                    mOnStatusChangedListener?.onChanged(status)
                 } catch(e: java.lang.Exception) {
                     Log.e(javaClass.name, "Error parse action "+action)
                     e.printStackTrace()
@@ -187,7 +190,7 @@ class DeviceManager(device: Device) {
                 val itemType = object : TypeToken<FaceList>() {}.type
                 try {
                     val faceList = gson.fromJson<FaceList>(responseString, itemType)
-                    Log.i(javaClass.name, "got face list, size: "+faceList.FaceList.size)
+                    log("got face list, size: "+faceList.FaceList.size)
                     if (mOnGotFaceListListener == null) {
                         Log.e(javaClass.name, "Error no listener of action "+action)
                     }
@@ -217,8 +220,8 @@ class DeviceManager(device: Device) {
                     if (mOnGotVideoFrameListener== null) {
                         Log.e(javaClass.name, "Error no listener of action "+action)
                     }
-                    mOnGotVideoFrameListener?.onVideoFrame(videoFrame.data)
-                    Log.i(javaClass.name, "got video frame")
+                    mOnGotVideoFrameListener?.onVideoFrame(videoFrame.Data)
+                    log("got video frame")
                 } catch(e: java.lang.Exception) {
                     Log.e(javaClass.name, "Error parse action "+action)
                     e.printStackTrace()
@@ -264,7 +267,7 @@ class DeviceManager(device: Device) {
         tcpClient.setOnReceivedDataListener(object: TCPClient.OnReceivedDataListener{
             override fun onData(data: CharArray, size: Int) {
                 stringBuilder.append(data, 0, size)
-                Log.i(javaClass.name, "onData, size = "+size)
+                log("onData, size = "+size)
 
                 while (processBuffer(stringBuilder))continue
             }
@@ -284,7 +287,20 @@ class DeviceManager(device: Device) {
         return -1
     }
 
-    fun setOnStatusChangedListener(listener: OnStatusChangedListener?) {
-        mOnStatusChangedListener = listener
+    fun subscribeStatus() : Observable<Status> {
+        val handler: ObservableOnSubscribe<Status> = ObservableOnSubscribe<Status> { emitter ->
+            var isConnected = tcpClient.isConnected()
+            emitter.onNext(if (isConnected) Status.connected else Status.connecting)
+            while(!emitter.isDisposed) {
+                if (tcpClient.isConnected() != isConnected) {
+                    isConnected = tcpClient.isConnected()
+                    emitter.onNext(if (isConnected) Status.connected else Status.connecting)
+                }
+                Thread.sleep(1000)
+            }
+        }
+
+        return io.reactivex.Observable.create(handler).subscribeOn(Schedulers.newThread())
+            .observeOn(AndroidSchedulers.mainThread())
     }
 }

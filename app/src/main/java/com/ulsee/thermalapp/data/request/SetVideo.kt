@@ -8,4 +8,6 @@ class SetVideo(status: VideoStatus) {
         openThermal(2),
         closeThermal(3)
     }
+    val Action = 4
+    val Flag = status.flag
 }
