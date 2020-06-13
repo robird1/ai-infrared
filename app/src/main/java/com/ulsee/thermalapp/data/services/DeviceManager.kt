@@ -3,6 +3,7 @@ package com.ulsee.thermalapp.data.services
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Device
 import com.ulsee.thermalapp.data.model.Settings
 import com.ulsee.thermalapp.data.response.Face
@@ -186,6 +187,9 @@ class DeviceManager(device: Device) {
                 val itemType = object : TypeToken<Settings>() {}.type
                 try {
                     settings = gson.fromJson<Settings>(responseString, itemType)
+                    if (settings?.IsFirstSetting == true) {
+                        Service.shared.tutorialDeviceID = device.getID()
+                    }
                 } catch(e: java.lang.Exception) {
                     Log.e(javaClass.name, "Error parse action "+action)
                     e.printStackTrace()
