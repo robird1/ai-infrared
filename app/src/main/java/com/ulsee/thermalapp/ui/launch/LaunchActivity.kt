@@ -15,7 +15,6 @@ import com.ulsee.thermalapp.MainActivity
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.AppPreference
 import com.ulsee.thermalapp.data.model.Device
-import com.ulsee.thermalapp.ui.device.ScanActivity
 import com.ulsee.thermalapp.ui.device.StarterActivity
 import com.ulsee.thermalapp.utils.PermissionAskPreference
 import io.realm.Realm
@@ -43,7 +42,11 @@ class LaunchActivity : AppCompatActivity() {
         permissionAskPreference = PermissionAskPreference(getSharedPreferences("permission", Context.MODE_PRIVATE))
 
         // permission
-        validatePermissions()
+        Timer().schedule(object: TimerTask() {
+            override fun run() {
+                validatePermissions()
+            }
+        }, 200)
     }
 
     private fun validatePermissions() {
