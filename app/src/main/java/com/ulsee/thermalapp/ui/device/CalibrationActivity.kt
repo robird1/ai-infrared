@@ -103,21 +103,21 @@ class CalibrationActivity : AppCompatActivity() {
                 Toast.makeText(this, "Error: can not get rgb image size", Toast.LENGTH_LONG).show()
             } else {
                 rgbOriginalImageSize = Size(btm!!.width, btm!!.height)
+                Glide.with(this).load(btm)
+                    .listener(object : RequestListener<Drawable> {
+                        override fun onLoadFailed(p0: GlideException?, p1: Any?, p2: Target<Drawable>?, p3: Boolean): Boolean {
+                            Toast.makeText(this@CalibrationActivity, "載入 rgb 圖片異常!", Toast.LENGTH_LONG).show()
+                            this@CalibrationActivity.finish()
+                            return false
+                        }
+                        override fun onResourceReady(p0: Drawable?, p1: Any?, p2: Target<Drawable>, p3: DataSource?, p4: Boolean): Boolean {
+                            rgbLoaded = true
+                            rgbSize = Size((p0 as BitmapDrawable).bitmap.width, p0.bitmap.height)
+                            if (rgbLoaded and thermalLoaded) alignImage()
+                            return false
+                        }
+                    }).into(rgbIV)
             }
-            Glide.with(this).load(btm)
-                .listener(object : RequestListener<Drawable> {
-                    override fun onLoadFailed(p0: GlideException?, p1: Any?, p2: Target<Drawable>?, p3: Boolean): Boolean {
-                        Toast.makeText(this@CalibrationActivity, "載入 rgb 圖片異常!", Toast.LENGTH_LONG).show()
-                        this@CalibrationActivity.finish()
-                        return false
-                    }
-                    override fun onResourceReady(p0: Drawable?, p1: Any?, p2: Target<Drawable>, p3: DataSource?, p4: Boolean): Boolean {
-                        rgbLoaded = true
-                        rgbSize = Size((p0 as BitmapDrawable).bitmap.width, p0.bitmap.height)
-                        if (rgbLoaded and thermalLoaded) alignImage()
-                        return false
-                    }
-                }).into(rgbIV)
 
             val theDecodedByte = Base64.decode(it.Data_2, 0);
             val theBitmap: Bitmap? = BitmapFactory.decodeByteArray(theDecodedByte, 0, theDecodedByte.size)
@@ -125,21 +125,21 @@ class CalibrationActivity : AppCompatActivity() {
                 Toast.makeText(this, "Error: can not get thermal image size", Toast.LENGTH_LONG).show()
             } else {
                 thermalOriginalImageSize = Size(theBitmap!!.width, theBitmap!!.height)
+                Glide.with(this).load(theBitmap)
+                    .listener(object : RequestListener<Drawable> {
+                        override fun onLoadFailed(p0: GlideException?, p1: Any?, p2: Target<Drawable>?, p3: Boolean): Boolean {
+                            Toast.makeText(this@CalibrationActivity, "載入 thermal 圖片異常!", Toast.LENGTH_LONG).show()
+                            this@CalibrationActivity.finish()
+                            return false
+                        }
+                        override fun onResourceReady(p0: Drawable?, p1: Any?, p2: Target<Drawable>, p3: DataSource?, p4: Boolean): Boolean {
+                            thermalLoaded = true
+                            thermalSize = Size((p0 as BitmapDrawable).bitmap.width, p0.bitmap.height)
+                            if (rgbLoaded and thermalLoaded) alignImage()
+                            return false
+                        }
+                    }).into(thermalIV)
             }
-            Glide.with(this).load(theBitmap)
-                .listener(object : RequestListener<Drawable> {
-                    override fun onLoadFailed(p0: GlideException?, p1: Any?, p2: Target<Drawable>?, p3: Boolean): Boolean {
-                        Toast.makeText(this@CalibrationActivity, "載入 thermal 圖片異常!", Toast.LENGTH_LONG).show()
-                        this@CalibrationActivity.finish()
-                        return false
-                    }
-                    override fun onResourceReady(p0: Drawable?, p1: Any?, p2: Target<Drawable>, p3: DataSource?, p4: Boolean): Boolean {
-                        thermalLoaded = true
-                        thermalSize = Size((p0 as BitmapDrawable).bitmap.width, p0.bitmap.height)
-                        if (rgbLoaded and thermalLoaded) alignImage()
-                        return false
-                    }
-                }).into(thermalIV)
         })
 
     }
