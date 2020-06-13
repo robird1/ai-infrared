@@ -13,6 +13,7 @@ import io.reactivex.Observable
 import io.reactivex.ObservableOnSubscribe
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import io.realm.Realm
 import org.json.JSONObject
 import java.lang.StringBuilder
 import kotlin.collections.ArrayList
@@ -97,6 +98,10 @@ class DeviceManager(device: Device) {
     }
 
     fun resetIP(ip: String) {
+        val realm = Realm.getDefaultInstance()
+        realm.beginTransaction()
+        device.setIP(ip)
+        realm.commitTransaction()
         tcpClient = TCPClient(ip, 13888)
     }
     val isDebug = false

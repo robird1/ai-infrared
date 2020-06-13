@@ -30,7 +30,6 @@ class Service {
             for (deviceManager in deviceManagerList) {
                 if (!deviceManager.tcpClient.isConnected() && !deviceManager.device.getIP().equals(it.getIP())) {
                     Log.i(javaClass.name, "found device ip changed, old ip: "+deviceManager.device.getIP()+", new ip: "+it.getIP())
-                    deviceManager.device.setIP(it.getIP())
                     deviceManager.resetIP(it.getIP())
                 }
             }
