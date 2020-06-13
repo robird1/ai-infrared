@@ -141,6 +141,8 @@ class DeviceManager(device: Device) {
         val gson = Gson()
         while(stringBuilder.startsWith("\n"))stringBuilder.delete(0, 1)
 
+        if (stringBuilder.length == 0) return hasAtLeastOnePacket
+
         // 1. parse packet
         if (!stringBuilder.startsWith("{")) {
             Log.e(javaClass.name, "response not start with {, error, drop..."+stringBuilder.length)
