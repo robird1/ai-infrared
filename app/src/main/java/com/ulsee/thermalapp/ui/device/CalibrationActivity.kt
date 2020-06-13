@@ -20,14 +20,12 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
-import com.ulsee.thermalapp.MainActivityTag
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.request.UpdateCalibration
 import com.ulsee.thermalapp.data.services.SettingsServiceTCP
 import kotlin.math.max
 import kotlin.math.min
-
 
 class CalibrationActivity : AppCompatActivity() {
 
@@ -50,6 +48,7 @@ class CalibrationActivity : AppCompatActivity() {
 
     // scale
     private var mScaleFactor = 1f
+    var mIsScaling = false
 
     private val scaleListener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
         override fun onScale(detector: ScaleGestureDetector): Boolean {
@@ -63,7 +62,18 @@ class CalibrationActivity : AppCompatActivity() {
             thermalIV.layoutParams = layoutParams
             return true
         }
+
+        override fun onScaleBegin(detector: ScaleGestureDetector?): Boolean {
+            mIsScaling = true
+            return true
+        }
+
+        override fun onScaleEnd(detector: ScaleGestureDetector?) {
+            mIsScaling = false
+            super.onScaleEnd(detector)
+        }
     }
+
     private lateinit var mScaleDetector : ScaleGestureDetector
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -90,7 +100,6 @@ class CalibrationActivity : AppCompatActivity() {
         mScaleDetector = ScaleGestureDetector(this, scaleListener)
 
         loadImages()
-        initThermalTouchListener()
     }
 
     private fun loadImages () {
@@ -164,38 +173,41 @@ class CalibrationActivity : AppCompatActivity() {
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        return mScaleDetector.onTouchEvent(event)
-    }
+        val pointerCount = event?.pointerCount
+//        val result = mScaleDetector.onTouchEvent(event)
+//        Log.i(javaClass.name, "onTouchEvent, mScaleDetector return "+result)
+//        return result
 
-    private fun initThermalTouchListener () {
+        val point = Point(event!!.rawX.toInt(), event!!.rawY.toInt())
 
-        thermalIV.setOnTouchListener(object: View.OnTouchListener{
-            override fun onTouch(view: View?, event: MotionEvent?): Boolean {
+        when (event!!.action and MotionEvent.ACTION_MASK) {
 
-                val point = Point(event!!.rawX.toInt(), event!!.rawY.toInt())
-
-                when (event!!.action and MotionEvent.ACTION_MASK) {
-
-                    MotionEvent.ACTION_DOWN ->                 // 2. record the last touch point
-                        lastPoint = point
-                    MotionEvent.ACTION_UP -> {
-                    }
-                    MotionEvent.ACTION_POINTER_DOWN -> {
-                    }
-                    MotionEvent.ACTION_POINTER_UP -> {
-                    }
-                    MotionEvent.ACTION_MOVE -> {
-                        // 3. get the move offset
-                        val offset = Point(point.x - lastPoint.x, point.y - lastPoint.y)
-                        thermalIV.x = thermalIV.x + offset.x
-                        thermalIV.y = thermalIV.y + offset.y
-                        // 4. record the last touch point
-                        lastPoint = point
-                    }
-                }
-                return true
+            MotionEvent.ACTION_DOWN -> {
+                // 2. record the last touch point
+                if (pointerCount == 1)
+                    lastPoint = point
             }
-        })
+            MotionEvent.ACTION_UP -> {
+            }
+            MotionEvent.ACTION_POINTER_DOWN -> {
+            }
+            MotionEvent.ACTION_POINTER_UP -> {
+            }
+            MotionEvent.ACTION_MOVE -> {
+                if (pointerCount == 1) {
+                    // 3. get the move offset
+                    val offset = Point(point.x - lastPoint.x, point.y - lastPoint.y)
+                    thermalIV.x = thermalIV.x + offset.x
+                    thermalIV.y = thermalIV.y + offset.y
+                    // 4. record the last touch point
+                    lastPoint = point
+                }
+                if (pointerCount == 2) {
+                    mScaleDetector.onTouchEvent(event)
+                }
+            }
+        }
+        return false
     }
 
     private fun save () {
@@ -221,7 +233,7 @@ class CalibrationActivity : AppCompatActivity() {
                 true
             }, { error: Throwable ->
                 error.printStackTrace()
-                Log.d(MainActivityTag, error.localizedMessage)
+                Log.d(javaClass.name, error.localizedMessage)
                 Toast.makeText(this, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
                 finish()
             })
