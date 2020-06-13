@@ -48,8 +48,8 @@ class UDPBroadcastService {
             val lMsg = ByteArray(4096)
             val dp = DatagramPacket(lMsg, lMsg.size)
             try {
-                while (!mUDPSocket.isClosed) {
-                    mUDPSocket.receive(dp);
+                while (!mUDPServerSocket.isClosed) {
+                    mUDPServerSocket.receive(dp);
                     val receivedMessage = String(lMsg, 0, dp.length)
                     Log.i(javaClass.name, "got: "+receivedMessage+", from "+dp.address.hostAddress)
 
