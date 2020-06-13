@@ -2,6 +2,7 @@ package com.ulsee.thermalapp.data
 
 import android.util.Log
 import com.ulsee.thermalapp.data.model.Device
+import com.ulsee.thermalapp.data.model.RealmDevice
 import com.ulsee.thermalapp.data.services.*
 import io.realm.Realm
 import io.realm.kotlin.where
@@ -22,7 +23,12 @@ class Service {
         get() = mDeviceSearchedListener != null
 
     // tutorial
+    fun requestTutorial(deviceID: String) {
+        tutorialDeviceID = deviceID
+        // todo: let main activity know this...
+    }
     var tutorialDeviceID : String? = null
+    var justJoinedDeviceIDList = ArrayList<String>()
 
     init {
         udpBroadcastService.subscribeSearchedDevice().subscribe{
@@ -43,9 +49,13 @@ class Service {
     // device
     fun getDeviceList():List<Device> {
         val realm = Realm.getDefaultInstance()
-        val results = realm.where<Device>().findAll()
+        val results = realm.where<RealmDevice>().findAll()
+        val deviceList = ArrayList<Device>()
 
-        for (device in results) {
+        for (realmDevice in results) {
+            val device = Device.clone(realmDevice)
+            deviceList.add(device)
+
             var isDeviceManagerExists = false
             for (deviceManager in deviceManagerList) {
                 if (deviceManager.device.getID().equals(device.getID())) {
@@ -58,7 +68,7 @@ class Service {
                 deviceManagerList.add(DeviceManager(device))
             }
         }
-        return results
+        return deviceList
     }
 
     fun keepSearchingDevice () {

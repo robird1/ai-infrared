@@ -99,10 +99,10 @@ class DeviceManager(device: Device) {
     }
 
     fun resetIP(ip: String) {
-        val realm = Realm.getDefaultInstance()
-        realm.beginTransaction()
+//        val realm = Realm.getDefaultInstance()
+//        realm.beginTransaction()
         device.setIP(ip)
-        realm.commitTransaction()
+//        realm.commitTransaction()
         tcpClient = TCPClient(ip, 13888)
     }
     val isDebug = false
@@ -188,7 +188,11 @@ class DeviceManager(device: Device) {
                 try {
                     settings = gson.fromJson<Settings>(responseString, itemType)
                     if (settings?.IsFirstSetting == true) {
-                        Service.shared.tutorialDeviceID = device.getID()
+                        val isJustJoinedDevice = Service.shared.justJoinedDeviceIDList.contains(device.getID())
+                        Log.i(javaClass.name, "find first settings device: "+device.getID()+", is just joined:"+isJustJoinedDevice)
+                        if (isJustJoinedDevice) {
+                            Service.shared.requestTutorial(device.getID())
+                        }
                     }
                 } catch(e: java.lang.Exception) {
                     Log.e(javaClass.name, "Error parse action "+action)

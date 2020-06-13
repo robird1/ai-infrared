@@ -2,7 +2,7 @@ package com.ulsee.thermalapp.data.model
 
 import io.realm.RealmObject
 
-open class Device : RealmObject() {
+open class Device {
 
      private var mID: String = ""
      open fun setID(value: String) {
@@ -35,4 +35,16 @@ open class Device : RealmObject() {
      open fun getCreatedAt(): Long {
           return mCreatedAt
      }
+
+     public companion object {
+          fun clone (realmDevice: RealmDevice) : Device {
+               val device = Device()
+               device.setID(realmDevice.getID())
+               device.setIP(realmDevice.getIP())
+               device.setName(realmDevice.getName())
+               device.setCreatedAt(realmDevice.getCreatedAt())
+               return device
+          }
+     }
+
 }

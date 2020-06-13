@@ -30,6 +30,9 @@ class TutorialStep2Activity : AppCompatActivity() {
     }
 
     fun nextTutorial () {
+        setResult(RESULT_OK)
+        finish()
+
         Service.shared.tutorialDeviceID = null
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
@@ -38,8 +41,7 @@ class TutorialStep2Activity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if(requestCode == REQUEST_CODE_DO_TUTORIAL) {
             if (resultCode == RESULT_OK) {
-                setResult(RESULT_OK)
-                finish()
+                nextTutorial()
             } else if (resultCode == Activity.RESULT_CANCELED) {
                 Toast.makeText(this, "Canceled", Toast.LENGTH_LONG).show()
             } else {

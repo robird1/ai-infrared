@@ -23,10 +23,8 @@ import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.AppPreference
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Device
+import com.ulsee.thermalapp.data.model.RealmDevice
 import io.realm.Realm
-import java.net.DatagramPacket
-import java.net.DatagramSocket
-import java.net.InetAddress
 
 class ScanActivity : AppCompatActivity() {
 
@@ -221,12 +219,17 @@ class ScanActivity : AppCompatActivity() {
     private fun saveDevice (obj: Device, isDuplicated: Boolean) {
         val realm = Realm.getDefaultInstance()
         realm.beginTransaction()
-        val device: Device = if(isDuplicated) realm.where(Device::class.java).equalTo("mID", obj.getID()).findFirst()!! else realm.createObject(Device::class.java)
+        val device: RealmDevice = if(isDuplicated) realm.where(RealmDevice::class.java).equalTo("mID", obj.getID()).findFirst()!! else realm.createObject(RealmDevice::class.java)
         device.setID(obj.getID())
         device.setName(obj.getName())
         device.setIP(obj.getIP())
         device.setCreatedAt(obj.getCreatedAt())
         realm.commitTransaction()
+
+        if (!isDuplicated) {
+            Log.i(javaClass.name, "found new joined device: "+device.getID())
+            Service.shared.justJoinedDeviceIDList.add(device.getID())
+        }
     }
 
     private fun goMain () {
