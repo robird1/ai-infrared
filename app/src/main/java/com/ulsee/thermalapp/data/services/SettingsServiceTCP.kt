@@ -82,7 +82,7 @@ class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
                     Thread.sleep(50) // 20 fps
                 }
             } catch(e: Exception) {
-                emitter.onError(e)
+                if (!emitter.isDisposed) emitter.onError(e)
             }
         }
 
@@ -115,9 +115,13 @@ class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
                     emitter.onNext(frame)
                 }
             })
-            while(!emitter.isDisposed) {
-                apiClient?.send(gson.toJson(SetVideo(SetVideo.VideoStatus.openThermal)))
-                Thread.sleep(50) // 20 fps
+            try {
+                while(!emitter.isDisposed) {
+                    apiClient?.send(gson.toJson(SetVideo(SetVideo.VideoStatus.openThermal)))
+                    Thread.sleep(50) // 20 fps
+                }
+            } catch(e: Exception) {
+                if (!emitter.isDisposed) emitter.onError(e)
             }
         }
 
