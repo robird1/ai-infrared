@@ -198,6 +198,10 @@ class CalibrationActivity : AppCompatActivity() {
     }
 
     private fun save () {
+        if (rgbIV.measuredWidth==0 || rgbIV.measuredHeight==0) {
+            Toast.makeText(this, "Error: image error", Toast.LENGTH_SHORT).show()
+            return
+        }
         // 1. 取得圖片的位置
         val w = (thermalIV.layoutParams.width) * rgbOriginalImageSize.width / rgbIV.measuredWidth
         val h = (thermalIV.layoutParams.height) * rgbOriginalImageSize.height / rgbIV.measuredHeight
