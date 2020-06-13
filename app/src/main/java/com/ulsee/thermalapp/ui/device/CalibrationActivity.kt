@@ -229,7 +229,7 @@ class CalibrationActivity : AppCompatActivity() {
             .subscribe({
                 Toast.makeText(this, "更新成功!", Toast.LENGTH_LONG).show()
                 setResult(RESULT_OK)
-                // finish()
+                finish()
                 true
             }, { error: Throwable ->
                 error.printStackTrace()
