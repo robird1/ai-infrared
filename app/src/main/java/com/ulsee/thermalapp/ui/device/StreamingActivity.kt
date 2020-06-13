@@ -12,9 +12,11 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.View
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
+import androidx.appcompat.widget.Toolbar
 import com.bumptech.glide.Glide
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
@@ -49,6 +51,9 @@ class StreamingActivity : AppCompatActivity() {
         }
         surfaceView =  findViewById<StreamingSurfaceView>(R.id.surfaceView) as StreamingSurfaceView
 
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar);
+
         if(!intent.hasExtra("device")) {
             Toast.makeText(this, "Error: no specified device", Toast.LENGTH_LONG).show()
             finish()
@@ -66,6 +71,8 @@ class StreamingActivity : AppCompatActivity() {
             finish()
             return
         }
+
+        findViewById<TextView>(R.id.textView_toolbar_title).text = deviceManager.device.getName()
 
         if (Service.shared.tutorialDeviceID != null) {
             findViewById<View>(R.id.button_next).visibility = View.VISIBLE
