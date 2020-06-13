@@ -25,7 +25,6 @@ import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.request.UpdateCalibration
 import com.ulsee.thermalapp.data.services.SettingsServiceTCP
-import okio.ByteString.decodeBase64
 import kotlin.math.max
 import kotlin.math.min
 
@@ -98,7 +97,7 @@ class CalibrationActivity : AppCompatActivity() {
         val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
         SettingsServiceTCP(deviceManager!!).getTwoPicture().subscribe({
 
-            val decodedByte = Base64.decode(it.RGB, 0);
+            val decodedByte = Base64.decode(it.Data_1, 0);
             val btm: Bitmap? = BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.size)
             if (btm==null) {
                 Toast.makeText(this, "Error: can not get rgb image size", Toast.LENGTH_LONG).show()
@@ -120,7 +119,7 @@ class CalibrationActivity : AppCompatActivity() {
                     }
                 }).into(rgbIV)
 
-            val theDecodedByte = Base64.decode(it.RGB, 0);
+            val theDecodedByte = Base64.decode(it.Data_1, 0);
             val theBitmap: Bitmap? = BitmapFactory.decodeByteArray(theDecodedByte, 0, theDecodedByte.size)
             if (theBitmap==null) {
                 Toast.makeText(this, "Error: can not get thermal image size", Toast.LENGTH_LONG).show()

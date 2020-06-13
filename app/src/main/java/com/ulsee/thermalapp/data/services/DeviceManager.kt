@@ -216,7 +216,7 @@ class DeviceManager(device: Device) {
                     if (mOnGotTwoPictureListListener== null) {
                         Log.e(javaClass.name, "Error no listener of action "+action)
                     }
-                    mOnGotTwoPictureListListener?.onGotTwoPictureList(twoPicture.RGB, twoPicture.The)
+                    mOnGotTwoPictureListListener?.onGotTwoPictureList(twoPicture.Data_1, twoPicture.Data_2)
                 } catch(e: java.lang.Exception) {
                     Log.e(javaClass.name, "Error parse action "+action)
                     e.printStackTrace()
