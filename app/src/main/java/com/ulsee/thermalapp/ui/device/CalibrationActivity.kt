@@ -119,7 +119,7 @@ class CalibrationActivity : AppCompatActivity() {
                     }
                 }).into(rgbIV)
 
-            val theDecodedByte = Base64.decode(it.Data_1, 0);
+            val theDecodedByte = Base64.decode(it.Data_2, 0);
             val theBitmap: Bitmap? = BitmapFactory.decodeByteArray(theDecodedByte, 0, theDecodedByte.size)
             if (theBitmap==null) {
                 Toast.makeText(this, "Error: can not get thermal image size", Toast.LENGTH_LONG).show()
