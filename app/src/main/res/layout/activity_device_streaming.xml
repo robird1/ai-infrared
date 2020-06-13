@@ -17,6 +17,21 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"></ImageView>
 
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/switch_thermal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="120dp"
+        android:text="Thermal"
+        android:background="@android:color/white">
+
+    </androidx.appcompat.widget.SwitchCompat>
+
     <Button
         android:id="@+id/button_next"
         android:visibility="gone"

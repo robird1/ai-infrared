@@ -7,12 +7,14 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.os.Bundle
 import android.util.Base64
+import android.util.Log
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SwitchCompat
 import com.bumptech.glide.Glide
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
@@ -27,6 +29,8 @@ class StreamingActivity : AppCompatActivity() {
     }
     lateinit var deviceID : String
     lateinit var imageView: ImageView
+    lateinit var thermalSwitch: SwitchCompat
+    lateinit var surfaceView: StreamingSurfaceView
     var disposable: Disposable? = null
     var streamType = StreamType.RGB
 
@@ -35,6 +39,15 @@ class StreamingActivity : AppCompatActivity() {
         setContentView(R.layout.activity_device_streaming)
 
         imageView = findViewById(R.id.imageView)
+        thermalSwitch = findViewById(R.id.switch_thermal)
+        thermalSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
+            if (isChecked) {
+                switchToThermalStreaming()
+            } else {
+                switchToRGBStreaming()
+            }
+        }
+        surfaceView =  findViewById<StreamingSurfaceView>(R.id.surfaceView) as StreamingSurfaceView
 
         if(!intent.hasExtra("device")) {
             Toast.makeText(this, "Error: no specified device", Toast.LENGTH_LONG).show()
@@ -54,17 +67,12 @@ class StreamingActivity : AppCompatActivity() {
             return
         }
 
-        // keep draw
-        val surfaceView = findViewById<StreamingSurfaceView>(R.id.surfaceView) as StreamingSurfaceView
-        disposable = SettingsServiceTCP(deviceManager).openRGBStream().subscribe({
-            surfaceView.draw(it)
-//                Glide.with(this).load(Base64.decode(it.data, Base64.DEFAULT)).into(imageView)
-        }, {})
-
         if (Service.shared.tutorialDeviceID != null) {
             findViewById<View>(R.id.button_next).visibility = View.VISIBLE
             findViewById<View>(R.id.button_next).setOnClickListener{setResult(RESULT_OK);finish()}
         }
+
+        startRGBStreaming()
     }
 
     override fun finish() {
@@ -76,6 +84,49 @@ class StreamingActivity : AppCompatActivity() {
         }
         disposable?.dispose()
         super.finish()
+    }
+
+    fun startRGBStreaming() {
+        if(disposable?.isDisposed == false)disposable?.dispose()
+        streamType = StreamType.RGB
+        val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
+        disposable = SettingsServiceTCP(deviceManager!!).openRGBStream().subscribe({
+            surfaceView.draw(it)
+        }, {})
+    }
+    fun startThermalStreaming() {
+        if(disposable?.isDisposed == false)disposable?.dispose()
+        streamType = StreamType.Thermal
+        val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
+        disposable = SettingsServiceTCP(deviceManager!!).openThermaltream().subscribe({
+            surfaceView.draw(it)
+        }, {})
+    }
+
+    fun switchToThermalStreaming () {
+        if (streamType == StreamType.Thermal) {
+            Log.e(javaClass.name, "Error switch streaming to thermal, but already thermal")
+            return
+        }
+        val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
+        SettingsServiceTCP(deviceManager!!).closeRGBStream().subscribe({
+            startThermalStreaming()
+        }, {
+            startThermalStreaming()
+        })
+    }
+
+    fun switchToRGBStreaming () {
+        if (streamType == StreamType.RGB) {
+            Log.e(javaClass.name, "Error switch streaming to rgb, but already rgb")
+            return
+        }
+        val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
+        SettingsServiceTCP(deviceManager!!).closeThermaltream().subscribe({
+            startRGBStreaming()
+        }, {
+            startRGBStreaming()
+        })
     }
 }
 
