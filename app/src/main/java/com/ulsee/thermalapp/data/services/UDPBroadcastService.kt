@@ -48,6 +48,7 @@ class UDPBroadcastService {
     // 每3秒傳送廣播，如果掃到qrcode,無法匹配，跳出progress表示無法連線，並改為每1秒傳送
     fun initialize(ctx: Context) {
 
+        mUDPServerSocket.broadcast = true
         // 2. keep recv
         Thread(Runnable {
             val lMsg = ByteArray(4096)
@@ -70,7 +71,7 @@ class UDPBroadcastService {
                         else Log.e(javaClass.name, "Error: UDP received device, but no listener")
                     }
                 }
-                Log.i(javaClass.name, "Broadcast packet sent to: " + getBroadcastAddress(ctx)?.hostAddress)
+                Log.w(javaClass.name, "UDP Broadcast closed")
             } catch (e: Exception) {
                 e.printStackTrace()
             }
