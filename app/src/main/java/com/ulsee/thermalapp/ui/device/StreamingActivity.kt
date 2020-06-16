@@ -77,9 +77,14 @@ class StreamingActivity : AppCompatActivity() {
         if (Service.shared.tutorialDeviceID != null) {
             findViewById<View>(R.id.button_next).visibility = View.VISIBLE
             findViewById<View>(R.id.button_next).setOnClickListener{setResult(RESULT_OK);finish()}
+            thermalSwitch.isChecked = true
         }
 
-        startRGBStreaming()
+        if (thermalSwitch.isChecked) {
+            startThermalStreaming()
+        } else {
+            startRGBStreaming()
+        }
     }
 
     override fun finish() {
