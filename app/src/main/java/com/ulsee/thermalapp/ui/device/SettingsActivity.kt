@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SwitchCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.addisonelliott.segmentedbutton.SegmentedButtonGroup
 import com.google.android.material.tabs.TabLayout
@@ -21,10 +22,17 @@ class SettingsActivity : AppCompatActivity() {
     lateinit var deviceID : String
     lateinit var segmentedButtonGroup : SegmentedButtonGroup
     lateinit var settingsNumberPadAdapter : SettingsNumberPadAdapter
+    lateinit var faceRecognitionSwitch: SwitchCompat
+    lateinit var flipImageSwitch: SwitchCompat
+    lateinit var onlyROISwitch: SwitchCompat
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_device_settings)
+
+        faceRecognitionSwitch = findViewById(R.id.switch_facerecognition)
+        flipImageSwitch = findViewById(R.id.switch_flipimage)
+        onlyROISwitch = findViewById(R.id.switch_onlyroi)
 
         if(!intent.hasExtra("device")) {
             Toast.makeText(this, "Error: no specified device", Toast.LENGTH_LONG).show()
@@ -91,6 +99,9 @@ class SettingsActivity : AppCompatActivity() {
             segmentedButtonGroup.setPosition(1, true)
             return
         }
+        settings!!.FaceRecognition = faceRecognitionSwitch.isChecked
+        settings!!.FlipImage = flipImageSwitch.isChecked
+        settings!!.OnlyROI = onlyROISwitch.isChecked
         updateSettings(settings!!)
     }
 

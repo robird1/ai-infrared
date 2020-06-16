@@ -6,4 +6,7 @@ open class Settings {
     var Deviation : Double = 0.0
     var IsFirstSetting: Boolean = false
     var ID = ""
+    var FaceRecognition: Boolean = false
+    var FlipImage: Boolean = false
+    var OnlyROI: Boolean = false
 }

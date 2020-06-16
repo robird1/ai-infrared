@@ -112,6 +112,51 @@
             app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
     </LinearLayout>
 
+    <LinearLayout
+        app:layout_constraintTop_toBottomOf="@+id/layout_numberpad"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switch_facerecognition"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="32dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:text="Face Recognition"
+            android:background="@android:color/white">
+        </androidx.appcompat.widget.SwitchCompat>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switch_flipimage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="32dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:text="Flip Image"
+            android:background="@android:color/white">
+        </androidx.appcompat.widget.SwitchCompat>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switch_onlyroi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="32dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:text="Only ROI"
+            android:background="@android:color/white">
+
+        </androidx.appcompat.widget.SwitchCompat>
+
+    </LinearLayout>
+
     <Button
         android:id="@+id/button_save"
         android:layout_width="match_parent"
