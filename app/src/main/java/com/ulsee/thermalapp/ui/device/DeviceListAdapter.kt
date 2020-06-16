@@ -1,6 +1,7 @@
 package com.ulsee.thermalapp.ui.device
 
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -43,18 +44,19 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
         private val nameTV = itemView?.findViewById<TextView>(R.id.textView_deviceName)
         private val connectedView = itemView?.findViewById<View>(R.id.view_connected)
         private val notConnectedView = itemView?.findViewById<View>(R.id.view_not_connected)
+        private lateinit var mPopup : PopupMenu
         var device : Device? = null
         var deviceID = ""
         init {
-            val menuBtn = itemView?.findViewById<View>(R.id.btn_menu)
+            val menuBtn = itemView?.findViewById<View>(R.id.layout_menu)
 
-            val popup = PopupMenu(itemView?.context, menuBtn)
-            popup.menu.add("a").setTitle("Calibration")
-            popup.menu.add("b").setTitle("Device Setting")
-            popup.menu.add("c").setTitle("WIFI Setting")
-            popup.menu.add("d").setTitle("Remove")
+            mPopup = PopupMenu(itemView?.context, menuBtn)
+            mPopup.menu.add("a").setTitle("Calibration")
+            mPopup.menu.add("b").setTitle("Device Setting")
+            mPopup.menu.add("c").setTitle("WIFI Setting")
+            mPopup.menu.add("d").setTitle("Remove")
 
-            popup.setOnMenuItemClickListener{ item: MenuItem? ->
+            mPopup.setOnMenuItemClickListener{ item: MenuItem? ->
                 when (item!!.title) {
                     "Calibration" -> {
                         val intent = Intent(itemView.context, CalibrationActivity::class.java)
@@ -103,7 +105,8 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
             }
 
             menuBtn.setOnClickListener {
-                popup.show()
+                Log.i(javaClass.name, "on menu clicked")
+                mPopup.show()
             }
 
             val thumbLayout = itemView?.findViewById<View>(R.id.layout_thumb)
