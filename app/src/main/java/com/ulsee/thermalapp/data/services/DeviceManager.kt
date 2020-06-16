@@ -20,6 +20,10 @@ import java.lang.StringBuilder
 import kotlin.collections.ArrayList
 
 class DeviceManager(device: Device) {
+
+    companion object {
+        val TCP_PORT = 13888
+    }
     enum class Status(status: Int) {
         connecting(0), connected(1)
     }
@@ -92,7 +96,7 @@ class DeviceManager(device: Device) {
 
     val device = device
     var settings : Settings? = null
-    var tcpClient = TCPClient(device.getIP(), 13888)
+    var tcpClient = TCPClient(device.getIP(), DeviceManager.TCP_PORT)
 
     init {
         listenData()
@@ -104,7 +108,7 @@ class DeviceManager(device: Device) {
 //        realm.beginTransaction()
         device.setIP(ip)
 //        realm.commitTransaction()
-        tcpClient = TCPClient(ip, 13888)
+        tcpClient = TCPClient(ip, DeviceManager.TCP_PORT)
     }
     val isDebug = false
     private fun log (str: String) {
@@ -307,12 +311,16 @@ class DeviceManager(device: Device) {
         val handler: ObservableOnSubscribe<Status> = ObservableOnSubscribe<Status> { emitter ->
             var isConnected = tcpClient.isConnected()
             emitter.onNext(if (isConnected) Status.connected else Status.connecting)
-            while(!emitter.isDisposed) {
-                if (tcpClient.isConnected() != isConnected) {
-                    isConnected = tcpClient.isConnected()
-                    emitter.onNext(if (isConnected) Status.connected else Status.connecting)
+            try {
+                while(!emitter.isDisposed) {
+                    if (tcpClient.isConnected() != isConnected) {
+                        isConnected = tcpClient.isConnected()
+                        emitter.onNext(if (isConnected) Status.connected else Status.connecting)
+                    }
+                    Thread.sleep(1000)
                 }
-                Thread.sleep(1000)
+            } catch (e: java.lang.Exception) {
+                if (!emitter.isDisposed)emitter.onError(e)
             }
         }
 
