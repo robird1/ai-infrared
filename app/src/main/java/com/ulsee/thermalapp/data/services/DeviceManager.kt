@@ -37,6 +37,7 @@ class DeviceManager(device: Device) {
         requestFace,
         faceResponse,
         modifyWifi, // 12
+        modifyWifiACK,
     }
 
     private val mLock = Object()

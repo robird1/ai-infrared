@@ -78,7 +78,6 @@ class WIFIListActivity : AppCompatActivity() {
         mProgressDialog.show()
         SettingsServiceTCP(mDeviceManager!!).switchWIFI(wifiInfo).subscribe( {
             switchToWIFI(wifiInfo)
-            // todo 切換網路後發送ACK訊息
         }, {
             it.printStackTrace()
             Toast.makeText(this, "Error to switch to wifi: "+it.message, Toast.LENGTH_LONG).show()
@@ -88,6 +87,7 @@ class WIFIListActivity : AppCompatActivity() {
     private fun switchToWIFI(wifiInfo: WIFIInfo) {
         val intent = Intent(this, SettingsActivity::class.java)
         intent.putExtra("wifi", wifiInfo)
+        intent.putExtra("device", deviceID)
         startActivityForResult(intent, REQUEST_CODE_SWITCH_WIFI)
     }
 
@@ -98,6 +98,8 @@ class WIFIListActivity : AppCompatActivity() {
                 finish()
             } else if (resultCode != Activity.RESULT_CANCELED) {
                 Toast.makeText(this, "Error: failed to switch to specified wifi", Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(this, "Error: failed to set specified wifi", Toast.LENGTH_LONG).show()
             }
         }
         super.onActivityResult(requestCode, resultCode, data)

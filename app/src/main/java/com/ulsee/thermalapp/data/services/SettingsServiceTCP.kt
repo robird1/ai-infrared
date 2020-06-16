@@ -154,4 +154,15 @@ class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
         return Completable.create(handler).subscribeOn(Schedulers.newThread())
             .observeOn(AndroidSchedulers.mainThread())
     }
+
+    fun ackWIFI(): Completable {
+        val handler: CompletableOnSubscribe = CompletableOnSubscribe { emitter ->
+            if (apiClient == null) throw Exception("error: target not specified")
+            if (apiClient?.isConnected() != true) throw Exception("error: target not connected")
+            apiClient?.send(gson.toJson(SetWIFIAck()))
+            emitter.onComplete()
+        }
+        return Completable.create(handler).subscribeOn(Schedulers.newThread())
+            .observeOn(AndroidSchedulers.mainThread())
+    }
 }

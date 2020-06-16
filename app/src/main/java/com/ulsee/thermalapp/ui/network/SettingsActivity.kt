@@ -8,9 +8,13 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.ulsee.thermalapp.R
+import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.WIFIInfo
+import com.ulsee.thermalapp.data.services.SettingsServiceTCP
 
 class SettingsActivity : AppCompatActivity() {
+
+    var mDeviceID = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,12 +25,38 @@ class SettingsActivity : AppCompatActivity() {
             finish()
             return
         }
+        if (!intent.hasExtra("device")) {
+            Toast.makeText(this, "Error: no device specified", Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
+        mDeviceID = intent.getStringExtra("device")
+
         val wifiInfo = intent.getSerializableExtra("wifi") as WIFIInfo
 
-        connect(wifiInfo)
+        if (connect(wifiInfo)) {
+            Thread(Runnable {
+                for(deviceManager in Service.shared.deviceManagerList) {
+                    val deviceManager = Service.shared.getManagerOfDeviceID(mDeviceID)
+                    if (deviceManager != null) {
+                        SettingsServiceTCP(deviceManager!!).ackWIFI().subscribe( {
+                            setResult(RESULT_OK)
+                            Toast.makeText(this, "Succeed switch WIFI!!", Toast.LENGTH_LONG).show()
+                            finish()
+                        }, {
+                            setResult(Activity.RESULT_FIRST_USER)
+                            it.printStackTrace()
+                            Toast.makeText(this, "Error to switch to wifi: "+it.message, Toast.LENGTH_LONG).show()
+                            finish()
+                        })
+                    }
+                }
+                Thread.sleep(1000)
+            }).start()
+        }
     }
 
-    fun connect (wifiInfo: WIFIInfo) {
+    fun connect (wifiInfo: WIFIInfo) : Boolean {
         val networkSSID = wifiInfo.ssid
         val networkPass = wifiInfo.password
 
@@ -60,13 +90,12 @@ class SettingsActivity : AppCompatActivity() {
                 wifiManager.enableNetwork(i.networkId, true)
                 val result = wifiManager.reconnect()
                 if (result) {
-                    setResult(RESULT_OK)
+                    return true
                 } else {
                     setResult(Activity.RESULT_FIRST_USER)
                 }
-                break
             }
         }
-        finish()
+        return false
     }
 }
