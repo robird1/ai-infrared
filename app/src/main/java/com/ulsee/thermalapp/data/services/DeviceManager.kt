@@ -105,9 +105,7 @@ class DeviceManager(device: Device) {
 
     fun resetIP(ip: String) {
         device.setIP(ip)
-        tcpClient.close()
-        tcpClient = TCPClient(ip, DeviceManager.TCP_PORT)
-        tcpClient.connect()
+        tcpClient.resetIP(ip)
     }
     val isDebug = false
     private fun log (str: String) {

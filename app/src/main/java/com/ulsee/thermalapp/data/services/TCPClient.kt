@@ -29,8 +29,14 @@ class TCPClient(ip: String, port: Int) {
     }
 
     fun close () {
-        bufferedReader = null
         TCPClientSocket?.close()
+        bufferedReader = null
+    }
+
+    fun resetIP(ip: String) {
+        close()
+        TCPClientSocket = Socket(ip, port)
+        connect()
     }
 
     fun listenData () {
@@ -51,7 +57,9 @@ class TCPClient(ip: String, port: Int) {
                         break
                     }
                     onReceivedDataListener?.onData(buffer, readLen)
-                    if (onReceivedDataListener == null) Log.e(javaClass.name, "Error: TCPClient receive message, but onReceivedDataListener is null");
+                    if (onReceivedDataListener == null) {
+                        Log.e(javaClass.name, "Error: TCPClient receive message, but onReceivedDataListener is null")
+                    };
                 } catch(e: Exception) {
                     if (e.message.equals("Connection reset"))break
                     Log.e(javaClass.name, "Error: TCPClient read from socket exception");
