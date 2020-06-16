@@ -1,7 +1,11 @@
 package com.ulsee.thermalapp.ui.device
 
 import android.app.Activity.RESULT_OK
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -33,6 +37,13 @@ class ListFragment : Fragment() {
         root.findViewById<View>(R.id.fab).setOnClickListener { openScanner() }
 
         (activity as MainActivity).setTitle("Device")
+
+        val intentFilter = IntentFilter("Device removed")
+        context?.registerReceiver(object: BroadcastReceiver(){
+            override fun onReceive(context: Context?, intent: Intent?) {
+                loadDevices()
+            }
+        },intentFilter)
         return root
     }
 

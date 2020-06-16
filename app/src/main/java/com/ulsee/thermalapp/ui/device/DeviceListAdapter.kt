@@ -7,14 +7,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Device
+import com.ulsee.thermalapp.data.model.RealmDevice
 import com.ulsee.thermalapp.data.services.DeviceManager
 import com.ulsee.thermalapp.ui.network.WIFIListActivity
 import io.reactivex.disposables.Disposable
+import io.realm.Realm
 
 class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
 
@@ -49,6 +52,7 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
             popup.menu.add("a").setTitle("Calibration")
             popup.menu.add("b").setTitle("Device Setting")
             popup.menu.add("c").setTitle("WIFI Setting")
+            popup.menu.add("d").setTitle("Remove")
 
             popup.setOnMenuItemClickListener{ item: MenuItem? ->
                 when (item!!.title) {
@@ -66,6 +70,33 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
                         val intent = Intent(itemView.context, WIFIListActivity::class.java)
                         intent.putExtra("device", deviceID)
                         itemView.context.startActivity(intent)
+                    }
+                    "Remove" -> {
+                        val ctx = itemView.context
+
+                        if (device == null) {
+                            Toast.makeText(ctx, "Error: no device specified", Toast.LENGTH_SHORT).show()
+                        } else {
+                            AlertDialog.Builder(ctx)
+                                .setMessage("確定刪除此裝置?")
+                                .setPositiveButton("刪除"
+                                ) { dialog, whichButton ->
+                                    // 1. delete
+                                    val realm = Realm.getDefaultInstance()
+                                    realm.beginTransaction()
+                                    val rows = realm.where(RealmDevice::class.java).equalTo("mID", device!!.getID()).findAll()
+                                    rows.deleteAllFromRealm()
+                                    realm.commitTransaction()
+                                    // 2. broadcast
+                                    ctx.sendBroadcast(Intent("Device removed"))
+                                }
+                                .setNegativeButton("Cancel"
+                                ) { dialog, whichButton ->
+                                    dialog.dismiss()
+                                }
+                                .create()
+                                .show()
+                        }
                     }
                 }
                 true
