@@ -30,6 +30,11 @@ class UDPBroadcastService {
 
     var shouldBroadcasting = false
 
+    val isDebug = false
+    private fun log (str: String) {
+        if (isDebug) Log.i(javaClass.name, str)
+    }
+
     fun getBroadcastAddress(ctx: Context): InetAddress? {
         val wifi = ctx.getSystemService(Context.WIFI_SERVICE) as WifiManager
         val dhcp = wifi.dhcpInfo
@@ -88,6 +93,7 @@ class UDPBroadcastService {
                         mUDPSocket.send(sendPacket)
                         mBroadcaseSendCounter = mBroadcaseSendInterval
                     }
+                    log("sent: "+String(sendData))
                     Thread.sleep(1000)
                 } catch (e: Exception) {
                     e.printStackTrace()
