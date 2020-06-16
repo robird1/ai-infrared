@@ -2,10 +2,8 @@ package com.ulsee.thermalapp
 
 import android.app.Application
 import com.ulsee.thermalapp.data.Service
-import com.ulsee.thermalapp.data.model.RealmDevice
 import io.realm.Realm
 import io.realm.RealmConfiguration
-
 
 class App : Application() {
 

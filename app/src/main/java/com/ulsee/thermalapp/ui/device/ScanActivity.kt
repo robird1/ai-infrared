@@ -295,6 +295,8 @@ class ScanActivity : AppCompatActivity() {
                 } catch(e: SocketException) {
                     Log.i(javaClass.name, "try to connect to IP.1 (AP TCP), but failed, isn't AP mode")
                     e.printStackTrace()
+                } catch(e: java.net.ConnectException) {
+                    // ignore connection error
                 } catch(e: Exception) {
                     e.printStackTrace()
                 } finally {

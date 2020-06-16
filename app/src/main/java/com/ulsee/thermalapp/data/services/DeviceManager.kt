@@ -104,11 +104,10 @@ class DeviceManager(device: Device) {
     }
 
     fun resetIP(ip: String) {
-//        val realm = Realm.getDefaultInstance()
-//        realm.beginTransaction()
         device.setIP(ip)
-//        realm.commitTransaction()
+        tcpClient.close()
         tcpClient = TCPClient(ip, DeviceManager.TCP_PORT)
+        tcpClient.connect()
     }
     val isDebug = false
     private fun log (str: String) {

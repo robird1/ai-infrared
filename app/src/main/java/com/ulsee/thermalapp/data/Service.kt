@@ -25,7 +25,6 @@ class Service {
     // tutorial
     fun requestTutorial(deviceID: String) {
         tutorialDeviceID = deviceID
-        // todo: let main activity know this...
     }
     var tutorialDeviceID : String? = null
     var justJoinedDeviceIDList = ArrayList<String>()
@@ -34,9 +33,21 @@ class Service {
         udpBroadcastService.subscribeSearchedDevice().subscribe{
             // if device ip changed
             for (deviceManager in deviceManagerList) {
-                if (!deviceManager.tcpClient.isConnected() && !deviceManager.device.getIP().equals(it.getIP())) {
+                if (deviceManager.device.getID().equals(it.getID()) && !deviceManager.device.getIP().equals(it.getIP())) {
                     Log.i(javaClass.name, "found device ip changed, old ip: "+deviceManager.device.getIP()+", new ip: "+it.getIP())
-                    deviceManager.resetIP(it.getIP())
+                    if (!deviceManager.tcpClient.isConnected()){
+                        Thread(Runnable {
+                            try {
+                                deviceManager.resetIP(it.getIP())
+                                Log.i(javaClass.name, "reset to new IP!")
+                            } catch (e: java.lang.Exception) {
+                                Log.i(javaClass.name, "failed to reset to new IP:")
+                                e.printStackTrace()
+                            }
+                        }).start()
+                    } else {
+                        Log.e(javaClass.name, "found device ip changed, but still connected... old ip: "+deviceManager.device.getIP()+", new ip: "+it.getIP())
+                    }
                 }
             }
             // if scanning

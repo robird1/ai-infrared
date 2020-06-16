@@ -20,6 +20,7 @@ class TCPClient(ip: String, port: Int) {
     private var TCPClientSocket : Socket? = null
     private var bufferedWriter : BufferedWriter? = null
     private var onReceivedDataListener: OnReceivedDataListener? = null
+    var bufferedReader : BufferedReader? = null
 
     fun connect () {
         TCPClientSocket = Socket(ip, port)
@@ -27,9 +28,13 @@ class TCPClient(ip: String, port: Int) {
         listenData()
     }
 
+    fun close () {
+        bufferedReader = null
+        TCPClientSocket?.close()
+    }
+
     fun listenData () {
         Thread(Runnable {
-            var bufferedReader : BufferedReader? = null
             var buffer = CharArray(4096)
             var readLen = 0
             while(isConnected()) {
@@ -37,7 +42,7 @@ class TCPClient(ip: String, port: Int) {
                     if (bufferedReader == null) {
                         bufferedReader = BufferedReader(InputStreamReader(TCPClientSocket?.getInputStream()))
                     }
-                    readLen = bufferedReader.read(buffer, 0, buffer.size)
+                    readLen = bufferedReader!!.read(buffer, 0, buffer.size)
                     if (readLen == -1) {
                         Log.i(javaClass.name, "readLen-1, close socket")
                         TCPClientSocket?.close()
@@ -49,6 +54,7 @@ class TCPClient(ip: String, port: Int) {
                     onReceivedDataListener?.onData(buffer, readLen)
                     if (onReceivedDataListener == null) Log.e(javaClass.name, "Error: TCPClient receive message, but onReceivedDataListener is null");
                 } catch(e: Exception) {
+                    if (e.message.equals("Connection reset"))break
                     Log.e(javaClass.name, "Error: TCPClient read from socket exception");
                     e.printStackTrace()
                 }

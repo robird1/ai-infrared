@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.wifi.WifiConfiguration
 import android.net.wifi.WifiManager
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.ulsee.thermalapp.R
@@ -34,30 +35,67 @@ class SettingsActivity : AppCompatActivity() {
 
         val wifiInfo = intent.getSerializableExtra("wifi") as WIFIInfo
 
-        var failedTimes = 0
+        var tryTimes = 0
+        var sendTimes = 0
+        val MAX_TRY_CONNECT_TIMES = 30
+        var onceACKSent = false
         if (connect(wifiInfo)) {
+            val deviceManager = Service.shared.getManagerOfDeviceID(mDeviceID)
             Thread(Runnable {
-                for(deviceManager in Service.shared.deviceManagerList) {
-                    val deviceManager = Service.shared.getManagerOfDeviceID(mDeviceID)
-                    if (deviceManager != null) {
+                deviceManager!!.tcpClient.close()
+                while(tryTimes <= MAX_TRY_CONNECT_TIMES && sendTimes< 5) {
+                    Log.i(javaClass.name, "try connect , isConnected = "+deviceManager!!.tcpClient.isConnected()+", times="+tryTimes)
+                    if (deviceManager.tcpClient.isConnected()) {
                         SettingsServiceTCP(deviceManager!!).ackWIFI().subscribe( {
-                            setResult(RESULT_OK)
-                            Toast.makeText(this, "Succeed switch WIFI!!", Toast.LENGTH_LONG).show()
-                            finish()
+                            onceACKSent = true
+                            Log.i(javaClass.name, "ACK sent!!")
+                            tryTimes += 1
+                            sendTimes += 1
+                            if (sendTimes >= 5) endWithSuccess()
                         }, {
-                            failedTimes += 1
-                            if (failedTimes >= 30) {
-                                setResult(Activity.RESULT_FIRST_USER)
-                                it.printStackTrace()
-                                Toast.makeText(this, "Error to switch to wifi (ACK): "+it.message, Toast.LENGTH_LONG).show()
-                                finish()
+                            tryTimes += 1
+                            Log.i(javaClass.name, "failed to ack "+tryTimes)
+                            if (tryTimes >= MAX_TRY_CONNECT_TIMES) {
+                                if (onceACKSent) {
+                                    endWithSuccess()
+                                } else {
+                                    endWithError(it)
+                                }
                             }
+                            deviceManager.tcpClient.reconnect()
                         })
+                    } else {
+                        tryTimes += 1
+                        if (tryTimes >= MAX_TRY_CONNECT_TIMES) {
+                            if (onceACKSent) {
+                                endWithSuccess()
+                            } else {
+                                endWithError(null)
+                            }
+                            break
+                        }
                     }
+                    Thread.sleep(1000)
                 }
-                Thread.sleep(1000)
             }).start()
         }
+    }
+
+    fun endWithSuccess () {
+        setResult(RESULT_OK)
+        Toast.makeText(this, "Succeed switch WIFI!!", Toast.LENGTH_LONG).show()
+        finish()
+    }
+
+    fun endWithError (exception: Throwable?) {
+        setResult(Activity.RESULT_FIRST_USER)
+        exception?.printStackTrace()
+        if (exception != null) {
+            Toast.makeText(this, "Error to switch to wifi (ACK): "+exception!!.message, Toast.LENGTH_LONG).show()
+        } else {
+            Toast.makeText(this, "Error to switch to wifi (ACK) ", Toast.LENGTH_LONG).show()
+        }
+        finish()
     }
 
     fun connect (wifiInfo: WIFIInfo) : Boolean {
