@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
     fun keepCheckingTutorialDevice () {
         timer?.schedule(object: TimerTask() {
             override fun run() {
-                Log.i(javaClass.name, "Service.shared.tutorialDeviceID = "+Service.shared.tutorialDeviceID)
+//                Log.i(javaClass.name, "Service.shared.tutorialDeviceID = "+Service.shared.tutorialDeviceID)
                 if (Service.shared.tutorialDeviceID != null) {
                     startActivity(Intent(this@MainActivity, TutorialStep1Activity::class.java))
                 }
