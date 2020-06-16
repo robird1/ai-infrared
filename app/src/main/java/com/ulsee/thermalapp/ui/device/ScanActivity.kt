@@ -76,6 +76,7 @@ class ScanActivity : AppCompatActivity() {
             if (mStatus == ScanActivity.Status.searchingDevice) {
                 if (device.getID() == mSearchingDeviceID) {
                     // 找到了
+                    mStatus = ScanActivity.Status.askingName
                     this@ScanActivity.runOnUiThread { mSearchingDeviceProgressDialog.dismiss(); askDeviceName(device) }
                 }
             }
@@ -288,6 +289,7 @@ class ScanActivity : AppCompatActivity() {
                             device.setIP(ip)
                             device.setCreatedAt(System.currentTimeMillis())
                             // 找到了
+                            mStatus = ScanActivity.Status.askingName
                             this@ScanActivity.runOnUiThread { mSearchingDeviceProgressDialog.dismiss(); askDeviceName(device) }
                         }
                     }
