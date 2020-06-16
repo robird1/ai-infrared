@@ -18,7 +18,10 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ulsee.thermalapp.MainActivity
 import com.ulsee.thermalapp.R
+import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.WIFIInfo
+import com.ulsee.thermalapp.data.services.DeviceManager
+import com.ulsee.thermalapp.data.services.SettingsServiceTCP
 import com.ulsee.thermalapp.utils.RecyclerViewItemClickSupport
 
 
@@ -29,10 +32,20 @@ class WIFIListActivity : AppCompatActivity() {
     lateinit var recyclerView : RecyclerView
     lateinit var swipeRefreshLayout: SwipeRefreshLayout
     lateinit var mProgressDialog : ProgressDialog
+    var deviceID = ""
+    var mDeviceManager : DeviceManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_network_wifilist)
+
+        deviceID = intent.getStringExtra("device")
+        val mDeviceManager = Service.shared.getManagerOfDeviceID(deviceID)
+        if (mDeviceManager == null) {
+            Toast.makeText(this, "Error: device not found", Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
 
         mProgressDialog = ProgressDialog(this)
         mProgressDialog.setMessage("connecting...")
@@ -63,10 +76,13 @@ class WIFIListActivity : AppCompatActivity() {
     private fun connectToWIFI(wifiInfo: WIFIInfo, password: String?) {
         wifiInfo.password = password
         mProgressDialog.show()
-        // todo ... 送出請求
-        // todo ... 監聽回覆
-        // todo ... 成功後，切換網路後發送訊息
-        switchToWIFI(wifiInfo)
+        SettingsServiceTCP(mDeviceManager!!).switchWIFI(wifiInfo).subscribe( {
+            switchToWIFI(wifiInfo)
+            // todo 切換網路後發送ACK訊息
+        }, {
+            it.printStackTrace()
+            Toast.makeText(this, "Error to switch to wifi: "+it.message, Toast.LENGTH_LONG).show()
+        })
     }
 
     private fun switchToWIFI(wifiInfo: WIFIInfo) {
@@ -151,6 +167,10 @@ class WIFIListActivity : AppCompatActivity() {
                     wifiInfoList.add(wifiInfo)
                 }
                 (recyclerView.adapter as WIFIListAdapter).setList(wifiInfoList)
+                if (results.size == 0) {
+                    Toast.makeText(this@WIFIListActivity, "There is no wifif scanned", Toast.LENGTH_LONG).show()
+                    finish()
+                }
             } else {
                 Toast.makeText(this@WIFIListActivity, "Failed to scan wifi", Toast.LENGTH_LONG).show()
             }

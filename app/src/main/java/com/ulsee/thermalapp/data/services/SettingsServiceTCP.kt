@@ -2,6 +2,7 @@ package com.ulsee.thermalapp.data.services
 
 import com.google.gson.Gson
 import com.ulsee.thermalapp.data.model.Settings
+import com.ulsee.thermalapp.data.model.WIFIInfo
 import com.ulsee.thermalapp.data.request.*
 import com.ulsee.thermalapp.data.response.TwoPicture
 import io.reactivex.Completable
@@ -139,6 +140,17 @@ class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
             it.onComplete()
         }
 
+        return Completable.create(handler).subscribeOn(Schedulers.newThread())
+            .observeOn(AndroidSchedulers.mainThread())
+    }
+
+    fun switchWIFI(wifiInfo: WIFIInfo): Completable {
+        val handler: CompletableOnSubscribe = CompletableOnSubscribe { emitter ->
+            if (apiClient == null) throw Exception("error: target not specified")
+            if (apiClient?.isConnected() != true) throw Exception("error: target not connected")
+            apiClient?.send(gson.toJson(SetWIFI(wifiInfo)))
+            emitter.onComplete()
+        }
         return Completable.create(handler).subscribeOn(Schedulers.newThread())
             .observeOn(AndroidSchedulers.mainThread())
     }

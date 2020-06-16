@@ -2,7 +2,7 @@ package com.ulsee.thermalapp.data.model
 
 import java.io.Serializable
 
-class WIFIInfo : Serializable {
+open class WIFIInfo : Serializable {
 
     enum class WIFIType {
         wep, wpa, open, unknown

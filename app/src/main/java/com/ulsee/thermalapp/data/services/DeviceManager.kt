@@ -36,7 +36,7 @@ class DeviceManager(device: Device) {
         streamResponse, // 9
         requestFace,
         faceResponse,
-        modifyWifi,
+        modifyWifi, // 12
     }
 
     private val mLock = Object()

@@ -13,6 +13,7 @@ import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Device
 import com.ulsee.thermalapp.data.services.DeviceManager
+import com.ulsee.thermalapp.ui.network.WIFIListActivity
 import io.reactivex.disposables.Disposable
 
 class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
@@ -47,6 +48,7 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
             val popup = PopupMenu(itemView?.context, menuBtn)
             popup.menu.add("a").setTitle("Calibration")
             popup.menu.add("b").setTitle("Device Setting")
+            popup.menu.add("c").setTitle("WIFI Setting")
 
             popup.setOnMenuItemClickListener{ item: MenuItem? ->
                 when (item!!.title) {
@@ -57,6 +59,11 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
                     }
                     "Device Setting" -> {
                         val intent = Intent(itemView.context, SettingsActivity::class.java)
+                        intent.putExtra("device", deviceID)
+                        itemView.context.startActivity(intent)
+                    }
+                    "WIFI Setting" -> {
+                        val intent = Intent(itemView.context, WIFIListActivity::class.java)
                         intent.putExtra("device", deviceID)
                         itemView.context.startActivity(intent)
                     }
