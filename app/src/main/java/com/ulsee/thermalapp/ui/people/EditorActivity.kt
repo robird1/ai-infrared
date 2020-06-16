@@ -58,7 +58,7 @@ class EditorActivity : AppCompatActivity() {
         if (oldValue != null) {
             findViewById<TextView>(R.id.textView_toolbar_title).text = "Edit People"
             findViewById<View>(R.id.button_delete).visibility = View.VISIBLE
-            nameInput.setText(oldValue!!.Name)
+            nameInput.setText(oldValue!!.NameWihtoutFileType)
 
             if (oldValue!!.Image.isNullOrEmpty() == false) {
                 Glide.with(this).load(Base64.decode(oldValue!!.Image, Base64.DEFAULT)).into(imageView);
@@ -140,6 +140,10 @@ class EditorActivity : AppCompatActivity() {
         }
 
         val name = nameInput.text.toString()
+        if (name.contains(".", false) || name.contains("{", false) || name.contains("}", false)) {
+            Toast.makeText(this, "請勿輸入特殊符號如下:\n .{}", Toast.LENGTH_SHORT).show()
+            return
+        }
         if (oldValue != null) {
             val base64 : String? = if(imageBase64 == null)  null else imageBase64
             val people = Face()

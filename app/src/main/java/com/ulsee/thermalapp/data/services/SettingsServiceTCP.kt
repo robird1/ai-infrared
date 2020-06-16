@@ -76,7 +76,14 @@ class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
                     emitter.onNext(frame)
                 }
             })
-            apiClient?.send(gson.toJson(SetVideo(SetVideo.VideoStatus.openRGB)))
+            try {
+                while(!emitter.isDisposed) {
+                    apiClient?.send(gson.toJson(SetVideo(SetVideo.VideoStatus.openRGB)))
+                    Thread.sleep(50) // 20 fps
+                }
+            } catch(e: Exception) {
+                if (!emitter.isDisposed) emitter.onError(e)
+            }
         }
 
         return Observable.create(handler).subscribeOn(Schedulers.newThread())
@@ -85,7 +92,6 @@ class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
 
     override fun closeRGBStream(): Completable {
         val handler: CompletableOnSubscribe = CompletableOnSubscribe {
-            apiClient?.setOnReceivedDataListener(null)
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
 //            if (apiClient?.isConnected() != true) apiClient?.reconnect()
@@ -109,7 +115,14 @@ class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
                     emitter.onNext(frame)
                 }
             })
-            apiClient?.send(gson.toJson(SetVideo(SetVideo.VideoStatus.openThermal)))
+            try {
+                while(!emitter.isDisposed) {
+                    apiClient?.send(gson.toJson(SetVideo(SetVideo.VideoStatus.openThermal)))
+                    Thread.sleep(50) // 20 fps
+                }
+            } catch(e: Exception) {
+                if (!emitter.isDisposed) emitter.onError(e)
+            }
         }
 
         return Observable.create(handler).subscribeOn(Schedulers.newThread())
@@ -118,7 +131,6 @@ class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
 
     override fun closeThermaltream(): Completable {
         val handler: CompletableOnSubscribe = CompletableOnSubscribe {
-            apiClient?.setOnReceivedDataListener(null)
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
 //            if (apiClient?.isConnected() != true) apiClient?.reconnect()

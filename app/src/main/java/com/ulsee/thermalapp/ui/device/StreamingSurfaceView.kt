@@ -53,6 +53,10 @@ class StreamingSurfaceView @JvmOverloads constructor(context: Context, attrs: At
         if (lastBase64ImageString != null && canvas != null) {
             val decodedString: ByteArray = Base64.decode(lastBase64ImageString!!, Base64.DEFAULT)
             val bitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
+            if (bitmap == null) {
+                Log.e(javaClass.name, "Error: received empty frame")
+                return
+            }
             val bitmapRect = Rect(0, 0, bitmap.width, bitmap.height)
             val canvasRect = Rect(0, 0, canvas!!.width, bitmap.height * canvas!!.width / bitmap.width)
             canvas?.drawBitmap(bitmap, bitmapRect, canvasRect, Paint())

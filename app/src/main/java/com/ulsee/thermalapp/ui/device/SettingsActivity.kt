@@ -67,14 +67,14 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun showSettings () {
-        val segmentPosition = if(settings!!.TemperationUnit == 0) 0 else 1
+        val segmentPosition = if(settings!!.TemperatureUnit == 0) 0 else 1
         segmentedButtonGroup.setPosition(segmentPosition, false)
         settingsNumberPadAdapter.fragments[0].setValue(settings!!.AlarmThreshold)
         settingsNumberPadAdapter.fragments[1].setValue(settings!!.Deviation)
     }
 
     private fun save () {
-        settings!!.TemperationUnit = if(segmentedButtonGroup.position == 0) 0 else 1
+        settings!!.TemperatureUnit = if(segmentedButtonGroup.position == 0) 0 else 1
         try {
             settings!!.AlarmThreshold = settingsNumberPadAdapter.fragments[0].getValue()
         } catch (e: Exception) {

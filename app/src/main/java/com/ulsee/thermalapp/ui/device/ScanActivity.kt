@@ -23,10 +23,8 @@ import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.AppPreference
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Device
+import com.ulsee.thermalapp.data.model.RealmDevice
 import io.realm.Realm
-import java.net.DatagramPacket
-import java.net.DatagramSocket
-import java.net.InetAddress
 
 class ScanActivity : AppCompatActivity() {
 
@@ -34,9 +32,6 @@ class ScanActivity : AppCompatActivity() {
 
     lateinit var cameraSource: CameraSource
     lateinit var barcodeDetector : BarcodeDetector
-    var mUDPSocket = DatagramSocket()
-    var mBroadcaseSendCounter = 1 // 數到0就送出
-    var mBroadcaseSendInterval = 3 // 數幾下才送出，平常是3，已經掃到有效的QRCode時是1
     var mScannedDeviceList = ArrayList<Device>() // IP, ID, Timestamp
     lateinit var mSearchingDeviceProgressDialog : ProgressDialog
     var mSearchingDeviceID = ""
@@ -56,12 +51,25 @@ class ScanActivity : AppCompatActivity() {
         initZxingScanner()
         // initQRCodeScanner()
 
-        keepSendUDPBroadcast()
+        Service.shared.mDeviceSearchedListener = mOnDeviceSearchedListener
     }
 
     override fun onDestroy() {
-        if (!mUDPSocket.isClosed)mUDPSocket.close()
+        Service.shared.mDeviceSearchedListener = null
         super.onDestroy()
+    }
+
+    val mOnDeviceSearchedListener = object : Service.DeviceSearchedListener {
+        override fun onNewDevice(device: Device) {
+            device.setCreatedAt(System.currentTimeMillis())
+            mScannedDeviceList.add(device)
+            if (mStatus == ScanActivity.Status.searchingDevice) {
+                if (device.getID() == mSearchingDeviceID) {
+                    // 找到了
+                    this@ScanActivity.runOnUiThread { mSearchingDeviceProgressDialog.dismiss(); askDeviceName(device) }
+                }
+            }
+        }
     }
 
     private fun initZxingScanner () {
@@ -95,7 +103,7 @@ class ScanActivity : AppCompatActivity() {
             .setBarcodeFormats(Barcode.QR_CODE).build()
         cameraSource = CameraSource.Builder(this, barcodeDetector)
             .setAutoFocusEnabled(true)
-            .setRequestedPreviewSize(1000, 1000).build()
+            .setRequestedPreviewSize(800, 800).build()
 
         surfaceView.holder.addCallback(object: SurfaceHolder.Callback {
             override fun surfaceChanged(holder: SurfaceHolder, format: Int,
@@ -150,13 +158,13 @@ class ScanActivity : AppCompatActivity() {
     }
 
     private fun processQRCode(qrCode: String) {
-        val isValidQRCode = qrCode?.startsWith("ULSEE")
+        val isValidQRCode = qrCode?.startsWith("ULSEE-")
         if(!isValidQRCode!!) {
             this@ScanActivity.runOnUiThread { Toast.makeText(this@ScanActivity, "此QRCode無效!!", Toast.LENGTH_SHORT).show() }
             return
         }
 
-        val deviceID = qrCode.substring(5)
+        val deviceID = qrCode.substring(6)
         val idx = mScannedDeviceList.indexOfFirst { it.getID().equals(deviceID) }
         val isDeviceAlreadyScanned = idx >= 0
         if (isDeviceAlreadyScanned) {
@@ -165,7 +173,6 @@ class ScanActivity : AppCompatActivity() {
         } else {
             this@ScanActivity.runOnUiThread { mSearchingDeviceProgressDialog.show() }
             mSearchingDeviceID = deviceID
-            mBroadcaseSendInterval = 1
             mStatus = Status.searchingDevice
         }
     }
@@ -177,9 +184,9 @@ class ScanActivity : AppCompatActivity() {
 
         val duplicatedDeviceIdx = Service.shared.getDeviceList().indexOfFirst { it.getID().equals(device.getID()) }
         val isDuplicated = duplicatedDeviceIdx >= 0
-        val duplicatedDevice = Service.shared.getDeviceList().first { it.getID().equals(device.getID()) }
 
         if(isDuplicated) {
+            val duplicatedDevice = Service.shared.getDeviceList()[duplicatedDeviceIdx]
             message = "此裝置已掃描過，將複寫手機中的設定"
             input.setText(duplicatedDevice.getName())
         }
@@ -204,6 +211,7 @@ class ScanActivity : AppCompatActivity() {
             ) { dialog, whichButton ->
                 mStatus = Status.scanningQRCode
                 dialog.dismiss()
+                initZxingScanner()
             }
             .create()
             .show()
@@ -212,96 +220,21 @@ class ScanActivity : AppCompatActivity() {
     private fun saveDevice (obj: Device, isDuplicated: Boolean) {
         val realm = Realm.getDefaultInstance()
         realm.beginTransaction()
-        val device: Device = if(isDuplicated) realm.where(Device::class.java).equalTo("mID", obj.getID()).findFirst()!! else realm.createObject(Device::class.java)
+        val device: RealmDevice = if(isDuplicated) realm.where(RealmDevice::class.java).equalTo("mID", obj.getID()).findFirst()!! else realm.createObject(RealmDevice::class.java)
         device.setID(obj.getID())
         device.setName(obj.getName())
         device.setIP(obj.getIP())
         device.setCreatedAt(obj.getCreatedAt())
         realm.commitTransaction()
+
+        if (!isDuplicated) {
+            Log.i(javaClass.name, "found new joined device: "+device.getID())
+            Service.shared.justJoinedDeviceIDList.add(device.getID())
+        }
     }
 
     private fun goMain () {
         startActivity(Intent(this, MainActivity::class.java))
         finish()
     }
-
-    fun getBroadcastAddress(): InetAddress? {
-        val wifi = getApplicationContext().getSystemService(Context.WIFI_SERVICE) as WifiManager
-        val dhcp = wifi.dhcpInfo
-        // handle null somehow
-        val broadcast = dhcp.ipAddress and dhcp.netmask or dhcp.netmask.inv()
-        val quads = ByteArray(4)
-        for (k in 0..3) quads[k] = (broadcast shr k * 8 and 0xFF).toByte()
-        return InetAddress.getByAddress(quads)
-    }
-
-    // 每3秒傳送廣播，如果掃到qrcode,無法匹配，跳出progress表示無法連線，並改為每1秒傳送
-    private fun keepSendUDPBroadcast() {
-        // TODO: 討論傳送的訊息
-        val message = "ULSEE-Thermal-Searching"
-        val BROADCAST_PORT = 8829
-
-        mUDPSocket.broadcast = true
-        val sendData: ByteArray = message.toByteArray()
-        val sendPacket = DatagramPacket(
-            sendData,
-            sendData.size,
-            getBroadcastAddress(),
-            BROADCAST_PORT
-        )
-
-        // 1. keep send
-        Thread(Runnable {
-            while (!mUDPSocket.isClosed and !isFinishing) {
-                try {
-                    if(--mBroadcaseSendCounter==0) {
-                        mUDPSocket.send(sendPacket)
-                        mBroadcaseSendCounter = mBroadcaseSendInterval
-                    }
-                    Thread.sleep(1000)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-        }).start()
-
-        // 2. keep recv
-        Thread(Runnable {
-            val lMsg = ByteArray(4096)
-            val dp = DatagramPacket(lMsg, lMsg.size)
-            try {
-                while (!mUDPSocket.isClosed and !isFinishing) {
-                    mUDPSocket.receive(dp);
-                    val receivedMessage = String(lMsg, 0, dp.length)
-                    Log.i(javaClass.name, "got: "+receivedMessage)
-
-                    val isValidDeviceResponse = receivedMessage.startsWith("ULSEE") // TODO: validate message
-                    if (isValidDeviceResponse) {
-                        val deviceID = receivedMessage.substring(5)
-                        val idx = mScannedDeviceList.indexOfFirst { it.getID() == deviceID }
-                        if (idx >= 0) {
-                            mScannedDeviceList[idx].setCreatedAt(System.currentTimeMillis())
-                        } else {
-                            val device = Device()
-                            device.setID(deviceID)
-                            device.setIP(dp.address.hostAddress)
-                            device.setCreatedAt(System.currentTimeMillis())
-                            mScannedDeviceList.add(device)
-
-                            if (mStatus == Status.searchingDevice) {
-                                if (deviceID == mSearchingDeviceID) {
-                                    // 找到了
-                                    this@ScanActivity.runOnUiThread { mSearchingDeviceProgressDialog.dismiss(); askDeviceName(device) }
-                                }
-                            }
-                        }
-                    }
-                }
-                Log.i(javaClass.name, "Broadcast packet sent to: " + getBroadcastAddress()?.hostAddress)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }).start()
-    }
-
 }
