@@ -224,6 +224,7 @@ class ScanActivity : AppCompatActivity() {
                 dialog.dismiss()
                 initZxingScanner()
             }
+            .setCancelable(false)
             .create()
             .show()
     }
