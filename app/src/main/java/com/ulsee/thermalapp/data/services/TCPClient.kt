@@ -48,7 +48,6 @@ class TCPClient(ip: String, port: Int) {
                         TCPClientSocket?.close()
                         bufferedReader = null
                         bufferedWriter = null
-                        onReceivedDataListener = null
                         break
                     }
                     onReceivedDataListener?.onData(buffer, readLen)
