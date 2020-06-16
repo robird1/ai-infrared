@@ -48,7 +48,8 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
         var device : Device? = null
         var deviceID = ""
         init {
-            val menuBtn = itemView?.findViewById<View>(R.id.layout_menu)
+            val menuLayout = itemView?.findViewById<View>(R.id.layout_menu)
+            val menuBtn = itemView?.findViewById<View>(R.id.btn_menu)
 
             mPopup = PopupMenu(itemView?.context, menuBtn)
             mPopup.menu.add("a").setTitle("Calibration")
@@ -105,7 +106,11 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
             }
 
             menuBtn.setOnClickListener {
-                Log.i(javaClass.name, "on menu clicked")
+                Log.i(javaClass.name, "on menu button clicked")
+                mPopup.show()
+            }
+            menuLayout.setOnClickListener{
+                Log.i(javaClass.name, "on menu layout clicked")
                 mPopup.show()
             }
 
