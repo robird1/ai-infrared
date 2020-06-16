@@ -20,6 +20,7 @@ import com.ulsee.thermalapp.MainActivity
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.WIFIInfo
+import com.ulsee.thermalapp.data.request.SetWIFI
 import com.ulsee.thermalapp.data.services.DeviceManager
 import com.ulsee.thermalapp.data.services.SettingsServiceTCP
 import com.ulsee.thermalapp.utils.RecyclerViewItemClickSupport
@@ -72,17 +73,17 @@ class WIFIListActivity : AppCompatActivity() {
         support.setOnItemClickListener { recyclerView, position, view ->
             val wifiInfo = (recyclerView.adapter as WIFIListAdapter).getList()[position]
             if(!wifiInfo.passwordRequired) {
-                connectToWIFI(wifiInfo, null)
+                connectToWIFI(wifiInfo, null, null)
             } else {
                 askPassword(wifiInfo)
             }
         }
     }
 
-    private fun connectToWIFI(wifiInfo: WIFIInfo, password: String?) {
+    private fun connectToWIFI(wifiInfo: WIFIInfo, password: String?, advanceParameter: SetWIFI.AdvanceParameter?) {
         wifiInfo.password = password
         mProgressDialog.show()
-        SettingsServiceTCP(mDeviceManager!!).switchWIFI(wifiInfo).subscribe( {
+        SettingsServiceTCP(mDeviceManager!!).switchWIFI(wifiInfo, advanceParameter).subscribe( {
             switchToWIFI(wifiInfo)
         }, {
             it.printStackTrace()
@@ -127,7 +128,7 @@ class WIFIListActivity : AppCompatActivity() {
                 if (result.isEmpty()) {
                     Toast.makeText(ctx, "請輸入WIFI密碼!", Toast.LENGTH_SHORT).show()
                 } else {
-                    connectToWIFI(wifiInfo, result)
+                    connectToWIFI(wifiInfo, result, null)
                 }
             }
             .setNegativeButton("Cancel"

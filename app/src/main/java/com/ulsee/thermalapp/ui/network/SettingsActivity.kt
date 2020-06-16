@@ -90,12 +90,14 @@ class SettingsActivity : AppCompatActivity() {
     fun endWithError (exception: Throwable?) {
         setResult(Activity.RESULT_FIRST_USER)
         exception?.printStackTrace()
-        if (exception != null) {
-            Toast.makeText(this, "Error to switch to wifi (ACK): "+exception!!.message, Toast.LENGTH_LONG).show()
-        } else {
-            Toast.makeText(this, "Error to switch to wifi (ACK) ", Toast.LENGTH_LONG).show()
+        runOnUiThread{
+            if (exception != null) {
+                Toast.makeText(this, "Error to switch to wifi (ACK): "+exception!!.message, Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(this, "Error to switch to wifi (ACK) ", Toast.LENGTH_LONG).show()
+            }
+            finish()
         }
-        finish()
     }
 
     fun connect (wifiInfo: WIFIInfo) : Boolean {
