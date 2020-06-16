@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -39,12 +38,18 @@ class ListFragment : Fragment() {
         (activity as MainActivity).setTitle("Device")
 
         val intentFilter = IntentFilter("Device removed")
-        context?.registerReceiver(object: BroadcastReceiver(){
-            override fun onReceive(context: Context?, intent: Intent?) {
-                loadDevices()
-            }
-        },intentFilter)
+        context?.registerReceiver(deviceChangedReceiver, intentFilter)
         return root
+    }
+
+    override fun onDestroy() {
+        context?.unregisterReceiver(deviceChangedReceiver)
+        super.onDestroy()
+    }
+    val deviceChangedReceiver = object: BroadcastReceiver(){
+        override fun onReceive(context: Context?, intent: Intent?) {
+            loadDevices()
+        }
     }
 
     private fun openScanner () {

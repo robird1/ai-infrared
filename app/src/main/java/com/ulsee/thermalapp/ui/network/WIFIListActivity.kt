@@ -51,7 +51,13 @@ class WIFIListActivity : AppCompatActivity() {
         mProgressDialog.setMessage("connecting...")
 
         initRecyclerView()
+        registerWIFIBroadcast()
         loadWIFIList()
+    }
+
+    override fun onDestroy() {
+        unregisterWIFIBroadcast()
+        super.onDestroy()
     }
 
     private fun initRecyclerView () {
@@ -93,6 +99,7 @@ class WIFIListActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_CODE_SWITCH_WIFI) {
+            mProgressDialog.dismiss()
             if (resultCode == RESULT_OK) {
                 startActivity(Intent(this, MainActivity::class.java))
                 finish()
@@ -179,12 +186,17 @@ class WIFIListActivity : AppCompatActivity() {
         }
     }
 
+    private fun registerWIFIBroadcast () {
+        val intentFilter = IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
+        registerReceiver(wifiScanReceiver, intentFilter)
+    }
+
+    private fun unregisterWIFIBroadcast () {
+        unregisterReceiver(wifiScanReceiver)
+    }
+
     private fun loadWIFIList() {
         val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-
-        val intentFilter = IntentFilter()
-        intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
-        registerReceiver(wifiScanReceiver, intentFilter)
 
         val success = wifiManager.startScan()
         if (!success) {
