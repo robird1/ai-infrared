@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.wifi.WifiManager
 import android.os.Bundle
+import android.text.format.Formatter
 import android.util.Log
 import android.view.SurfaceHolder
 import android.view.SurfaceView
@@ -17,6 +18,8 @@ import com.google.android.gms.vision.CameraSource
 import com.google.android.gms.vision.Detector
 import com.google.android.gms.vision.barcode.Barcode
 import com.google.android.gms.vision.barcode.BarcodeDetector
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.google.zxing.integration.android.IntentIntegrator
 import com.ulsee.thermalapp.MainActivity
 import com.ulsee.thermalapp.R
@@ -24,7 +27,13 @@ import com.ulsee.thermalapp.data.AppPreference
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Device
 import com.ulsee.thermalapp.data.model.RealmDevice
+import com.ulsee.thermalapp.data.model.Settings
+import com.ulsee.thermalapp.data.services.DeviceManager
 import io.realm.Realm
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.net.Socket
+import java.net.SocketException
 
 class ScanActivity : AppCompatActivity() {
 
@@ -52,6 +61,7 @@ class ScanActivity : AppCompatActivity() {
         // initQRCodeScanner()
 
         Service.shared.mDeviceSearchedListener = mOnDeviceSearchedListener
+        keepTryConenctToAPTCP()
     }
 
     override fun onDestroy() {
@@ -236,5 +246,62 @@ class ScanActivity : AppCompatActivity() {
     private fun goMain () {
         startActivity(Intent(this, MainActivity::class.java))
         finish()
+    }
+
+    private fun getLocalIP () : String {
+        val wm = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        val ip: String = Formatter.formatIpAddress(wm.connectionInfo.ipAddress)
+        return ip
+    }
+
+    private fun getAPTCPIP () : String {
+        var localIP = getLocalIP()
+        var arr = localIP.split(".")
+        return String.format("%s.%s.%s.1",arr[0],arr[1],arr[2])
+    }
+
+    private fun keepTryConenctToAPTCP () {
+        var TCPClientSocket : Socket? = null
+        val gson = Gson()
+        Thread(Runnable {
+            while(!isFinishing) {
+                try {
+                    // 1. get ip
+                    val ip = getAPTCPIP()
+                    // 2. try connect
+                    TCPClientSocket = Socket(ip, DeviceManager.TCP_PORT)
+                    // 3. try to get settings ID
+                    val bufferedReader = BufferedReader(InputStreamReader(TCPClientSocket!!.getInputStream()))
+                    var buffer = CharArray(4096)
+                    val readLen = bufferedReader.read(buffer, 0, buffer.size)
+                    val responseString = String(buffer, 0, readLen)
+                    Log.i(javaClass.name, "try to connect to IP.1, received:")
+                    Log.i(javaClass.name, responseString)
+                    // 4. try to get settings
+                    val itemType = object : TypeToken<Settings>() {}.type
+                    val settings = gson.fromJson<Settings>(responseString, itemType)
+                    // 5. check device
+                    if (mStatus == ScanActivity.Status.searchingDevice) {
+                        if (settings.ID == mSearchingDeviceID) {
+                            val device = Device()
+                            device.setID(settings.ID)
+                            device.setIP(ip)
+                            device.setCreatedAt(System.currentTimeMillis())
+                            // 找到了
+                            this@ScanActivity.runOnUiThread { mSearchingDeviceProgressDialog.dismiss(); askDeviceName(device) }
+                        }
+                    }
+                    Thread.sleep(1000)
+                } catch(e: SocketException) {
+                    Log.i(javaClass.name, "try to connect to IP.1 (AP TCP), but failed, isn't AP mode")
+                    e.printStackTrace()
+                } catch(e: Exception) {
+                    e.printStackTrace()
+                } finally {
+                    TCPClientSocket?.close()
+                    TCPClientSocket = null
+                }
+            }
+        }).start()
     }
 }

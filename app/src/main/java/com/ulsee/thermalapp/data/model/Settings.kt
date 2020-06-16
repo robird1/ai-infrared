@@ -5,4 +5,5 @@ open class Settings {
     var AlarmThreshold : Double = 0.0
     var Deviation : Double = 0.0
     var IsFirstSetting: Boolean = false
+    var ID = ""
 }
