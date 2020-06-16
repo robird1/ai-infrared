@@ -4,7 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 
-class SettingsNumberPadAdapter(fragment: AppCompatActivity): FragmentStateAdapter(fragment) {
+class SettingsNumberPadAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {
 
     val fragments = listOf(SettingsNumberPadFragment(), SettingsNumberPadFragment())
 
