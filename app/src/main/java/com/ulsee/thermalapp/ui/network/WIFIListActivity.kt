@@ -40,7 +40,7 @@ class WIFIListActivity : AppCompatActivity() {
         setContentView(R.layout.activity_network_wifilist)
 
         deviceID = intent.getStringExtra("device")
-        val mDeviceManager = Service.shared.getManagerOfDeviceID(deviceID)
+        mDeviceManager = Service.shared.getManagerOfDeviceID(deviceID)
         if (mDeviceManager == null) {
             Toast.makeText(this, "Error: device not found", Toast.LENGTH_LONG).show()
             finish()

@@ -34,6 +34,7 @@ class SettingsActivity : AppCompatActivity() {
 
         val wifiInfo = intent.getSerializableExtra("wifi") as WIFIInfo
 
+        var failedTimes = 0
         if (connect(wifiInfo)) {
             Thread(Runnable {
                 for(deviceManager in Service.shared.deviceManagerList) {
@@ -44,10 +45,13 @@ class SettingsActivity : AppCompatActivity() {
                             Toast.makeText(this, "Succeed switch WIFI!!", Toast.LENGTH_LONG).show()
                             finish()
                         }, {
-                            setResult(Activity.RESULT_FIRST_USER)
-                            it.printStackTrace()
-                            Toast.makeText(this, "Error to switch to wifi: "+it.message, Toast.LENGTH_LONG).show()
-                            finish()
+                            failedTimes += 1
+                            if (failedTimes >= 30) {
+                                setResult(Activity.RESULT_FIRST_USER)
+                                it.printStackTrace()
+                                Toast.makeText(this, "Error to switch to wifi (ACK): "+it.message, Toast.LENGTH_LONG).show()
+                                finish()
+                            }
                         })
                     }
                 }
