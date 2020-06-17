@@ -10,7 +10,7 @@ import java.net.Socket
 
 class TCPClient(ip: String, port: Int) {
 
-    val ip = ip
+    var ip = ip
     val port = port
 
     interface OnReceivedDataListener {
@@ -35,7 +35,7 @@ class TCPClient(ip: String, port: Int) {
 
     fun resetIP(ip: String) {
         close()
-        TCPClientSocket = Socket(ip, port)
+        this.ip = ip
         connect()
     }
 

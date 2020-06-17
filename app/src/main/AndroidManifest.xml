@@ -87,6 +87,13 @@
             android:name=".ui.notification.NotificationActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"></activity>
+
+        <!-- zxing qrcode -->
+        <activity
+            android:name="com.journeyapps.barcodescanner.CaptureActivity"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity"
+            tools:replace="screenOrientation"></activity>
     </application>
 
 </manifest>

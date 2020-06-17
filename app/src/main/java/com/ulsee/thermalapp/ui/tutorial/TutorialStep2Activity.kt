@@ -21,6 +21,7 @@ class TutorialStep2Activity : AppCompatActivity() {
         setContentView(R.layout.activity_tutorial_step2)
 
         findViewById<View>(R.id.button_next).setOnClickListener{doTutorial()}
+        findViewById<View>(R.id.imageView).setOnClickListener{doTutorial()}
     }
 
     fun doTutorial () {

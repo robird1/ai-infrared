@@ -84,7 +84,10 @@ class ScanActivity : AppCompatActivity() {
     }
 
     private fun initZxingScanner () {
-        IntentIntegrator(this).initiateScan()
+        val integrator = IntentIntegrator(this)
+        integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
+        integrator.initiateScan()
+        //IntentIntegrator(this).initiateScan()
     }
 
     // Get the results:
@@ -221,10 +224,17 @@ class ScanActivity : AppCompatActivity() {
             .setNegativeButton("Cancel"
             ) { dialog, whichButton ->
                 mStatus = Status.scanningQRCode
-                dialog.dismiss()
-                initZxingScanner()
+//                dialog.dismiss()
+//                initZxingScanner()
             }
             .setCancelable(false)
+            .setOnDismissListener {
+                if (mStatus != ScanActivity.Status.askingName) {
+                    mStatus = Status.scanningQRCode
+                    it.dismiss()
+                    initZxingScanner()
+                }
+            }
             .create()
             .show()
     }
