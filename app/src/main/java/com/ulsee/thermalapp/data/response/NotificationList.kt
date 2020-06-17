@@ -5,5 +5,5 @@ import com.ulsee.thermalapp.data.services.DeviceManager
 
 class NotificationList {
     val Action = DeviceManager.Action.notificationListResponse.ordinal
-    val FeverList : List<Notification> = ArrayList<Notification>()
+    val FaceList : List<Notification> = ArrayList<Notification>()
 }

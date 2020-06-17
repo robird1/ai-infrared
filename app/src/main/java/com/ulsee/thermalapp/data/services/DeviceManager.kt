@@ -311,11 +311,11 @@ class DeviceManager(device: Device) {
                 val itemType = object : TypeToken<NotificationList>() {}.type
                 try {
                     val list = gson.fromJson<NotificationList>(responseString, itemType)
-                    log("got notification list, size: "+list.FeverList.size)
+                    log("got notification list, size: "+list.FaceList.size)
                     if (mOnGotNotificationListListener == null) {
                         Log.e(javaClass.name, "Error no listener of action "+action)
                     }
-                    mOnGotNotificationListListener?.onGotNotificationList(list.FeverList)
+                    mOnGotNotificationListListener?.onGotNotificationList(list.FaceList)
                 } catch(e: java.lang.Exception) {
                     Log.e(javaClass.name, "Error parse action "+action)
                     e.printStackTrace()
