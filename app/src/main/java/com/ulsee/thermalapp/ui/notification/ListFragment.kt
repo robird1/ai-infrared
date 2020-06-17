@@ -52,7 +52,10 @@ class ListFragment  : Fragment() {
         }
         NotificationServiceTCP(deviceManager).getAll()
             .subscribe({ notificationList: List<Notification> ->
-                (recyclerView.adapter as NotificationListAdapter).setList(notificationList)
+                val sortedList = notificationList.sortedByDescending {
+                    it.createdAt.time
+                }
+                (recyclerView.adapter as NotificationListAdapter).setList(sortedList)
                 swipeRefreshLayout.isRefreshing = false
             }, { error: Throwable ->
                 Log.d(MainActivityTag, error.localizedMessage)
