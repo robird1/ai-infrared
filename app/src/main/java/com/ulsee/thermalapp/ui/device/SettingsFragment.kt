@@ -64,16 +64,16 @@ class SettingsFragment(deviceID: String, autoFinish: Boolean) : Fragment() {
     }
 
     private fun showSettings () {
-        val segmentPosition = if(settings!!.TemperatureUnit == 0) 0 else 1
+        val segmentPosition = if(settings!!.TempUnit == 0) 0 else 1
         segmentedButtonGroup.setPosition(segmentPosition, false)
-        settingsNumberPadAdapter.fragments[0].setValue(settings!!.AlarmThreshold)
+        settingsNumberPadAdapter.fragments[0].setValue(settings!!.TempAlarmValue)
         settingsNumberPadAdapter.fragments[1].setValue(settings!!.Deviation)
     }
 
     private fun save () {
-        settings!!.TemperatureUnit = if(segmentedButtonGroup.position == 0) 0 else 1
+        settings!!.TempUnit = if(segmentedButtonGroup.position == 0) 0 else 1
         try {
-            settings!!.AlarmThreshold = settingsNumberPadAdapter.fragments[0].getValue()
+            settings!!.TempAlarmValue = settingsNumberPadAdapter.fragments[0].getValue()
         } catch (e: Exception) {
             e.printStackTrace()
             Toast.makeText(context, "數字錯誤!", Toast.LENGTH_SHORT).show()
@@ -88,9 +88,9 @@ class SettingsFragment(deviceID: String, autoFinish: Boolean) : Fragment() {
             segmentedButtonGroup.setPosition(1, true)
             return
         }
-        settings!!.FaceRecognition = faceRecognitionSwitch.isChecked
-        settings!!.FlipImage = flipImageSwitch.isChecked
-        settings!!.OnlyROI = onlyROISwitch.isChecked
+        settings!!.IsFR = faceRecognitionSwitch.isChecked
+        settings!!.IsFlip = flipImageSwitch.isChecked
+        settings!!.IsOnlyROI = onlyROISwitch.isChecked
         updateSettings(settings!!)
     }
 
