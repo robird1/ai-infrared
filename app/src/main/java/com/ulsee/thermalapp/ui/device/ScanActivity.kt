@@ -84,7 +84,10 @@ class ScanActivity : AppCompatActivity() {
     }
 
     private fun initZxingScanner () {
-        IntentIntegrator(this).initiateScan()
+        val integrator = IntentIntegrator(this)
+        integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
+        integrator.initiateScan()
+        //IntentIntegrator(this).initiateScan()
     }
 
     // Get the results:
@@ -225,6 +228,11 @@ class ScanActivity : AppCompatActivity() {
                 initZxingScanner()
             }
             .setCancelable(false)
+            .setOnDismissListener {
+                mStatus = Status.scanningQRCode
+                it.dismiss()
+                initZxingScanner()
+            }
             .create()
             .show()
     }
