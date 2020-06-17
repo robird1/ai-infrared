@@ -42,6 +42,7 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
 
     inner class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
         private val nameTV = itemView?.findViewById<TextView>(R.id.textView_deviceName)
+        private val hintTV = itemView?.findViewById<TextView>(R.id.textView_hint)
         private val connectedView = itemView?.findViewById<View>(R.id.view_connected)
         private val notConnectedView = itemView?.findViewById<View>(R.id.view_not_connected)
         private lateinit var mPopup : PopupMenu
@@ -155,6 +156,8 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
         fun displayConnectionStatus(isConnected: Boolean) {
             connectedView.visibility = if(isConnected) View.VISIBLE else View.GONE
             notConnectedView.visibility = if(!isConnected) View.VISIBLE else View.GONE
+
+            hintTV.setText(if(isConnected) "裝置已經連線\n點擊可觀看即時畫面" else "裝置尚未連線...")
         }
     }
 }
