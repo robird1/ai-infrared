@@ -1,5 +1,6 @@
 package com.ulsee.thermalapp
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -11,6 +12,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.ulsee.thermalapp.data.AppPreference
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Notification
 import com.ulsee.thermalapp.data.services.DeviceManager
@@ -81,6 +83,7 @@ class MainActivity : AppCompatActivity() {
                     if (!deviceManager.haveOnNotificationListener) {
                         deviceManager.setOnNotificationListener(object: DeviceManager.OnNotificationListener{
                             override fun onNotification(notification: Notification) {
+                                if (!AppPreference(this@MainActivity.getSharedPreferences("app", Context.MODE_PRIVATE)).isFeverNotificationEnabled()) return
                                 val intent = Intent(this@MainActivity, NotificationActivity::class.java)
                                 intent.putExtra("notification", notification)
                                 NotificationCenter.shared.show(this@MainActivity, intent,"通知",notification.Name)
