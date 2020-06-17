@@ -39,7 +39,7 @@ class ListFragment  : Fragment() {
 
         loadNotifications()
 
-        (activity as MainActivity).setTitle("Notificaation")
+        (activity as MainActivity).setTitle("Notification")
 
         return root
     }
