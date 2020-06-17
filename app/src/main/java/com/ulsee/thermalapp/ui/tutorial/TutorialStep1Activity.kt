@@ -20,6 +20,7 @@ class TutorialStep1Activity : AppCompatActivity() {
         setContentView(R.layout.activity_tutorial_step1)
 
         findViewById<View>(R.id.button_next).setOnClickListener{doTutorial()}
+        findViewById<View>(R.id.imageView).setOnClickListener{doTutorial()}
     }
 
     override fun onBackPressed() {
