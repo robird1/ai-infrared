@@ -110,7 +110,7 @@ class StreamingActivity : AppCompatActivity() {
         val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
         disposable = SettingsServiceTCP(deviceManager!!).openRGBStream().subscribe({
             surfaceView.draw(it)
-        }, {})
+        }, {it.printStackTrace()})
     }
     fun startThermalStreaming() {
         if(disposable?.isDisposed == false)disposable?.dispose()
@@ -118,7 +118,7 @@ class StreamingActivity : AppCompatActivity() {
         val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
         disposable = SettingsServiceTCP(deviceManager!!).openThermaltream().subscribe({
             surfaceView.draw(it)
-        }, {})
+        }, {it.printStackTrace()})
     }
 
     fun switchToThermalStreaming () {

@@ -1,5 +1,6 @@
 package com.ulsee.thermalapp.data.services
 
+import android.util.Log
 import com.google.gson.Gson
 import com.ulsee.thermalapp.data.model.Settings
 import com.ulsee.thermalapp.data.model.WIFIInfo
@@ -13,6 +14,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import java.lang.Exception
 import java.lang.StringBuilder
+import kotlin.math.max
+import kotlin.math.min
 
 class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
 
@@ -66,22 +69,53 @@ class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
             .observeOn(AndroidSchedulers.mainThread())
     }
 
+    fun calculateFPS(sentCount: Int, recvCount: Int) : Long {
+        var fps = 20L
+
+        if (sentCount - recvCount > 3) {
+            fps = (20 - min(19, sentCount-recvCount)).toLong()
+        }
+
+        Log.i(javaClass.name, String.format("%d sent, %d recv, new fps = %d", sentCount, recvCount, fps))
+
+        return fps
+    }
+
     override fun openRGBStream(): Observable<String> {
         val handler: ObservableOnSubscribe<String> = ObservableOnSubscribe<String> { emitter ->
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
 //            if (apiClient?.isConnected() != true) apiClient?.reconnect()
 
+            var fps = 20L
+            var interval = 50L
+            var sentCount = 0
+            var recvCount = 0
+            var i = 0L
+
             deviceManager.setOnGotVideoFrameListener(object: DeviceManager.OnGotVideoFrameListener{
                 override fun onVideoFrame(frame: String) {
+                    val newFPS = calculateFPS(sentCount, ++recvCount)
+                    if (newFPS != fps) {
+                        fps = newFPS
+                    }
                     emitter.onNext(frame)
                 }
             })
             try {
                 while(!emitter.isDisposed) {
-                    apiClient?.send(gson.toJson(SetVideo(SetVideo.VideoStatus.openRGB)))
-                    Thread.sleep(50) // 20 fps
+                    i ++
+                    i %= 20
+                    if (i % (20L/fps) == 0L) {
+                        apiClient?.send(gson.toJson(SetVideo(SetVideo.VideoStatus.openRGB)))
+                        val newFPS = calculateFPS(++sentCount, recvCount)
+                        if (newFPS != fps) {
+                            fps = newFPS
+                        }
+                    }
+                    Thread.sleep(interval)
                 }
+                Log.i(javaClass.name, "end send loop")
             } catch(e: Exception) {
                 if (!emitter.isDisposed) emitter.onError(e)
             }
@@ -111,15 +145,21 @@ class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
             if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
 //            if (apiClient?.isConnected() != true) apiClient?.reconnect()
 
+            var fps = 20L
+            var sentCount = 0
+            var recvCount = 0
+
             deviceManager.setOnGotVideoFrameListener(object: DeviceManager.OnGotVideoFrameListener{
                 override fun onVideoFrame(frame: String) {
+                    fps = calculateFPS(sentCount, ++recvCount)
                     emitter.onNext(frame)
                 }
             })
             try {
                 while(!emitter.isDisposed) {
                     apiClient?.send(gson.toJson(SetVideo(SetVideo.VideoStatus.openThermal)))
-                    Thread.sleep(50) // 20 fps
+                    fps = calculateFPS(++sentCount, recvCount)
+                    Thread.sleep(1000/fps)
                 }
             } catch(e: Exception) {
                 if (!emitter.isDisposed) emitter.onError(e)
