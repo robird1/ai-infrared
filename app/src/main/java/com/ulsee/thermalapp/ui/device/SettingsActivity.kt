@@ -37,10 +37,8 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         val fragment = SettingsFragment(deviceID, true)
-
         val fragmentManager: FragmentManager = supportFragmentManager
         val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
-
         fragmentTransaction.replace(R.id.frameLayout, fragment)
         fragmentTransaction.commit()
     }

@@ -17,6 +17,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.appcompat.widget.Toolbar
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 import com.bumptech.glide.Glide
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
@@ -30,7 +32,6 @@ class StreamingActivity : AppCompatActivity() {
         Thermal()
     }
     lateinit var deviceID : String
-    lateinit var imageView: ImageView
     lateinit var thermalSwitch: SwitchCompat
     lateinit var surfaceView: StreamingSurfaceView
     var disposable: Disposable? = null
@@ -40,7 +41,6 @@ class StreamingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_device_streaming)
 
-        imageView = findViewById(R.id.imageView)
         thermalSwitch = findViewById(R.id.switch_thermal)
         thermalSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
             if (isChecked) {
@@ -85,6 +85,12 @@ class StreamingActivity : AppCompatActivity() {
         } else {
             startRGBStreaming()
         }
+
+        val fragment = SettingsFragment(deviceID, false)
+        val fragmentManager: FragmentManager = supportFragmentManager
+        val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
+        fragmentTransaction.replace(R.id.frameLayout, fragment)
+        fragmentTransaction.commit()
     }
 
     override fun finish() {
