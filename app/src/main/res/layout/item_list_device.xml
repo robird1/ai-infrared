@@ -100,13 +100,20 @@
                     android:background="#ccc">
                 </ImageView>
 
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="16dp"
+                    android:text="裝置已經連線\n點擊可觀看即時畫面"
+                    android:textColor="#000">
+                </TextView>
+
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:src="@drawable/btn_play"
                     android:scaleType="centerInside"
                     android:layout_centerInParent="true">
-
                 </ImageView>
 
             </RelativeLayout>
