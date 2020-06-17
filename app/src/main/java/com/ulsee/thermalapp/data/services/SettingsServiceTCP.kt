@@ -144,7 +144,7 @@ class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
             .observeOn(AndroidSchedulers.mainThread())
     }
 
-    fun switchWIFI(wifiInfo: WIFIInfo, advanceParameter: SetWIFI.AdvanceParameter?): Completable {
+    fun switchWIFI(wifiInfo: WIFIInfo?, advanceParameter: SetWIFI.AdvanceParameter?): Completable {
         val handler: CompletableOnSubscribe = CompletableOnSubscribe { emitter ->
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true) throw Exception("error: target not connected")

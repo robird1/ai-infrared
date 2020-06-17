@@ -3,7 +3,7 @@ package com.ulsee.thermalapp.data.request
 import com.ulsee.thermalapp.data.model.WIFIInfo
 import com.ulsee.thermalapp.data.services.DeviceManager
 
-class SetWIFI(wifiInfo: WIFIInfo, advanceParameter: AdvanceParameter?) {
+class SetWIFI(wifiInfo: WIFIInfo?, advanceParameter: AdvanceParameter?) {
     class AdvanceParameter {
         val IP = ""
         val Mask = ""
@@ -11,14 +11,16 @@ class SetWIFI(wifiInfo: WIFIInfo, advanceParameter: AdvanceParameter?) {
         val DNS = ""
     }
     val Action = DeviceManager.Action.modifyWifi.ordinal
-    val SSID = wifiInfo.ssid
-    val Password = wifiInfo.password
 
-    val Flag : Int = if(advanceParameter == null) 1 else 2
-    val IP = if(advanceParameter == null) "" else advanceParameter!!.IP
-    val Mask = if(advanceParameter == null) "" else advanceParameter!!.Mask
-    val Gateway = if(advanceParameter == null) "" else advanceParameter!!.Gateway
-    val DNS = if(advanceParameter == null) "" else advanceParameter!!.DNS
+    val Flag : Int = if (wifiInfo == null) 0 else (if(advanceParameter == null) 1 else 2)
+
+    val SSID : String? = wifiInfo?.ssid
+    val Password : String?  = wifiInfo?.password
+
+    val IP : String?  = advanceParameter?.IP
+    val Mask : String?  = advanceParameter?.Mask
+    val Gateway : String?  = advanceParameter?.Gateway
+    val DNS  : String? = advanceParameter?.DNS
 
 //    val Flag : Int = 2
 //    val IP = "192.168.11.197"

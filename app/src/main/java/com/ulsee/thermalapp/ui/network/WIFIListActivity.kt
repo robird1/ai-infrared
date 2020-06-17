@@ -9,6 +9,7 @@ import android.content.IntentFilter
 import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -54,11 +55,23 @@ class WIFIListActivity : AppCompatActivity() {
         initRecyclerView()
         registerWIFIBroadcast()
         loadWIFIList()
+
+        findViewById<View>(R.id.button_reset).setOnClickListener { resetToHostspot() }
     }
 
     override fun onDestroy() {
         unregisterWIFIBroadcast()
         super.onDestroy()
+    }
+
+    private fun resetToHostspot () {
+        SettingsServiceTCP(mDeviceManager!!).switchWIFI(null, null).subscribe( {
+            Toast.makeText(this, "成功改回熱點模式!", Toast.LENGTH_LONG).show()
+            finish()
+        }, {
+            it.printStackTrace()
+            Toast.makeText(this, "Error to switch to wifi: "+it.message, Toast.LENGTH_LONG).show()
+        })
     }
 
     private fun initRecyclerView () {
