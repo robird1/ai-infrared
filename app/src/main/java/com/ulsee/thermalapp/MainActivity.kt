@@ -12,7 +12,11 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.ulsee.thermalapp.data.Service
+import com.ulsee.thermalapp.data.model.Notification
+import com.ulsee.thermalapp.data.services.DeviceManager
+import com.ulsee.thermalapp.ui.notification.NotificationActivity
 import com.ulsee.thermalapp.ui.tutorial.TutorialStep1Activity
+import com.ulsee.thermalapp.utils.NotificationCenter
 import java.util.*
 
 val MainActivityTag = "MainActivity"
@@ -39,6 +43,7 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
 
         keepCheckingTutorialDevice()
+        keepCheckingNotification()
     }
 
     override fun onResume() {
@@ -67,5 +72,23 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }, 1000, 1000)
+    }
+
+    fun keepCheckingNotification () {
+        Thread(Runnable {
+            if(!isFinishing) {
+                for(deviceManager in Service.shared.deviceManagerList) {
+                    if (!deviceManager.haveOnNotificationListener) {
+                        deviceManager.setOnNotificationListener(object: DeviceManager.OnNotificationListener{
+                            override fun onNotification(notification: Notification) {
+                                val intent = Intent(this@MainActivity, NotificationActivity::class.java)
+                                intent.putExtra("notification", notification)
+                                NotificationCenter.shared.show(this@MainActivity, intent,"通知",notification.Name)
+                            }
+                        })
+                    }
+                }
+            }
+        }).start()
     }
 }

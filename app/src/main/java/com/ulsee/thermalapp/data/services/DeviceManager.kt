@@ -5,6 +5,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Device
+import com.ulsee.thermalapp.data.model.Notification
 import com.ulsee.thermalapp.data.model.Settings
 import com.ulsee.thermalapp.data.response.Face
 import com.ulsee.thermalapp.data.response.FaceList
@@ -14,7 +15,6 @@ import io.reactivex.Observable
 import io.reactivex.ObservableOnSubscribe
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import io.realm.Realm
 import org.json.JSONObject
 import java.lang.StringBuilder
 import kotlin.collections.ArrayList
@@ -42,6 +42,7 @@ class DeviceManager(device: Device) {
         faceResponse,
         modifyWifi, // 12
         modifyWifiACK,
+        notification,// 14
     }
 
     private val mLock = Object()
@@ -93,6 +94,17 @@ class DeviceManager(device: Device) {
             mOnGotFaceListenerList.remove(listener)
         }
     }
+
+    interface OnNotificationListener{
+        fun onNotification(notification: Notification)
+    }
+    var mOnNotificationListener : OnNotificationListener? = null
+    fun setOnNotificationListener(listener: OnNotificationListener?) {
+        if(listener != null && mOnNotificationListener != null) Log.e(javaClass.name, "error set listener but already exists: setOnNotificationListener")
+        mOnNotificationListener = listener
+    }
+    val haveOnNotificationListener : Boolean
+        get() = mOnNotificationListener != null
 
     val device = device
     var settings : Settings? = null
@@ -265,6 +277,19 @@ class DeviceManager(device: Device) {
                             Log.e(javaClass.name, "Error got face image of "+response.Name+", but no one handle")
                         }
                     }
+                } catch(e: java.lang.Exception) {
+                    Log.e(javaClass.name, "Error parse action "+action)
+                    e.printStackTrace()
+                }
+            }
+            Action.notification.ordinal -> {
+                val itemType = object : TypeToken<Notification>() {}.type
+                try {
+                    val response = gson.fromJson<Notification>(responseString, itemType)
+                    if (mOnNotificationListener== null) {
+                        Log.e(javaClass.name, "Error no listener of action "+action)
+                    }
+                    mOnNotificationListener?.onNotification(response)
                 } catch(e: java.lang.Exception) {
                     Log.e(javaClass.name, "Error parse action "+action)
                     e.printStackTrace()
