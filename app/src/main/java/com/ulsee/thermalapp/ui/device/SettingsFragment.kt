@@ -35,9 +35,9 @@ class SettingsFragment(deviceID: String, autoFinish: Boolean) : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_device_setting, container, false)
-        initUI(root)
         val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
         settings = deviceManager!!.settings
+        initUI(root)
         showSettings()
         return root
     }
@@ -46,6 +46,10 @@ class SettingsFragment(deviceID: String, autoFinish: Boolean) : Fragment() {
         faceRecognitionSwitch = root.findViewById(R.id.switch_facerecognition)
         flipImageSwitch = root.findViewById(R.id.switch_flipimage)
         onlyROISwitch =root.findViewById(R.id.switch_onlyroi)
+
+        faceRecognitionSwitch.isChecked = settings?.IsFR == true
+        flipImageSwitch.isChecked = settings?.IsFlip == true
+        onlyROISwitch.isChecked = settings?.IsOnlyROI == true
 
         segmentedButtonGroup = root.findViewById<SegmentedButtonGroup>(R.id.segmentedButton)
 
