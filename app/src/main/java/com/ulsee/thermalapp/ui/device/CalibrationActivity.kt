@@ -151,6 +151,10 @@ class CalibrationActivity : AppCompatActivity() {
                         }
                     }).into(thermalIV)
             }
+        }, {
+            it.printStackTrace()
+            Toast.makeText(this@CalibrationActivity, "載入圖片異常!", Toast.LENGTH_LONG).show()
+            finish()
         })
 
     }
