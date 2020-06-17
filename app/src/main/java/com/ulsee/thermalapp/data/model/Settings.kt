@@ -17,9 +17,11 @@ open class Settings {
     var LastModifiedDate = "2020/06/12" //
     var TempMin = 0.0
     var ThermalTime = 0
+
+    // 以下參數要注意...
     var Version = ""
     var XRatio = 0.0
-    var XShift = 0.0
+    var XShift = 0
     var YRatio = 0.0
-    var YShift = 0.0
+    var YShift = 0
 }
