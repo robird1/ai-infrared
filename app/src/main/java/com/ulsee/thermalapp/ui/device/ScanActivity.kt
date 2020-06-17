@@ -224,14 +224,16 @@ class ScanActivity : AppCompatActivity() {
             .setNegativeButton("Cancel"
             ) { dialog, whichButton ->
                 mStatus = Status.scanningQRCode
-                dialog.dismiss()
-                initZxingScanner()
+//                dialog.dismiss()
+//                initZxingScanner()
             }
             .setCancelable(false)
             .setOnDismissListener {
-                mStatus = Status.scanningQRCode
-                it.dismiss()
-                initZxingScanner()
+                if (mStatus != ScanActivity.Status.askingName) {
+                    mStatus = Status.scanningQRCode
+                    it.dismiss()
+                    initZxingScanner()
+                }
             }
             .create()
             .show()
