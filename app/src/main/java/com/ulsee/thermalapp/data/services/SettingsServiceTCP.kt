@@ -73,7 +73,7 @@ class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
         var fps = 20L
 
         if (sentCount - recvCount > 3) {
-            fps = (20 - min(19, sentCount-recvCount)).toLong()
+            fps = (20 - min(19, (sentCount-recvCount)*3)).toLong()
         }
 
         Log.i(javaClass.name, String.format("%d sent, %d recv, new fps = %d", sentCount, recvCount, fps))
