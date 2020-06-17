@@ -34,7 +34,7 @@ class ListFragment  : Fragment() {
         swipeRefreshLayout.setOnRefreshListener { loadNotifications() }
 
         recyclerView = root.findViewById<RecyclerView>(R.id.recyclerView)
-        recyclerView.adapter = DeviceListAdapter()
+        recyclerView.adapter = NotificationListAdapter()
         recyclerView.layoutManager = LinearLayoutManager(context)
 
         loadNotifications()
