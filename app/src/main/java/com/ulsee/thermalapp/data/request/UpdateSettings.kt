@@ -5,8 +5,8 @@ import com.ulsee.thermalapp.data.model.Settings
 class UpdateSettings(settings: Settings) : Settings() {
     val Action = 0
     init {
-        TemperatureUnit = settings.TemperatureUnit
-        AlarmThreshold = settings.AlarmThreshold
+        TempUnit = settings.TempUnit
+        TempAlarmValue = settings.TempAlarmValue
         Deviation = settings.Deviation
     }
 }
