@@ -7,10 +7,7 @@ import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Device
 import com.ulsee.thermalapp.data.model.Notification
 import com.ulsee.thermalapp.data.model.Settings
-import com.ulsee.thermalapp.data.response.Face
-import com.ulsee.thermalapp.data.response.FaceList
-import com.ulsee.thermalapp.data.response.TwoPicture
-import com.ulsee.thermalapp.data.response.VideoFrame
+import com.ulsee.thermalapp.data.response.*
 import io.reactivex.Observable
 import io.reactivex.ObservableOnSubscribe
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -42,7 +39,11 @@ class DeviceManager(device: Device) {
         faceResponse,
         modifyWifi, // 12
         modifyWifiACK,
-        notification,// 14
+        requestNotificationList,
+        notificationListResponse,
+        requestNotificationImage,
+        notificationImageResponse,
+        notification,// 18
     }
 
     private val mLock = Object()
@@ -92,6 +93,30 @@ class DeviceManager(device: Device) {
     fun removeOnGotFaceListener(listener: OnGotFaceListener) {
         synchronized(mLock) {
             mOnGotFaceListenerList.remove(listener)
+        }
+    }
+
+    interface OnGotNotificationListListener{
+        fun onGotNotificationList(falceList: List<com.ulsee.thermalapp.data.model.Notification>)
+    }
+    var mOnGotNotificationListListener : OnGotNotificationListListener? = null
+    fun setOnGotNotificationListListener(listener: OnGotNotificationListListener?) {
+        if(listener != null && mOnGotNotificationListListener != null) Log.e(javaClass.name, "error set listener but already exists: setOnGotNotificationListListener")
+        mOnGotNotificationListListener = listener
+    }
+
+    interface OnGotNotificationImageListener{
+        fun onNotificationImage(image: NotificationImage) : Boolean
+    }
+    var mOnGotNotificationImageListenerList = ArrayList<OnGotNotificationImageListener>()
+    fun addOnGotNotificationImageListener(listener: OnGotNotificationImageListener) {
+        synchronized(mLock) {
+            mOnGotNotificationImageListenerList.add(listener)
+        }
+    }
+    fun removeOnGotNotificationImageListener(listener: OnGotNotificationImageListener) {
+        synchronized(mLock) {
+            mOnGotNotificationImageListenerList.remove(listener)
         }
     }
 
@@ -275,6 +300,42 @@ class DeviceManager(device: Device) {
                         // for (listener in mOnGotFaceListenerList) result = result || listener.onFace(response)
                         if (result == false) {
                             Log.e(javaClass.name, "Error got face image of "+response.Name+", but no one handle")
+                        }
+                    }
+                } catch(e: java.lang.Exception) {
+                    Log.e(javaClass.name, "Error parse action "+action)
+                    e.printStackTrace()
+                }
+            }
+            Action.notificationListResponse.ordinal -> {
+                val itemType = object : TypeToken<NotificationList>() {}.type
+                try {
+                    val list = gson.fromJson<NotificationList>(responseString, itemType)
+                    log("got notification list, size: "+list.FeverList.size)
+                    if (mOnGotNotificationListListener == null) {
+                        Log.e(javaClass.name, "Error no listener of action "+action)
+                    }
+                    mOnGotNotificationListListener?.onGotNotificationList(list.FeverList)
+                } catch(e: java.lang.Exception) {
+                    Log.e(javaClass.name, "Error parse action "+action)
+                    e.printStackTrace()
+                }
+            }
+            Action.notificationImageResponse.ordinal -> {
+                val itemType = object : TypeToken<NotificationImage>() {}.type
+                try {
+                    val response = gson.fromJson<NotificationImage>(responseString, itemType)
+                    if (mOnGotNotificationImageListenerList.size == 0) {
+                        Log.e(javaClass.name, "Error no listener of action "+action)
+                    }
+                    synchronized(mLock) {
+                        var result = false
+                        for(i in mOnGotNotificationImageListenerList.indices) {
+                            result = result || mOnGotNotificationImageListenerList[i].onNotificationImage(response)
+                        }
+                        // for (listener in mOnGotFaceListenerList) result = result || listener.onFace(response)
+                        if (result == false) {
+                            Log.e(javaClass.name, "Error got notification image of "+response.Name+", but no one handle")
                         }
                     }
                 } catch(e: java.lang.Exception) {
