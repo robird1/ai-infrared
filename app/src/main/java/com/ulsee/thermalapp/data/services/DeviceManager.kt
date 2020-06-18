@@ -228,6 +228,8 @@ class DeviceManager(device: Device) {
                 val itemType = object : TypeToken<Settings>() {}.type
                 try {
                     settings = gson.fromJson<Settings>(responseString, itemType)
+                    if (settings!!.Deviation > 10) settings?.Deviation = 0.0
+                    if (settings!!.Deviation < -10) settings?.Deviation = 0.0
                     //if (settings?.IsFirstActivate == true) {
                         val isJustJoinedDevice = Service.shared.justJoinedDeviceIDList.contains(device.getID())
                         Log.i(javaClass.name, "find first settings device: "+device.getID()+", is just joined:"+isJustJoinedDevice)
