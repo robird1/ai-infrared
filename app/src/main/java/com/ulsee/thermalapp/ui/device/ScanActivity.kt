@@ -86,6 +86,7 @@ class ScanActivity : AppCompatActivity() {
     private fun initZxingScanner () {
         val integrator = IntentIntegrator(this)
         integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
+        integrator.setPrompt("Scan device QRCode");
         integrator.initiateScan()
         //IntentIntegrator(this).initiateScan()
     }
