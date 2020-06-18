@@ -2,6 +2,7 @@ package com.ulsee.thermalapp.ui.people
 
 import android.app.ProgressDialog
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -19,14 +20,15 @@ import com.bumptech.glide.Glide
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Face
-import com.ulsee.thermalapp.data.services.DeviceManager
 import com.ulsee.thermalapp.data.services.PeopleServiceTCP
-import com.ulsee.thermalapp.data.services.TCPClient
+import java.io.ByteArrayOutputStream
 import java.io.InputStream
+
 
 class EditorActivity : AppCompatActivity() {
 
     var REAQUEST_CODE_PICK_IMAGE = 1234
+    var REAQUEST_CODE_TAKE_PHOTO = 1235
 
     var oldValue : Face? = null
     var imageBase64 : String? = null
@@ -79,6 +81,15 @@ class EditorActivity : AppCompatActivity() {
     }
 
     fun pickImage () {
+        pickImageFromTakePhoto()
+    }
+
+    fun pickImageFromTakePhoto () {
+        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        startActivityForResult(cameraIntent, REAQUEST_CODE_TAKE_PHOTO)
+    }
+
+    fun pickImageFromAlbum () {
         val getIntent = Intent(Intent.ACTION_GET_CONTENT)
         getIntent.type = "image/*"
         val pickIntent = Intent(
@@ -125,6 +136,20 @@ class EditorActivity : AppCompatActivity() {
                 Glide.with(this).load("data:image/jpg;base64,"+imageBase64).into(imageView)
             }
 
+        }
+        else if (requestCode == REAQUEST_CODE_TAKE_PHOTO) {
+            val photo = data!!.extras!!["data"] as Bitmap?
+
+            if (photo == null) {
+                Toast.makeText(this, "error take photo", Toast.LENGTH_LONG ).show()
+                return
+            } else {
+                val byteArrayOutputStream = ByteArrayOutputStream()
+                photo.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+                val byteArray: ByteArray = byteArrayOutputStream.toByteArray()
+                imageBase64 = Base64.encodeToString(byteArray, Base64.DEFAULT)
+                imageView.setImageBitmap(photo)
+            }
         }
         super.onActivityResult(requestCode, resultCode, data)
     }
