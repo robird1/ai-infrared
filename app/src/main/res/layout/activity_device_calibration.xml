@@ -64,74 +64,48 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/button_save"
-        android:orientation="vertical"
         android:layout_marginBottom="20dp"
-        android:gravity="center">
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/button_save"
+        app:layout_constraintStart_toStartOf="parent">
 
-        <io.github.controlwear.virtual.joystick.android.JoystickView
-            xmlns:custom="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/joystick"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            custom:JV_buttonColor="#fff"
-            custom:JV_buttonSizeRatio="35%"
-            custom:JV_borderColor="#000"
-            custom:JV_backgroundColor="#000"
-            custom:JV_borderWidth="4dp"
-            custom:JV_fixedCenter="false"
-            app:layout_constraintTop_toBottomOf="@+id/button_connect"
-            custom:layout_constraintStart_toStartOf="parent"
-            custom:layout_constraintEnd_toEndOf="parent"/>
+        <SeekBar
+            android:id="@+id/seekBar_height"
+            android:layout_width="130dp"
+            android:layout_marginTop="45dp"
+            android:layout_height="30dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/textView_title_heightscale"
+            app:layout_constraintTop_toTopOf="parent"
+            android:rotation="270"/>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#fff">
-            <TextView
-                android:id="@+id/textView_title_widthscale"
-                android:layout_width="120dp"
-                android:layout_height="wrap_content"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                android:text="width scale:">
-            </TextView>
+            android:layout_marginBottom="20dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toTopOf="@+id/button_save">
+
+            <io.github.controlwear.virtual.joystick.android.JoystickView xmlns:custom="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/joystick"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                app:layout_constraintTop_toBottomOf="@+id/button_connect"
+                custom:JV_backgroundColor="#000"
+                custom:JV_borderColor="#000"
+                custom:JV_borderWidth="4dp"
+                custom:JV_buttonColor="#fff"
+                custom:JV_buttonSizeRatio="35%"
+                custom:JV_fixedCenter="false"
+                custom:layout_constraintEnd_toEndOf="parent"
+                custom:layout_constraintStart_toStartOf="parent" />
 
             <SeekBar
                 android:id="@+id/seekBar_width"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                app:layout_constraintStart_toEndOf="@+id/textView_title_widthscale"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#fff"
-            android:layout_marginTop="12dp">
-            <TextView
-                android:id="@+id/textView_title_heightscale"
-                android:layout_width="120dp"
-                android:layout_height="wrap_content"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                android:text="height scale:">
-            </TextView>
-
-            <SeekBar
-                android:id="@+id/seekBar_height"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                app:layout_constraintStart_toEndOf="@+id/textView_title_heightscale"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                android:layout_width="130dp"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
 
     </LinearLayout>
 
