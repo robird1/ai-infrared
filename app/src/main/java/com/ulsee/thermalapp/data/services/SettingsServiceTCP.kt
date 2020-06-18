@@ -31,7 +31,7 @@ class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
         val handler: CompletableOnSubscribe = CompletableOnSubscribe { emitter ->
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true) throw Exception("error: target not connected")
-            apiClient?.send(gson.toJson(UpdateSettings(settings)))
+            apiClient?.send(gson.toJson(UpdateSettings.from(settings)))
             emitter.onComplete()
         }
         return Completable.create(handler).subscribeOn(Schedulers.newThread())
