@@ -1,6 +1,5 @@
 package com.ulsee.thermalapp.data.model
 
-import android.util.Log
 import java.io.Serializable
 import java.text.SimpleDateFormat
 import java.util.*
@@ -11,16 +10,21 @@ open class Notification : Serializable {
 
     val peopleName : String
     get() {
-        var arr = Name.split("_")
+        val arr = Name.split("_")
         if (arr.size == 6) {
-            return arr[5]
+            var str = arr[5]
+            val arr2 = str.split(".")
+            if (arr2.size > 1) {
+                str = str.substring(0, str.length-1-arr2[arr2.size-1].length)
+            }
+            return str
         }
         return ""
     }
 
     val createdAt : Date
     get() {
-        var arr = Name.split("_")
+        val arr = Name.split("_")
         if (arr.size == 6) {
             val pattern = "yyyyMMddHHmmss"
             val simpleDateFormat = SimpleDateFormat(pattern)
@@ -31,7 +35,7 @@ open class Notification : Serializable {
 
     val tempratureUnitString : String
         get() {
-            var arr = Name.split("_")
+            val arr= Name.split("_")
             if (arr.size == 6) {
                 return arr[2]
             }
@@ -44,7 +48,7 @@ open class Notification : Serializable {
         }
     val temprature : String
         get() {
-        var arr = Name.split("_")
+        val arr= Name.split("_")
         if (arr.size == 6) {
             return arr[3].substring(0,2)+"."+arr[3].substring(2)
         }
@@ -53,7 +57,7 @@ open class Notification : Serializable {
 
     val hasMask  : Boolean
         get() {
-            var arr = Name.split("_")
+            val arr= Name.split("_")
             if (arr.size == 6) {
                 return arr[4] == "mask"
             }
@@ -67,7 +71,7 @@ open class Notification : Serializable {
 //    var hasMask = false
 //
 //    init {
-//        var arr = Name.split("_")
+//        val arr= Name.split("_")
 //        if (arr.size != 6) {
 //            Log.w(javaClass.name, "notification name format error")
 //        } else {
