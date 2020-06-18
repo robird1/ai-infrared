@@ -25,6 +25,7 @@ import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.request.UpdateCalibration
 import com.ulsee.thermalapp.data.services.SettingsServiceTCP
+import io.github.controlwear.virtual.joystick.android.JoystickView
 import kotlin.math.max
 import kotlin.math.min
 
@@ -102,6 +103,7 @@ class CalibrationActivity : AppCompatActivity() {
 
         initThermalTouchListener()
         initControlUI()
+        initJoystick()
     }
 
     private fun initThermalTouchListener () {
@@ -134,7 +136,6 @@ class CalibrationActivity : AppCompatActivity() {
             }
         })
     }
-
 
     private fun loadImages () {
         val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
@@ -208,6 +209,32 @@ class CalibrationActivity : AppCompatActivity() {
         // 2. 設定xy 置中
         thermalIV.x = ((screenWidth - mInitThermalIVSize.width)/2).toFloat()
         thermalIV.y = ((rgbSize.height - mInitThermalIVSize.height)/2).toFloat()
+    }
+
+    private fun initJoystick () {
+        val joystick: JoystickView = findViewById<View>(R.id.joystick) as JoystickView
+        joystick.setOnMoveListener { angle, strength ->
+            var x = 1
+            var y = -1
+            if (strength > 50) {
+                x = 2
+                y = -2
+            }
+            if (angle in 45..134) {
+                x = 0
+            } else if (angle in 135..224) {
+                x = -x
+                y = 0
+            } else if (angle in 225..314) {
+                x = 0
+                y = -y
+            } else if (angle >= 315 || angle < 45) {
+                y = 0
+            }
+            // move...
+            thermalIV.x = thermalIV.x + x
+            thermalIV.y = thermalIV.y + y
+        }
     }
 
     private fun initControlUI () {

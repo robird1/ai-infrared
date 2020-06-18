@@ -73,4 +73,8 @@ dependencies {
 
     // swipe refresh
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
+
+    // joystick
+    implementation 'io.github.controlwear:virtualjoystick:1.10.1'
+
 }
