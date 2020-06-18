@@ -13,6 +13,7 @@ import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
 import android.widget.ImageView
+import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
@@ -28,8 +29,6 @@ import kotlin.math.max
 import kotlin.math.min
 
 class CalibrationActivity : AppCompatActivity() {
-
-    val Tag = "CalibrationActivity"
 
     lateinit var rgbIV : ImageView
     lateinit var thermalIV : ImageView
@@ -100,7 +99,42 @@ class CalibrationActivity : AppCompatActivity() {
         mScaleDetector = ScaleGestureDetector(this, scaleListener)
 
         loadImages()
+
+        initThermalTouchListener()
+        initControlUI()
     }
+
+    private fun initThermalTouchListener () {
+
+        thermalIV.setOnTouchListener(object: View.OnTouchListener{
+            override fun onTouch(view: View?, event: MotionEvent?): Boolean {
+
+                val point = Point(event!!.rawX.toInt(), event!!.rawY.toInt())
+
+                when (event!!.action and MotionEvent.ACTION_MASK) {
+
+                    MotionEvent.ACTION_DOWN ->                 // 2. record the last touch point
+                        lastPoint = point
+                    MotionEvent.ACTION_UP -> {
+                    }
+                    MotionEvent.ACTION_POINTER_DOWN -> {
+                    }
+                    MotionEvent.ACTION_POINTER_UP -> {
+                    }
+                    MotionEvent.ACTION_MOVE -> {
+                        // 3. get the move offset
+                        val offset = Point(point.x - lastPoint.x, point.y - lastPoint.y)
+                        thermalIV.x = thermalIV.x + offset.x
+                        thermalIV.y = thermalIV.y + offset.y
+                        // 4. record the last touch point
+                        lastPoint = point
+                    }
+                }
+                return true
+            }
+        })
+    }
+
 
     private fun loadImages () {
         val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
@@ -176,43 +210,73 @@ class CalibrationActivity : AppCompatActivity() {
         thermalIV.y = ((rgbSize.height - mInitThermalIVSize.height)/2).toFloat()
     }
 
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        val pointerCount = event?.pointerCount
-//        val result = mScaleDetector.onTouchEvent(event)
-//        Log.i(javaClass.name, "onTouchEvent, mScaleDetector return "+result)
-//        return result
+    private fun initControlUI () {
+        val widthSlider = findViewById<SeekBar>(R.id.seekBar_width)
+        val heightSlider = findViewById<SeekBar>(R.id.seekBar_height)
 
-        val point = Point(event!!.rawX.toInt(), event!!.rawY.toInt())
+        widthSlider.progress = 50
+        widthSlider.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                val layoutParams = thermalIV.layoutParams
+                layoutParams.width = (mInitThermalIVSize.width * widthSlider.progress / 50).toInt()
+                layoutParams.height = (mInitThermalIVSize.height * heightSlider.progress / 50).toInt()
+                if (layoutParams.width <= 0)layoutParams.width = 1
+                if (layoutParams.height <= 0)layoutParams.height = 1
+                thermalIV.layoutParams = layoutParams
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
 
-        when (event!!.action and MotionEvent.ACTION_MASK) {
-
-            MotionEvent.ACTION_DOWN -> {
-                // 2. record the last touch point
-                if (pointerCount == 1)
-                    lastPoint = point
+        heightSlider.progress = 50
+        heightSlider.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                val layoutParams = thermalIV.layoutParams
+                layoutParams.width = (mInitThermalIVSize.width * widthSlider.progress / 50).toInt()
+                layoutParams.height = (mInitThermalIVSize.height * heightSlider.progress / 50).toInt()
+                if (layoutParams.width <= 0)layoutParams.width = 1
+                if (layoutParams.height <= 0)layoutParams.height = 1
+                thermalIV.layoutParams = layoutParams
             }
-            MotionEvent.ACTION_UP -> {
-            }
-            MotionEvent.ACTION_POINTER_DOWN -> {
-            }
-            MotionEvent.ACTION_POINTER_UP -> {
-            }
-            MotionEvent.ACTION_MOVE -> {
-                if (pointerCount == 1) {
-                    // 3. get the move offset
-                    val offset = Point(point.x - lastPoint.x, point.y - lastPoint.y)
-                    thermalIV.x = thermalIV.x + offset.x
-                    thermalIV.y = thermalIV.y + offset.y
-                    // 4. record the last touch point
-                    lastPoint = point
-                }
-                if (pointerCount == 2) {
-                    mScaleDetector.onTouchEvent(event)
-                }
-            }
-        }
-        return false
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
     }
+
+//    override fun onTouchEvent(event: MotionEvent?): Boolean {
+//        val pointerCount = event?.pointerCount
+//
+//        val point = Point(event!!.rawX.toInt(), event!!.rawY.toInt())
+//
+//        when (event.action and MotionEvent.ACTION_MASK) {
+//
+//            MotionEvent.ACTION_DOWN -> {
+//                // 2. record the last touch point
+//                if (pointerCount == 1)
+//                    lastPoint = point
+//            }
+//            MotionEvent.ACTION_UP -> {
+//            }
+//            MotionEvent.ACTION_POINTER_DOWN -> {
+//            }
+//            MotionEvent.ACTION_POINTER_UP -> {
+//            }
+//            MotionEvent.ACTION_MOVE -> {
+//                if (pointerCount == 1) {
+//                    // 3. get the move offset
+//                    val offset = Point(point.x - lastPoint.x, point.y - lastPoint.y)
+//                    thermalIV.x = thermalIV.x + offset.x
+//                    thermalIV.y = thermalIV.y + offset.y
+//                    // 4. record the last touch point
+//                    lastPoint = point
+//                }
+//                if (pointerCount == 2) {
+//                    mScaleDetector.onTouchEvent(event)
+//                }
+//            }
+//        }
+//        return false
+//    }
 
     private fun save () {
         if (rgbIV.measuredWidth==0 || rgbIV.measuredHeight==0) {
