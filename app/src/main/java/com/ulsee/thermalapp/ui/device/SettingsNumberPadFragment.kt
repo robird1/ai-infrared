@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.ulsee.thermalapp.R
@@ -12,7 +13,7 @@ import com.ulsee.thermalapp.R
 class SettingsNumberPadFragment : Fragment() {
 
     var initValue = ""
-    var input : EditText? = null
+    var input : TextView? = null
 
     interface OnChangedListener {
         fun onChanged(value: Double)
@@ -25,8 +26,8 @@ class SettingsNumberPadFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_settings_numberpad, container, false)
-        input = root.findViewById(R.id.editText)
-        if (!initValue.isEmpty()) input!!.setText(initValue)
+        input = root.findViewById(R.id.textView)
+        if (initValue.isNotEmpty()) input!!.text = initValue
 
         root.findViewById<View>(R.id.imageButton_up).setOnClickListener {
             var value = 0.0
@@ -57,7 +58,7 @@ class SettingsNumberPadFragment : Fragment() {
         if (input == null) {
             initValue = "%.1f".format(value)
         } else {
-            input!!.setText("%.1f".format(value))
+            input!!.text = "%.1f".format(value)
         }
         onChangedListener?.onChanged(value)
     }
