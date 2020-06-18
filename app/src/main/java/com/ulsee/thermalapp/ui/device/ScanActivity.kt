@@ -202,7 +202,7 @@ class ScanActivity : AppCompatActivity() {
 
         if(isDuplicated) {
             val duplicatedDevice = Service.shared.getDeviceList()[duplicatedDeviceIdx]
-            message = ctx.getString(R.string.hint_device_overrite)
+            message = ctx.getString(R.string.hint_device_overwrite)
             input.setText(duplicatedDevice.getName())
         }
 

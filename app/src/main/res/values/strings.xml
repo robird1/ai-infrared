@@ -9,33 +9,34 @@
     <string name="save">Save</string>
     <string name="next">Next</string>
     <string name="cancel">Cancel</string>
-    <string name="remove">刪除</string>
+    <string name="remove">Remove</string>
 
-    <string name="update_successfully">更新成功</string>
-    <string name="create_successfully">新增成功</string>
-    <string name="remove_successfully">刪除成功</string>
+    <string name="update_successfully">update successfully</string>
+    <string name="create_successfully">create successfully</string>
+    <string name="remove_successfully">remove successfully</string>
 
-    <string name="number_error">數字錯誤</string>
+    <string name="number_error">wrong format of number</string>
     <!-- device -->
-    <string name="hint_input_device_name">請輸入裝置名稱</string>
-    <string name="hint_device_overrite">此裝置已掃描過，將複寫手機中的設定</string>
-    <string name="unable_to_connect_to_device">無法與此裝置連線...請確認裝置網路狀況...</string>
-    <string name="add_first_device">立即新增第一個裝置</string>
-    <string name="device_connected_click_to_watch_camera">裝置已經連線\n點擊可觀看即時畫面</string>
-    <string name="device_not_connected_yet">裝置尚未連線...</string>
-    <string name="confirm_remove_device">確定刪除此裝置</string>
+    <string name="hint_input_device_name">please enter device name</string>
+    <string name="hint_device_overwrite">Device had paired, will overwrite setting</string>
+    <string name="unable_to_connect_to_device">unable to connect to device...</string>
+    <string name="add_first_device">add first device</string>
+    <string name="device_connected_click_to_watch_camera">device connected
+        click watching camera</string>
+    <string name="device_not_connected_yet">device not connected...</string>
+    <string name="confirm_remove_device">sure to remove device</string>
 
     <!-- device relative -->
     <!-- wifi -->
-    <string name="switch_to_hotspot_successfully">成功改回熱點模式</string>
-    <string name="hint_input_wifi_password">請輸入WIFI密碼</string>
+    <string name="switch_to_hotspot_successfully">switch to hotspot successfully</string>
+    <string name="hint_input_wifi_password">please enter wifi password</string>
 
-    <string name="error_load_image">載入圖片異常</string>
-    <string name="please_select_image">請選擇圖片</string>
-    <string name="please_enter_name">請輸入名稱</string>
-    <string name="please_not_enter_special_characters">請勿輸入特殊符號如下:
+    <string name="error_load_image">failed to load image</string>
+    <string name="please_select_image">please select image</string>
+    <string name="please_enter_name">please enter name</string>
+    <string name="please_not_enter_special_characters">please not enter special characters:
         .{}</string>
-    <string name="confirm_remove_data">確定要刪除此筆資料</string>
+    <string name="confirm_remove_data">sure to delete data</string>
     <string name="title_alert_notification">Notification</string>
 
 </resources>
