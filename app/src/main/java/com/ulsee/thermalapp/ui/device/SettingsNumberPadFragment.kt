@@ -14,6 +14,11 @@ class SettingsNumberPadFragment : Fragment() {
     var initValue = ""
     var input : EditText? = null
 
+    interface OnChangedListener {
+        fun onChanged(value: Double)
+    }
+    var onChangedListener : OnChangedListener? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -48,11 +53,12 @@ class SettingsNumberPadFragment : Fragment() {
     }
 
     fun setValue (value: Double) {
-        // 避免小樹過多......
+        // 避免小數過多......
         if (input == null) {
             initValue = "%.1f".format(value)
         } else {
             input!!.setText("%.1f".format(value))
         }
+        onChangedListener?.onChanged(value)
     }
 }

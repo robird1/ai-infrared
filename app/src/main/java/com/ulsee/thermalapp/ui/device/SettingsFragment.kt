@@ -22,7 +22,7 @@ class SettingsFragment(deviceID: String, autoFinish: Boolean) : Fragment() {
 
     var settings: Settings? = null
     var deviceID = deviceID
-    val mAutoFinish = autoFinish
+    val mAutoFinish = false//autoFinish
     lateinit var segmentedButtonGroup : SegmentedButtonGroup
     lateinit var settingsNumberPadAdapter : SettingsNumberPadAdapter
     lateinit var faceRecognitionSwitch: SwitchCompat
@@ -39,6 +39,7 @@ class SettingsFragment(deviceID: String, autoFinish: Boolean) : Fragment() {
         settings = deviceManager!!.settings
         initUI(root)
         showSettings()
+        addListeners()
         return root
     }
 
@@ -46,15 +47,10 @@ class SettingsFragment(deviceID: String, autoFinish: Boolean) : Fragment() {
         faceRecognitionSwitch = root.findViewById(R.id.switch_facerecognition)
         flipImageSwitch = root.findViewById(R.id.switch_flipimage)
         onlyROISwitch =root.findViewById(R.id.switch_onlyroi)
-
-        faceRecognitionSwitch.isChecked = settings?.IsFR == true
-        flipImageSwitch.isChecked = settings?.IsFlip == true
-        onlyROISwitch.isChecked = settings?.IsOnlyROI == true
-
         segmentedButtonGroup = root.findViewById<SegmentedButtonGroup>(R.id.segmentedButton)
-
         val tabLayout = root.findViewById<TabLayout>(R.id.tabLayout)
         val viewPager = root.findViewById<ViewPager2>(R.id.viewPager)
+
         settingsNumberPadAdapter = SettingsNumberPadAdapter(this)
         viewPager.adapter = settingsNumberPadAdapter
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
@@ -72,6 +68,29 @@ class SettingsFragment(deviceID: String, autoFinish: Boolean) : Fragment() {
         segmentedButtonGroup.setPosition(segmentPosition, false)
         settingsNumberPadAdapter.fragments[0].setValue(settings!!.TempAlarmValue)
         settingsNumberPadAdapter.fragments[1].setValue(settings!!.Deviation)
+
+        faceRecognitionSwitch.isChecked = settings?.IsFR == true
+        flipImageSwitch.isChecked = settings?.IsFlip == true
+        onlyROISwitch.isChecked = settings?.IsOnlyROI == true
+    }
+
+    private fun addListeners () {
+
+        faceRecognitionSwitch.setOnCheckedChangeListener { _, _ -> save()  }
+        flipImageSwitch.setOnCheckedChangeListener { _, _ -> save()  }
+        onlyROISwitch.setOnCheckedChangeListener { _, _ -> save()  }
+        segmentedButtonGroup.setOnPositionChangedListener { save() }
+
+        settingsNumberPadAdapter.fragments[0].onChangedListener = object: SettingsNumberPadFragment.OnChangedListener{
+            override fun onChanged(value: Double) {
+                save()
+            }
+        }
+        settingsNumberPadAdapter.fragments[1].onChangedListener = object: SettingsNumberPadFragment.OnChangedListener{
+            override fun onChanged(value: Double) {
+                save()
+            }
+        }
     }
 
     private fun save () {

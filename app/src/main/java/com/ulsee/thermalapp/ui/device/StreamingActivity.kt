@@ -86,11 +86,11 @@ class StreamingActivity : AppCompatActivity() {
             startRGBStreaming()
         }
 
-        val fragment = SettingsFragment(deviceID, false)
-        val fragmentManager: FragmentManager = supportFragmentManager
-        val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
-        fragmentTransaction.replace(R.id.frameLayout, fragment)
-        fragmentTransaction.commit()
+//        val fragment = SettingsFragment(deviceID, false)
+//        val fragmentManager: FragmentManager = supportFragmentManager
+//        val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
+//        fragmentTransaction.replace(R.id.frameLayout, fragment)
+//        fragmentTransaction.commit()
     }
 
     override fun finish() {
