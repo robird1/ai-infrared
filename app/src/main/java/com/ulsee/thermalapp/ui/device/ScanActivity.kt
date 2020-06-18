@@ -65,8 +65,10 @@ class ScanActivity : AppCompatActivity() {
             })
             .setCancelable(false)
             .setOnDismissListener {
-                mStatus = ScanActivity.Status.scanningQRCode
-                initZxingScanner()
+                if (mStatus != ScanActivity.Status.askingName) {
+                    mStatus = ScanActivity.Status.scanningQRCode
+                    initZxingScanner()
+                }
             }
             .create()
 
