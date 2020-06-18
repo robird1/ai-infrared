@@ -50,9 +50,10 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
         var deviceID = ""
         init {
             val menuLayout = itemView?.findViewById<View>(R.id.layout_menu)
-            val menuBtn = itemView?.findViewById<View>(R.id.btn_menu)
+//            val menuBtn = itemView?.findViewById<View>(R.id.btn_menu)
+//            menuBtn.bringToFront()
 
-            mPopup = PopupMenu(itemView?.context, menuBtn)
+            mPopup = PopupMenu(itemView?.context, menuLayout)
             mPopup.menu.add("a").setTitle("Calibration")
             mPopup.menu.add("b").setTitle("Device Setting")
             mPopup.menu.add("c").setTitle("WIFI Setting")
@@ -106,14 +107,18 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
                 true
             }
 
-            menuBtn.setOnClickListener {
-                Log.i(javaClass.name, "on menu button clicked")
-                mPopup.show()
-            }
+//            menuBtn.setOnClickListener {
+//                Log.i(javaClass.name, "on menu button clicked")
+//                mPopup.show()
+//            }
             menuLayout.setOnClickListener{
                 Log.i(javaClass.name, "on menu layout clicked")
                 mPopup.show()
             }
+//            itemView?.findViewById<View>(R.id.layout_header).setOnClickListener{
+//                Log.i(javaClass.name, "on menu header clicked")
+//                mPopup.show()
+//            }
 
             val thumbLayout = itemView?.findViewById<View>(R.id.layout_thumb)
             thumbLayout.setOnClickListener(object: View.OnClickListener{

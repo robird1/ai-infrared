@@ -74,15 +74,33 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="more">
+                        android:text="More">
                     </TextView>
-                    <ImageButton
+<!--                    <ImageButton-->
+<!--                        android:id="@+id/btn_menu"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="match_parent"-->
+<!--                        android:src="@drawable/ic_settings_black_24dp"-->
+<!--                        android:background="#fff"-->
+<!--                        android:focusable="true"-->
+<!--                        android:clickable="true">-->
+<!--                    </ImageButton>-->
+<!--                    <ImageView-->
+<!--                        android:id="@+id/btn_menu"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="match_parent"-->
+<!--                        android:src="@drawable/ic_settings_black_24dp"-->
+<!--                        android:background="#fff"-->
+<!--                        android:focusable="true"-->
+<!--                        android:clickable="true"-->
+<!--                        android:onClick="clickEvent">-->
+<!--                    </ImageView>-->
+                    <View
                         android:id="@+id/btn_menu"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:src="@drawable/ic_more"
-                        android:background="@null">
-                    </ImageButton>
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:background="@drawable/ic_settings_black_24dp">
+                    </View>
                 </LinearLayout>
             </RelativeLayout>
 
