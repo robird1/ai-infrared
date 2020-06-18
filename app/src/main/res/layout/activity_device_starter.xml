@@ -27,7 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/colorPrimary"
-            android:text="立即新增第一個裝置">
+            android:text="@string/add_first_device">
 
         </TextView>
 

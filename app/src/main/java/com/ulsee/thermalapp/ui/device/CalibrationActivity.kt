@@ -153,7 +153,7 @@ class CalibrationActivity : AppCompatActivity() {
             }
         }, {
             it.printStackTrace()
-            Toast.makeText(this@CalibrationActivity, "載入圖片異常!", Toast.LENGTH_LONG).show()
+            Toast.makeText(this@CalibrationActivity, getString(R.string.error_load_image), Toast.LENGTH_LONG).show()
             finish()
         })
 
@@ -231,7 +231,7 @@ class CalibrationActivity : AppCompatActivity() {
         val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
         SettingsServiceTCP(deviceManager!!).calibration(UpdateCalibration(x, y, w, h))
             .subscribe({
-                Toast.makeText(this, "更新成功!", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, getString(R.string.update_successfully), Toast.LENGTH_LONG).show()
                 setResult(RESULT_OK)
                 finish()
                 true

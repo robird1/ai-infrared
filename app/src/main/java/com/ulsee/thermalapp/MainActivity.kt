@@ -86,7 +86,7 @@ class MainActivity : AppCompatActivity() {
                                 if (!AppPreference(this@MainActivity.getSharedPreferences("app", Context.MODE_PRIVATE)).isFeverNotificationEnabled()) return
                                 val intent = Intent(this@MainActivity, NotificationActivity::class.java)
                                 intent.putExtra("notification", notification)
-                                NotificationCenter.shared.show(this@MainActivity, intent,"通知",notification.Name)
+                                NotificationCenter.shared.show(this@MainActivity, intent, this@MainActivity.getString(R.string.title_alert_notification),notification.Name)
                             }
                         })
                     }

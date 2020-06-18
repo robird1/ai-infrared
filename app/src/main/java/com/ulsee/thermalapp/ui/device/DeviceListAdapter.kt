@@ -83,8 +83,8 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
                             Toast.makeText(ctx, "Error: no device specified", Toast.LENGTH_SHORT).show()
                         } else {
                             AlertDialog.Builder(ctx)
-                                .setMessage("確定刪除此裝置?")
-                                .setPositiveButton("刪除"
+                                .setMessage(ctx.getString(R.string.confirm_remove_device))
+                                .setPositiveButton(ctx.getString(R.string.remove)
                                 ) { dialog, whichButton ->
                                     // 1. delete
                                     val realm = Realm.getDefaultInstance()
@@ -162,7 +162,8 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
             connectedView.visibility = if(isConnected) View.VISIBLE else View.GONE
             notConnectedView.visibility = if(!isConnected) View.VISIBLE else View.GONE
 
-            hintTV.setText(if(isConnected) "裝置已經連線\n點擊可觀看即時畫面" else "裝置尚未連線...")
+            val ctx = itemView.context
+            hintTV.text = if(isConnected) ctx.getString(R.string.device_connected_click_to_watch_camera) else ctx.getString(R.string.device_not_connected_yet)
         }
     }
 }

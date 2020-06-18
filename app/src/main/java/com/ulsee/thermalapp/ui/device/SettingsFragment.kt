@@ -107,7 +107,7 @@ class SettingsFragment(deviceID: String, autoFinish: Boolean) : Fragment() {
             settings!!.Deviation = settingsNumberPadAdapter.fragments[1].getValue()
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(context, "數字錯誤!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, getString(R.string.number_error), Toast.LENGTH_SHORT).show()
             segmentedButtonGroup.setPosition(1, true)
             return
         }
@@ -121,7 +121,7 @@ class SettingsFragment(deviceID: String, autoFinish: Boolean) : Fragment() {
         val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
         SettingsServiceTCP(deviceManager!!).update(settings)
             .subscribe({
-                Toast.makeText(context, "更新成功!", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, getString(R.string.update_successfully), Toast.LENGTH_LONG).show()
                 if(mAutoFinish) activity?.finish()
             }, { error: Throwable ->
                 error.printStackTrace()

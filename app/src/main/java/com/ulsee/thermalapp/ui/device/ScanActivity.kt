@@ -55,7 +55,7 @@ class ScanActivity : AppCompatActivity() {
         setContentView(R.layout.activity_device_scan)
 
         mSearchingDeviceProgressDialog = ProgressDialog(this)
-        mSearchingDeviceProgressDialog.setMessage("無法與此裝置連線...請確認裝置網路狀況...")
+        mSearchingDeviceProgressDialog.setMessage(getString(R.string.unable_to_connect_to_device))
 
         initZxingScanner()
         // initQRCodeScanner()
@@ -202,19 +202,19 @@ class ScanActivity : AppCompatActivity() {
 
         if(isDuplicated) {
             val duplicatedDevice = Service.shared.getDeviceList()[duplicatedDeviceIdx]
-            message = "此裝置已掃描過，將複寫手機中的設定"
+            message = ctx.getString(R.string.hint_device_overrite)
             input.setText(duplicatedDevice.getName())
         }
 
         AlertDialog.Builder(ctx)
-            .setTitle("請輸入裝置名稱")
+            .setTitle(ctx.getString(R.string.hint_input_device_name))
             .setMessage(message)
             .setView(input)
             .setPositiveButton("Save"
             ) { dialog, whichButton ->
                 val deviceName = input.text.toString()
                 if (deviceName.isEmpty()) {
-                    Toast.makeText(ctx, "請輸入裝置名稱!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(ctx, ctx.getString(R.string.hint_input_device_name), Toast.LENGTH_SHORT).show()
                 } else {
                     device.setName(deviceName)
                     saveDevice(device, isDuplicated)

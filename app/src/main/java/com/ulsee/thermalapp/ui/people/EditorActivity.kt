@@ -131,17 +131,17 @@ class EditorActivity : AppCompatActivity() {
 
     private fun save () {
         if (imageBase64 == null && oldValue == null) {
-            Toast.makeText(this, "請選擇圖片!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.please_select_image), Toast.LENGTH_SHORT).show()
             return
         }
         if (nameInput.text.isEmpty()) {
-            Toast.makeText(this, "請輸入名稱!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.please_enter_name), Toast.LENGTH_SHORT).show()
             return
         }
 
         val name = nameInput.text.toString()
         if (name.contains(".", false) || name.contains("{", false) || name.contains("}", false)) {
-            Toast.makeText(this, "請勿輸入特殊符號如下:\n .{}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.please_not_enter_special_characters), Toast.LENGTH_SHORT).show()
             return
         }
         if (oldValue != null) {
@@ -171,7 +171,7 @@ class EditorActivity : AppCompatActivity() {
         mProgressDialog.show()
         PeopleServiceTCP(selectedTCPClient).create(face)
             .subscribe({ newPeople ->
-                Toast.makeText(this, "新增成功!!", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, getString(R.string.create_successfully), Toast.LENGTH_LONG).show()
                 setResult(RESULT_OK)
                 finish()
                 mProgressDialog.dismiss()
@@ -192,7 +192,7 @@ class EditorActivity : AppCompatActivity() {
         mProgressDialog.show()
         PeopleServiceTCP(selectedTCPClient).update(face)
             .subscribe({
-                Toast.makeText(this, "編輯成功!!", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, getString(R.string.update_successfully), Toast.LENGTH_LONG).show()
                 setResult(RESULT_OK)
                 finish()
                 mProgressDialog.dismiss()
@@ -207,12 +207,12 @@ class EditorActivity : AppCompatActivity() {
         val ctx = this
 
         AlertDialog.Builder(ctx)
-            .setMessage("確定要刪除此筆資料?")
-            .setPositiveButton("刪除"
+            .setMessage(getString(R.string.confirm_remove_data))
+            .setPositiveButton(getString(R.string.remove)
             ) { dialog, whichButton ->
                deletePeople(oldValue!!)
             }
-            .setNegativeButton("取消"
+            .setNegativeButton(getString(R.string.cancel)
             ) { dialog, whichButton ->
                 dialog.dismiss()
             }
@@ -230,7 +230,7 @@ class EditorActivity : AppCompatActivity() {
         mProgressDialog.show()
         PeopleServiceTCP(selectedTCPClient).delete(face)
             .subscribe({
-                Toast.makeText(this, "刪除成功!!", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, getString(R.string.remove_successfully), Toast.LENGTH_LONG).show()
                 setResult(RESULT_OK)
                 finish()
                 mProgressDialog.dismiss()

@@ -66,7 +66,7 @@ class WIFIListActivity : AppCompatActivity() {
 
     private fun resetToHostspot () {
         SettingsServiceTCP(mDeviceManager!!).switchWIFI(null, null).subscribe( {
-            Toast.makeText(this, "成功改回熱點模式!", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.switch_to_hotspot_successfully), Toast.LENGTH_LONG).show()
             finish()
         }, {
             it.printStackTrace()
@@ -133,13 +133,13 @@ class WIFIListActivity : AppCompatActivity() {
 
         AlertDialog.Builder(ctx)
             .setTitle(wifiInfo.ssid)
-            .setMessage("請輸入WIFI密碼")
+            .setMessage(getString(R.string.hint_input_wifi_password))
             .setView(input)
             .setPositiveButton("Submit"
             ) { dialog, whichButton ->
                 val result = input.text.toString()
                 if (result.isEmpty()) {
-                    Toast.makeText(ctx, "請輸入WIFI密碼!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(ctx, getString(R.string.hint_input_wifi_password), Toast.LENGTH_SHORT).show()
                 } else {
                     connectToWIFI(wifiInfo, result, null)
                 }
