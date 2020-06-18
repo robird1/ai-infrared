@@ -1,5 +1,6 @@
 package com.ulsee.thermalapp.ui.notification
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -17,6 +18,10 @@ import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Notification
 import com.ulsee.thermalapp.data.services.NotificationServiceTCP
 import com.ulsee.thermalapp.ui.device.DeviceListAdapter
+import com.ulsee.thermalapp.ui.people.EditorActivity
+import com.ulsee.thermalapp.ui.people.PeopleListAdapter
+import com.ulsee.thermalapp.utils.RecyclerViewItemClickSupport
+import java.io.Serializable
 
 class ListFragment  : Fragment() {
 
@@ -36,6 +41,12 @@ class ListFragment  : Fragment() {
         recyclerView = root.findViewById<RecyclerView>(R.id.recyclerView)
         recyclerView.adapter = NotificationListAdapter()
         recyclerView.layoutManager = LinearLayoutManager(context)
+
+        val support: RecyclerViewItemClickSupport = RecyclerViewItemClickSupport.addTo(recyclerView)
+        support.setOnItemClickListener { recyclerView, position, _ ->
+            val notification = (recyclerView.adapter as NotificationListAdapter).getList()[position]
+            show(notification)
+        }
 
         loadNotifications()
 
@@ -62,5 +73,13 @@ class ListFragment  : Fragment() {
                 Toast.makeText(context, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
                 swipeRefreshLayout.isRefreshing = false
             })
+    }
+
+    private fun show(notification: Notification) {
+        val intent = Intent(context, NotificationActivity::class.java)
+        if (notification != null) {
+            intent.putExtra("notification", notification as Serializable)
+        }
+        startActivity(intent)
     }
 }

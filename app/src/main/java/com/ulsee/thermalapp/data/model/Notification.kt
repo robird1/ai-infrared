@@ -29,14 +29,19 @@ open class Notification : Serializable {
         return Date()
     }
 
+    val tempratureUnitString : String
+        get() {
+            var arr = Name.split("_")
+            if (arr.size == 6) {
+                return arr[2]
+            }
+            return ""
+        }
+
     val tempratureUnit : String
         get() {
-        var arr = Name.split("_")
-        if (arr.size == 6) {
-            return arr[2]
+            return if (tempratureUnitString == "Celsius") "°C" else "°F"
         }
-        return ""
-    }
     val temprature : String
         get() {
         var arr = Name.split("_")
