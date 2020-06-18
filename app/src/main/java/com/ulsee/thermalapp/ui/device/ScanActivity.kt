@@ -2,6 +2,7 @@ package com.ulsee.thermalapp.ui.device
 
 import android.app.ProgressDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.net.wifi.WifiManager
 import android.os.Bundle
@@ -11,6 +12,7 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.View
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -42,7 +44,7 @@ class ScanActivity : AppCompatActivity() {
     lateinit var cameraSource: CameraSource
     lateinit var barcodeDetector : BarcodeDetector
     var mScannedDeviceList = ArrayList<Device>() // IP, ID, Timestamp
-    lateinit var mSearchingDeviceProgressDialog : ProgressDialog
+    lateinit var mSearchingDeviceProgressDialog : AlertDialog
     var mSearchingDeviceID = ""
 
     enum class Status {
@@ -54,8 +56,19 @@ class ScanActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_device_scan)
 
-        mSearchingDeviceProgressDialog = ProgressDialog(this)
-        mSearchingDeviceProgressDialog.setMessage(getString(R.string.unable_to_connect_to_device))
+        mSearchingDeviceProgressDialog = AlertDialog
+            .Builder(this)
+            .setView(ProgressBar(this))
+            .setMessage(getString(R.string.unable_to_connect_to_device))
+            .setNegativeButton(getString(R.string.cancel), DialogInterface.OnClickListener { dialog, which ->
+                dialog.dismiss()
+            })
+            .setCancelable(false)
+            .setOnDismissListener {
+                mStatus = ScanActivity.Status.scanningQRCode
+                initZxingScanner()
+            }
+            .create()
 
         initZxingScanner()
         // initQRCodeScanner()
