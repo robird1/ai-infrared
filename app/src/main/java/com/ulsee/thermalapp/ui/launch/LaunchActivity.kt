@@ -26,6 +26,7 @@ class LaunchActivity : AppCompatActivity() {
 
     val NEEDED_PERMISSIONS = arrayOf<String>(
         android.Manifest.permission.READ_EXTERNAL_STORAGE,
+        android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
         android.Manifest.permission.ACCESS_WIFI_STATE,
         android.Manifest.permission.INTERNET,
         android.Manifest.permission.CAMERA,

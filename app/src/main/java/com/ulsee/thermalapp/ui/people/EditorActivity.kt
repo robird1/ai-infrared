@@ -3,8 +3,10 @@ package com.ulsee.thermalapp.ui.people
 import android.app.ProgressDialog
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
 import android.util.Base64
 import android.util.Log
@@ -16,12 +18,15 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.FileProvider
 import com.bumptech.glide.Glide
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Face
 import com.ulsee.thermalapp.data.services.PeopleServiceTCP
+import com.ulsee.thermalapp.utils.FilePickerHelper
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.InputStream
 
 
@@ -84,8 +89,26 @@ class EditorActivity : AppCompatActivity() {
         pickImageFromTakePhoto()
     }
 
+    lateinit var takePhotoIntentUri: Uri
     fun pickImageFromTakePhoto () {
+
+        val imageFileName = "take_photo" //make a better file name
+
+        val storageDir: File =
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+        val image: File = File.createTempFile(
+            imageFileName,
+            ".jpg",
+            storageDir
+        )
+
         val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        //takePhotoIntentUri = Uri.fromFile(image);
+        takePhotoIntentUri = FileProvider.getUriForFile(
+            this,
+            getPackageName() + ".fileprovider",
+            image);
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, takePhotoIntentUri);
         startActivityForResult(cameraIntent, REAQUEST_CODE_TAKE_PHOTO)
     }
 
@@ -138,18 +161,32 @@ class EditorActivity : AppCompatActivity() {
 
         }
         else if (requestCode == REAQUEST_CODE_TAKE_PHOTO) {
-            val photo = data!!.extras!!["data"] as Bitmap?
+//            val photo = data!!.extras!!["data"] as Bitmap?
 
-            if (photo == null) {
-                Toast.makeText(this, "error take photo", Toast.LENGTH_LONG ).show()
-                return
-            } else {
-                val byteArrayOutputStream = ByteArrayOutputStream()
-                photo.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
-                val byteArray: ByteArray = byteArrayOutputStream.toByteArray()
-                imageBase64 = Base64.encodeToString(byteArray, Base64.DEFAULT)
-                imageView.setImageBitmap(photo)
-            }
+            val file = FilePickerHelper.shared().putPickedFile(this, takePhotoIntentUri);
+
+            val bm = BitmapFactory.decodeFile(file.path)
+            val bOut = ByteArrayOutputStream()
+            bm.compress(Bitmap.CompressFormat.JPEG, 100, bOut)
+            imageBase64 = Base64.encodeToString(
+                bOut.toByteArray(),
+                Base64.DEFAULT
+            )
+
+            imageView.setImageBitmap(bm)
+
+//            val photo = data!!.extras!!["data"] as Bitmap?
+//
+//            if (photo == null) {
+//                Toast.makeText(this, "error take photo", Toast.LENGTH_LONG ).show()
+//                return
+//            } else {
+//                val byteArrayOutputStream = ByteArrayOutputStream()
+//                photo.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
+//                val byteArray: ByteArray = byteArrayOutputStream.toByteArray()
+//                imageBase64 = Base64.encodeToString(byteArray, Base64.DEFAULT)
+//                imageView.setImageBitmap(photo)
+//            }
         }
         super.onActivityResult(requestCode, resultCode, data)
     }
