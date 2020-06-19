@@ -79,6 +79,23 @@ class Service {
                 deviceManagerList.add(DeviceManager(device))
             }
         }
+
+        // remove devicemanager
+        var i = deviceManagerList.size-1
+        while(i >= 0) {
+            val deviceManager = deviceManagerList[i]
+            var exists = false
+            for(realmDevice in results) {
+                if (realmDevice.getID() == deviceManager.device.getID()) {
+                    exists = true
+                    break
+                }
+            }
+            if (!exists) {
+                deviceManagerList.removeAt(i)
+            }
+            --i
+        }
         return deviceList
     }
 
