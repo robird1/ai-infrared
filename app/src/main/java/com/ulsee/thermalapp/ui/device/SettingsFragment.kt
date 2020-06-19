@@ -79,7 +79,27 @@ class SettingsFragment(deviceID: String, autoFinish: Boolean) : Fragment() {
         faceRecognitionSwitch.setOnCheckedChangeListener { _, _ -> save()  }
         flipImageSwitch.setOnCheckedChangeListener { _, _ -> save()  }
         onlyROISwitch.setOnCheckedChangeListener { _, _ -> save()  }
-        segmentedButtonGroup.setOnPositionChangedListener { save() }
+        segmentedButtonGroup.setOnPositionChangedListener {
+            // save()
+            // 根據溫度單位，自動換算溫度
+            if (segmentedButtonGroup.position == 0) {
+                val f = settingsNumberPadAdapter.fragments[0].getValue()
+                if (f in 95.0..113.0) {
+                    val c = (f-32)*5/9
+                    settingsNumberPadAdapter.fragments[0].setValue(c)
+                } else {
+                    save()
+                }
+            } else {
+                val c = settingsNumberPadAdapter.fragments[0].getValue()
+                if (c in 35.0..45.0) {
+                    val f = c*9/5+32
+                    settingsNumberPadAdapter.fragments[0].setValue(f)
+                } else {
+                    save()
+                }
+            }
+        }
 
         settingsNumberPadAdapter.fragments[0].onChangedListener = object: SettingsNumberPadFragment.OnChangedListener{
             override fun onChanged(value: Double) {
