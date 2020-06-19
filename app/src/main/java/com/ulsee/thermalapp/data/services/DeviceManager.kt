@@ -231,14 +231,14 @@ class DeviceManager(device: Device) {
                     settings = gson.fromJson<Settings>(responseString, itemType)
                     if (settings!!.Deviation > 10) settings?.Deviation = 0.0
                     if (settings!!.Deviation < -10) settings?.Deviation = 0.0
-                    //if (settings?.IsFirstActivate == true) {
+                    if (settings?.IsFirstActivate == true) {
                         val isJustJoinedDevice = Service.shared.justJoinedDeviceIDList.contains(device.getID())
                         Log.i(javaClass.name, "find first settings device: "+device.getID()+", is just joined:"+isJustJoinedDevice)
                         if (isJustJoinedDevice) {
                             Service.shared.requestTutorial(device.getID())
                             Service.shared.justJoinedDeviceIDList.remove(device.getID())
                         }
-                    //}
+                    }
                 } catch(e: java.lang.Exception) {
                     Log.e(javaClass.name, "Error parse action "+action)
                     e.printStackTrace()
