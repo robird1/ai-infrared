@@ -61,13 +61,18 @@ class ListFragment  : Fragment() {
             Toast.makeText(context, "no connected device", Toast.LENGTH_LONG).show()
             return
         }
+        Log.i(javaClass.name, "call list")
         NotificationServiceTCP(deviceManager).getAll()
             .subscribe({ notificationList: List<Notification> ->
+                (activity as MainActivity).setTitle("Notification("+notificationList.size+")")
+                Log.i(javaClass.name, "got list")
                 val sortedList = notificationList.sortedByDescending {
                     it.createdAt.time
                 }
+                Log.i(javaClass.name, "sort list")
                 (recyclerView.adapter as NotificationListAdapter).setList(sortedList)
                 swipeRefreshLayout.isRefreshing = false
+                Log.i(javaClass.name, "set list")
             }, { error: Throwable ->
                 Log.d(MainActivityTag, error.localizedMessage)
                 Toast.makeText(context, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
