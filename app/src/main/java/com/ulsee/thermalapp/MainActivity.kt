@@ -2,8 +2,9 @@ package com.ulsee.thermalapp
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.util.Log
+import android.util.Base64;
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -20,6 +21,7 @@ import com.ulsee.thermalapp.ui.notification.NotificationActivity
 import com.ulsee.thermalapp.ui.tutorial.TutorialStep1Activity
 import com.ulsee.thermalapp.utils.NotificationCenter
 import java.util.*
+
 
 val MainActivityTag = "MainActivity"
 
@@ -86,7 +88,15 @@ class MainActivity : AppCompatActivity() {
                                 if (!AppPreference(this@MainActivity.getSharedPreferences("app", Context.MODE_PRIVATE)).isFeverNotificationEnabled()) return
                                 val intent = Intent(this@MainActivity, NotificationActivity::class.java)
                                 intent.putExtra("notification", notification)
-                                NotificationCenter.shared.show(this@MainActivity, intent, this@MainActivity.getString(R.string.title_alert_notification),notification.Name)
+
+
+                                val decodedString: ByteArray = Base64.decode(notification.Image, Base64.DEFAULT)
+                                val decodedByte = BitmapFactory.decodeByteArray(
+                                    decodedString,
+                                    0,
+                                    decodedString.size
+                                )
+                                NotificationCenter.shared.show(this@MainActivity, intent, this@MainActivity.getString(R.string.title_alert_notification),notification.Name, decodedByte)
                             }
                         })
                     }

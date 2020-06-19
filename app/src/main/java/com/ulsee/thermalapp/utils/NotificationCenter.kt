@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
+import android.graphics.Bitmap
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
@@ -30,7 +31,8 @@ class NotificationCenter {
         ctx: Context,
         intent: Intent,
         title: String?,
-        messageBody: String?
+        messageBody: String?,
+        bigImage: Bitmap?
     ) {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val pendingIntent = PendingIntent.getActivity(
@@ -47,6 +49,13 @@ class NotificationCenter {
             .setAutoCancel(true)
             .setSound(defaultSoundUri)
             .setContentIntent(pendingIntent)
+
+        if (bigImage != null) {
+            val bigPicture = NotificationCompat.BigPictureStyle()
+            bigPicture.bigPicture(bigImage)
+            notificationBuilder.setStyle(bigPicture)
+        }
+
         val notificationManager =
             ctx.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
