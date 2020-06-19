@@ -322,14 +322,34 @@ class CalibrationActivity : AppCompatActivity() {
         val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
         SettingsServiceTCP(deviceManager!!).calibration(UpdateCalibration(x, y, w, h))
             .subscribe({
-                Toast.makeText(this, getString(R.string.update_successfully), Toast.LENGTH_LONG).show()
-                setResult(RESULT_OK)
-                finish()
-                true
+                if (Service.shared.tutorialDeviceID != null) {
+                    notifyActivated()
+                } else {
+                    Toast.makeText(this, getString(R.string.update_successfully), Toast.LENGTH_LONG).show()
+                    setResult(RESULT_OK)
+                    finish()
+                }
             }, { error: Throwable ->
                 error.printStackTrace()
                 Log.d(javaClass.name, error.localizedMessage)
                 Toast.makeText(this, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
+                finish()
+            })
+    }
+
+    private fun notifyActivated () {
+        val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
+        SettingsServiceTCP(deviceManager!!).notifyActivated()
+            .subscribe({
+                Toast.makeText(this, getString(R.string.update_successfully), Toast.LENGTH_LONG).show()
+                setResult(RESULT_OK)
+                finish()
+            }, { error: Throwable ->
+                error.printStackTrace()
+                Log.d(javaClass.name, error.localizedMessage)
+                Toast.makeText(this, "Warning: failed to notify activated", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, getString(R.string.update_successfully), Toast.LENGTH_LONG).show()
+                setResult(RESULT_OK)
                 finish()
             })
     }

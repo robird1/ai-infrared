@@ -44,6 +44,7 @@ class DeviceManager(device: Device) {
         requestNotificationImage,
         notificationImageResponse,
         notification,// 18
+        notifyActivated,
     }
 
     private val mLock = Object()
