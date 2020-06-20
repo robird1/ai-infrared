@@ -2,6 +2,7 @@ package com.ulsee.thermalapp
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Base64;
@@ -20,6 +21,7 @@ import com.ulsee.thermalapp.data.services.DeviceManager
 import com.ulsee.thermalapp.ui.notification.NotificationActivity
 import com.ulsee.thermalapp.ui.tutorial.TutorialStep1Activity
 import com.ulsee.thermalapp.utils.NotificationCenter
+import java.lang.Exception
 import java.util.*
 
 
@@ -89,14 +91,17 @@ class MainActivity : AppCompatActivity() {
                                 val intent = Intent(this@MainActivity, NotificationActivity::class.java)
                                 intent.putExtra("notification", notification)
 
-
-                                val decodedString: ByteArray = Base64.decode(notification.Image, Base64.DEFAULT)
-                                val decodedByte = BitmapFactory.decodeByteArray(
-                                    decodedString,
-                                    0,
-                                    decodedString.size
-                                )
-                                NotificationCenter.shared.show(this@MainActivity, intent, this@MainActivity.getString(R.string.title_alert_notification),notification.Name, decodedByte)
+                                var bitImage : Bitmap? = null
+                                try {
+                                    val decodedString: ByteArray = Base64.decode(notification.Image, Base64.DEFAULT)
+                                    bitImage = BitmapFactory.decodeByteArray(
+                                        decodedString,
+                                        0,
+                                        decodedString.size
+                                    )
+                                } catch(e:Exception) {
+                                }
+                                NotificationCenter.shared.show(this@MainActivity, intent, this@MainActivity.getString(R.string.title_alert_notification),notification.Name, bitImage)
                             }
                         })
                     }
