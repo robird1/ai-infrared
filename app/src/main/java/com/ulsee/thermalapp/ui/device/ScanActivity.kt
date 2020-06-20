@@ -188,13 +188,13 @@ class ScanActivity : AppCompatActivity() {
     }
 
     private fun processQRCode(qrCode: String) {
-        val isValidQRCode = qrCode?.startsWith("ULSEE-")
+        val isValidQRCode = qrCode?.startsWith("uls-")
         if(!isValidQRCode!!) {
             this@ScanActivity.runOnUiThread { Toast.makeText(this@ScanActivity, "此QRCode無效!!", Toast.LENGTH_SHORT).show() }
             return
         }
 
-        val deviceID = qrCode.substring(6)
+        val deviceID = qrCode
         val idx = mScannedDeviceList.indexOfFirst { it.getID().equals(deviceID) }
         val isDeviceAlreadyScanned = idx >= 0
         if (isDeviceAlreadyScanned) {
