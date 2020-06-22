@@ -41,6 +41,10 @@ class EditorActivity : AppCompatActivity() {
     lateinit var nameInput : EditText
     lateinit var toolbar : Toolbar
     lateinit var mProgressDialog : ProgressDialog
+    val isEditing : Boolean
+        get() {
+            return oldValue != null && oldValue!!.Name.isNotEmpty()
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,9 +66,12 @@ class EditorActivity : AppCompatActivity() {
         findViewById<View>(R.id.button_save).setOnClickListener { save() }
         findViewById<View>(R.id.button_delete).setOnClickListener { confirmDelete() }
 
-        if (oldValue != null) {
+        if (isEditing) {
             findViewById<TextView>(R.id.textView_toolbar_title).text = "Edit People"
             findViewById<View>(R.id.button_delete).visibility = View.VISIBLE
+        }
+
+        if (oldValue != null) {
             nameInput.setText(oldValue!!.NameWihtoutFileType)
 
             if (oldValue!!.Image.isNullOrEmpty() == false) {
@@ -197,7 +204,7 @@ class EditorActivity : AppCompatActivity() {
             Toast.makeText(this, getString(R.string.please_not_enter_special_characters), Toast.LENGTH_SHORT).show()
             return
         }
-        if (oldValue != null) {
+        if (isEditing) {
             val base64 : String? = if(imageBase64 == null)  null else imageBase64
             val people = Face()
             people.ID = oldValue!!.ID
@@ -209,7 +216,8 @@ class EditorActivity : AppCompatActivity() {
             val people = Face()
             people.ID = 0
             people.Name = name
-            people.Image = imageBase64!!
+            people.Image = oldValue?.Image
+            if (imageBase64 != null) people.Image = imageBase64
             addPeople(people)
         }
     }
