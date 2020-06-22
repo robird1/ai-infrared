@@ -38,5 +38,6 @@
         .{}</string>
     <string name="confirm_remove_data">sure to delete data</string>
     <string name="title_alert_notification">Notification</string>
+    <string name="qrcode_invalid">QRCode is invalid</string>
 
 </resources>

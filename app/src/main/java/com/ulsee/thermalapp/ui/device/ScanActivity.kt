@@ -162,26 +162,6 @@ class ScanActivity : AppCompatActivity() {
                 if (qrCodeList != null && qrCodeList.size() != 0) {
                     val qrCode = qrCodeList.valueAt(0)?.displayValue
                     processQRCode(qrCode!!)
-//                    Log.i(TAG, "qrcode scanned: "+qrCode)
-//
-//                    val isValidQRCode = qrCode?.startsWith("ULSEE")
-//                    if(!isValidQRCode!!) {
-//                        this@ScanActivity.runOnUiThread { Toast.makeText(this@ScanActivity, "此QRCode無效!!", Toast.LENGTH_SHORT).show() }
-//                        return
-//                    }
-//
-//                    val deviceID = qrCode.substring(5)
-//                    val idx = mScannedDeviceList.indexOfFirst { it.getID().equals(deviceID) }
-//                    val isDeviceAlreadyScanned = idx >= 0
-//                    if (isDeviceAlreadyScanned) {
-//                        mStatus = Status.askingName
-//                        this@ScanActivity.runOnUiThread { askDeviceName(mScannedDeviceList[idx]) }
-//                    } else {
-//                        this@ScanActivity.runOnUiThread { mSearchingDeviceProgressDialog.show() }
-//                        mSearchingDeviceID = deviceID
-//                        mBroadcaseSendInterval = 1
-//                        mStatus = Status.searchingDevice
-//                    }
                 }
             }
         })
@@ -189,8 +169,11 @@ class ScanActivity : AppCompatActivity() {
 
     private fun processQRCode(qrCode: String) {
         val isValidQRCode = qrCode?.startsWith("ULS-")
-        if(!isValidQRCode!!) {
-            this@ScanActivity.runOnUiThread { Toast.makeText(this@ScanActivity, "此QRCode無效!!", Toast.LENGTH_SHORT).show() }
+        if(!isValidQRCode) {
+            this@ScanActivity.runOnUiThread {
+                Toast.makeText(this@ScanActivity, getString(R.string.qrcode_invalid), Toast.LENGTH_SHORT).show()
+                initZxingScanner()
+            }
             return
         }
 
