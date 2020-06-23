@@ -12,6 +12,7 @@ import android.util.Size
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.Toast
@@ -104,6 +105,7 @@ class CalibrationActivity : AppCompatActivity() {
         initThermalTouchListener()
         initControlUI()
         initJoystick()
+        initMoveButton()
     }
 
     private fun initThermalTouchListener () {
@@ -235,6 +237,17 @@ class CalibrationActivity : AppCompatActivity() {
             thermalIV.x = thermalIV.x + x
             thermalIV.y = thermalIV.y + y
         }
+    }
+
+    private fun initMoveButton () {
+        val move = { x :Int, y :Int ->
+            thermalIV.x = thermalIV.x + x
+            thermalIV.y = thermalIV.y + y
+            true}
+        findViewById<Button>(R.id.button_up).setOnTouchListener { _, _ -> move(0, -1)  }
+        findViewById<Button>(R.id.button_left).setOnTouchListener { _, _ -> move(-1, 0)  }
+        findViewById<Button>(R.id.button_right).setOnTouchListener { _, _ -> move(1, 0)  }
+        findViewById<Button>(R.id.button_down).setOnTouchListener { _, _ -> move(0, 1)  }
     }
 
     private fun initControlUI () {
