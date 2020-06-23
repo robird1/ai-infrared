@@ -44,10 +44,10 @@ class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
             if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
 //            if (apiClient?.isConnected() != true) apiClient?.reconnect()
 
-            deviceManager.setOnGotTwoPictureListListener(object: DeviceManager.OnGotTwoPictureListListener{
-                override fun onGotTwoPictureList(rgb: String, thermal: String) {
-                    deviceManager.setOnGotTwoPictureListListener(null)
-                    emitter.onNext(TwoPicture(0,rgb,thermal))
+            deviceManager.setOnGotTwoPictureListener(object: DeviceManager.OnGotTwoPictureListener{
+                override fun onGotTwoPicture(twoPicture: TwoPicture) {
+                    deviceManager.setOnGotTwoPictureListener(null)
+                    emitter.onNext(twoPicture)
                     emitter.onComplete()
                 }
             })

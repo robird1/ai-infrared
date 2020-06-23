@@ -25,6 +25,7 @@ import com.bumptech.glide.request.target.Target
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.request.UpdateCalibration
+import com.ulsee.thermalapp.data.response.TwoPicture
 import com.ulsee.thermalapp.data.services.SettingsServiceTCP
 import io.github.controlwear.virtual.joystick.android.JoystickView
 import kotlin.math.max
@@ -36,6 +37,7 @@ class CalibrationActivity : AppCompatActivity() {
     lateinit var thermalIV : ImageView
     lateinit var deviceID : String
 
+    var mTwoPictureInfo : TwoPicture? = null
     var rgbLoaded = false
     var thermalLoaded = false
     var rgbOriginalImageSize  = Size(1000, 1011)
@@ -142,6 +144,7 @@ class CalibrationActivity : AppCompatActivity() {
     private fun loadImages () {
         val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
         SettingsServiceTCP(deviceManager!!).getTwoPicture().subscribe({
+            mTwoPictureInfo = it
 
             val decodedByte = Base64.decode(it.Data_1, 0);
             val btm: Bitmap? = BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.size)
@@ -197,20 +200,36 @@ class CalibrationActivity : AppCompatActivity() {
     }
 
     private fun alignImage () {
+        if (mTwoPictureInfo == null) {
+            Toast.makeText(this, "Error: data null", Toast.LENGTH_LONG).show()
+            finish()
+        }
+        if (rgbSize.width == 0 || rgbSize.height == 0) {
+            Toast.makeText(this, "Error: size 0", Toast.LENGTH_LONG).show()
+            finish()
+        }
 
-        val screenWidth = thermalIV.measuredWidth
-        val thermalHeight = thermalSize.height
+        val screenWidth = rgbIV.measuredWidth
 
-        val initScale = 0.5
-        // 1. 設定thermal圖片寬度是 rgb的一半，高度維持比例
-        mInitThermalIVSize = Size((screenWidth*initScale).toInt(), (thermalHeight*initScale).toInt())
+        // 1. size
         val layoutParams = thermalIV.layoutParams
-        layoutParams.width = mInitThermalIVSize.width
-        layoutParams.height = mInitThermalIVSize.height
+        layoutParams.width = (mTwoPictureInfo!!.W * screenWidth / 640)
+        layoutParams.height = (mTwoPictureInfo!!.H * screenWidth / 640 )
         thermalIV.layoutParams = layoutParams
-        // 2. 設定xy 置中
-        thermalIV.x = ((screenWidth - mInitThermalIVSize.width)/2).toFloat()
-        thermalIV.y = ((rgbSize.height - mInitThermalIVSize.height)/2).toFloat()
+        // 2. point
+        thermalIV.x = (mTwoPictureInfo!!.X * screenWidth / 640).toFloat()
+        thermalIV.y = (mTwoPictureInfo!!.Y * screenWidth / 640).toFloat()
+
+//        val initScale = 0.5
+//        // 1. 設定thermal圖片寬度是 rgb的一半，高度維持比例
+//        mInitThermalIVSize = Size((screenWidth*initScale).toInt(), (thermalHeight/thermalSize.width*screenWidth*initScale).toInt())
+//        val layoutParams = thermalIV.layoutParams
+//        layoutParams.width = mInitThermalIVSize.width
+//        layoutParams.height = mInitThermalIVSize.height
+//        thermalIV.layoutParams = layoutParams
+//        // 2. 設定xy 置中
+//        thermalIV.x = ((screenWidth - mInitThermalIVSize.width)/2).toFloat()
+//        thermalIV.y = ((rgbSize.height - mInitThermalIVSize.height)/2).toFloat()
     }
 
     private fun initJoystick () {

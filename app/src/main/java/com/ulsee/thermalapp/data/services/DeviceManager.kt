@@ -58,13 +58,13 @@ class DeviceManager(device: Device) {
         mOnGotFaceListListener = listener
     }
 
-    interface OnGotTwoPictureListListener{
-        fun onGotTwoPictureList(rgb: String, thermal: String)
+    interface OnGotTwoPictureListener{
+        fun onGotTwoPicture(twoPicture: TwoPicture)
     }
-    var mOnGotTwoPictureListListener : OnGotTwoPictureListListener? = null
-    fun setOnGotTwoPictureListListener(listener: OnGotTwoPictureListListener?) {
-        if(listener != null && mOnGotTwoPictureListListener != null) Log.e(javaClass.name, "error set listener but already exists: setOnGotTwoPictureListListener")
-        mOnGotTwoPictureListListener = listener
+    var mOnGotTwoPictureListener : OnGotTwoPictureListener? = null
+    fun setOnGotTwoPictureListener(listener: OnGotTwoPictureListener?) {
+        if(listener != null && mOnGotTwoPictureListener != null) Log.e(javaClass.name, "error set listener but already exists: setOnGotTwoPictureListener")
+        mOnGotTwoPictureListener = listener
     }
 
     interface OnGotVideoFrameListener{
@@ -262,10 +262,10 @@ class DeviceManager(device: Device) {
                 val itemType = object : TypeToken<TwoPicture>() {}.type
                 try {
                     val twoPicture = gson.fromJson<TwoPicture>(responseString, itemType)
-                    if (mOnGotTwoPictureListListener== null) {
+                    if (mOnGotTwoPictureListener== null) {
                         Log.e(javaClass.name, "Error no listener of action "+action)
                     }
-                    mOnGotTwoPictureListListener?.onGotTwoPictureList(twoPicture.Data_1, twoPicture.Data_2)
+                    mOnGotTwoPictureListener?.onGotTwoPicture(twoPicture)
                 } catch(e: java.lang.Exception) {
                     Log.e(javaClass.name, "Error parse action "+action)
                     e.printStackTrace()
