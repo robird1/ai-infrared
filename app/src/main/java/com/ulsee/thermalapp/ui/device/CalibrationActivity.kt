@@ -216,6 +216,7 @@ class CalibrationActivity : AppCompatActivity() {
         layoutParams.width = (mTwoPictureInfo!!.W * screenWidth / 640)
         layoutParams.height = (mTwoPictureInfo!!.H * screenWidth / 640 )
         thermalIV.layoutParams = layoutParams
+        mInitThermalIVSize = Size(layoutParams.width, layoutParams.height)
         // 2. point
         thermalIV.x = (mTwoPictureInfo!!.X * screenWidth / 640).toFloat()
         thermalIV.y = (mTwoPictureInfo!!.Y * screenWidth / 640).toFloat()
