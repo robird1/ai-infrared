@@ -30,6 +30,7 @@
     <!-- wifi -->
     <string name="switch_to_hotspot_successfully">switch to hotspot successfully</string>
     <string name="hint_input_wifi_password">please enter wifi password</string>
+    <string name="reset_to_hotspot">Reset to hotspot</string>
 
     <string name="error_load_image">failed to load image</string>
     <string name="please_select_image">please select image</string>
@@ -39,5 +40,8 @@
     <string name="confirm_remove_data">sure to delete data</string>
     <string name="title_alert_notification">Notification</string>
     <string name="qrcode_invalid">QRCode is invalid</string>
+    <!-- calibration -->
+    <string name="error_load_rgb_image">failed to load rgb image</string>
+    <string name="error_load_thermal_image">failed to load thermal image</string>
 
 </resources>

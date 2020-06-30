@@ -156,7 +156,7 @@ class CalibrationActivity : AppCompatActivity() {
                 Glide.with(this).load(btm)
                     .listener(object : RequestListener<Drawable> {
                         override fun onLoadFailed(p0: GlideException?, p1: Any?, p2: Target<Drawable>?, p3: Boolean): Boolean {
-                            Toast.makeText(this@CalibrationActivity, "載入 rgb 圖片異常!", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this@CalibrationActivity, getString(R.string.error_load_rgb_image), Toast.LENGTH_LONG).show()
                             this@CalibrationActivity.finish()
                             return false
                         }
@@ -179,7 +179,7 @@ class CalibrationActivity : AppCompatActivity() {
                 Glide.with(this).load(theBitmap)
                     .listener(object : RequestListener<Drawable> {
                         override fun onLoadFailed(p0: GlideException?, p1: Any?, p2: Target<Drawable>?, p3: Boolean): Boolean {
-                            Toast.makeText(this@CalibrationActivity, "載入 thermal 圖片異常!", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this@CalibrationActivity, getString(R.string.error_load_thermal_image), Toast.LENGTH_LONG).show()
                             this@CalibrationActivity.finish()
                             return false
                         }

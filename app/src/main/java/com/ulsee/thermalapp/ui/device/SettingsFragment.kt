@@ -119,7 +119,7 @@ class SettingsFragment(deviceID: String, autoFinish: Boolean) : Fragment() {
             settings!!.TempAlarmValue = settingsNumberPadAdapter.fragments[0].getValue()
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(context, "數字錯誤!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, getString(R.string.number_error), Toast.LENGTH_SHORT).show()
             segmentedButtonGroup.setPosition(0, true)
             return
         }
