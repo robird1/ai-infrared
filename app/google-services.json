@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "431546896336",
+    "firebase_url": "https://thermalapp-3e4d5.firebaseio.com",
+    "project_id": "thermalapp-3e4d5",
+    "storage_bucket": "thermalapp-3e4d5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:431546896336:android:daeed97b6fecfa9816b3d5",
+        "android_client_info": {
+          "package_name": "com.ulsee.thermalapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "431546896336-fs4unc6aq3gtru1hcb9rk69lll7kdol7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBTfspdsr2Ne1j3nYwMrdLkMe5Gfp2v3QE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "431546896336-fs4unc6aq3gtru1hcb9rk69lll7kdol7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
