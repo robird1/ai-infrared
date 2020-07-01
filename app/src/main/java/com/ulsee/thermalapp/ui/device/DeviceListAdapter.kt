@@ -153,7 +153,7 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
             nameTV?.text = device.getName()
 
             val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
-            disposable = deviceManager?.subscribeStatus()?.subscribe{
+            disposable = deviceManager?.subscribeConnectionStatus()?.subscribe{
                 displayConnectionStatus(it == DeviceManager.Status.connected)
             }
         }

@@ -394,7 +394,7 @@ class DeviceManager(device: Device) {
         return -1
     }
 
-    fun subscribeStatus() : Observable<Status> {
+    fun subscribeConnectionStatus() : Observable<Status> {
         val handler: ObservableOnSubscribe<Status> = ObservableOnSubscribe<Status> { emitter ->
             var isConnected = tcpClient.isConnected()
             emitter.onNext(if (isConnected) Status.connected else Status.connecting)
