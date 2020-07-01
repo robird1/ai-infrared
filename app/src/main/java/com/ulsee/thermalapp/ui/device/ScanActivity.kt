@@ -46,6 +46,10 @@ class ScanActivity : AppCompatActivity() {
     var mScannedDeviceList = ArrayList<Device>() // IP, ID, Timestamp
     lateinit var mSearchingDeviceProgressDialog : AlertDialog
     var mSearchingDeviceID = ""
+    var mAPTCPSocket : Socket? = null
+    var mIsConnectedToAPTCP = false
+    var mAPSettings : Settings? = null
+    var mAPDevice : Device? = null
 
     enum class Status {
         scanningQRCode, searchingDevice, askingName
@@ -180,7 +184,12 @@ class ScanActivity : AppCompatActivity() {
         val deviceID = qrCode
         val idx = mScannedDeviceList.indexOfFirst { it.getID().equals(deviceID) }
         val isDeviceAlreadyScanned = idx >= 0
-        if (isDeviceAlreadyScanned) {
+        if (mIsConnectedToAPTCP && mAPDevice?.getID() == deviceID) {
+            mStatus = Status.askingName
+            this@ScanActivity.runOnUiThread {
+                mSearchingDeviceProgressDialog.dismiss(); askDeviceName(mAPDevice!!)
+            }
+        } else if (isDeviceAlreadyScanned) {
             mStatus = Status.askingName
             this@ScanActivity.runOnUiThread { askDeviceName(mScannedDeviceList[idx]) }
         } else {
@@ -272,17 +281,20 @@ class ScanActivity : AppCompatActivity() {
     }
 
     private fun keepTryConenctToAPTCP () {
-        var TCPClientSocket : Socket? = null
         val gson = Gson()
         Thread(Runnable {
             while(!isFinishing) {
                 try {
+                    if (mIsConnectedToAPTCP) {
+                        Thread.sleep(1000)
+                        continue
+                    }
                     // 1. get ip
                     val ip = getAPTCPIP()
                     // 2. try connect
-                    TCPClientSocket = Socket(ip, DeviceManager.TCP_PORT)
+                    mAPTCPSocket = Socket(ip, DeviceManager.TCP_PORT)
                     // 3. try to get settings ID
-                    val bufferedReader = BufferedReader(InputStreamReader(TCPClientSocket!!.getInputStream()))
+                    val bufferedReader = BufferedReader(InputStreamReader(mAPTCPSocket!!.getInputStream()))
                     var buffer = CharArray(4096)
                     val readLen = bufferedReader.read(buffer, 0, buffer.size)
                     val responseString = String(buffer, 0, readLen)
@@ -290,30 +302,39 @@ class ScanActivity : AppCompatActivity() {
                     Log.i(javaClass.name, responseString)
                     // 4. try to get settings
                     val itemType = object : TypeToken<Settings>() {}.type
-                    val settings = gson.fromJson<Settings>(responseString, itemType)
+                    mAPSettings = gson.fromJson<Settings>(responseString, itemType)
+
+                    mAPDevice = Device()
+                    mAPDevice?.setID(mAPSettings!!.ID)
+                    mAPDevice?.setIP(ip)
+                    mAPDevice?.setCreatedAt(System.currentTimeMillis())
+
+                    mIsConnectedToAPTCP = true
                     // 5. check device
                     if (mStatus == ScanActivity.Status.searchingDevice) {
-                        if (settings.ID == mSearchingDeviceID) {
-                            val device = Device()
-                            device.setID(settings.ID)
-                            device.setIP(ip)
-                            device.setCreatedAt(System.currentTimeMillis())
+                        if (mAPSettings?.ID == mSearchingDeviceID) {
                             // 找到了
                             mStatus = ScanActivity.Status.askingName
-                            this@ScanActivity.runOnUiThread { mSearchingDeviceProgressDialog.dismiss(); askDeviceName(device) }
+                            this@ScanActivity.runOnUiThread { mSearchingDeviceProgressDialog.dismiss(); askDeviceName(mAPDevice!!) }
                         }
                     }
                     Thread.sleep(1000)
                 } catch(e: SocketException) {
                     Log.i(javaClass.name, "try to connect to IP.1 (AP TCP), but failed, isn't AP mode")
 //                    e.printStackTrace()
+                    mAPTCPSocket?.close()
+                    mAPTCPSocket = null
+                    mIsConnectedToAPTCP = false
                 } catch(e: java.net.ConnectException) {
                     // ignore connection error
+                    mAPTCPSocket?.close()
+                    mAPTCPSocket = null
+                    mIsConnectedToAPTCP = false
                 } catch(e: Exception) {
                     e.printStackTrace()
-                } finally {
-                    TCPClientSocket?.close()
-                    TCPClientSocket = null
+                    mAPTCPSocket?.close()
+                    mAPTCPSocket = null
+                    mIsConnectedToAPTCP = false
                 }
             }
         }).start()
