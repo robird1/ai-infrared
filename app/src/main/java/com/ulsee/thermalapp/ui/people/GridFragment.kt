@@ -17,6 +17,7 @@ import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ulsee.thermalapp.MainActivity
@@ -38,6 +39,7 @@ class GridFragment : Fragment() {
 
     lateinit var recyclerView: RecyclerView
     lateinit var swipeRefreshLayout: SwipeRefreshLayout
+    private var mFaceList : List<Face> = ArrayList<Face>()
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -49,7 +51,7 @@ class GridFragment : Fragment() {
         swipeRefreshLayout.setOnRefreshListener { loadPeopleList() }
         recyclerView = root.findViewById<RecyclerView>(R.id.recyclerView)
         recyclerView.adapter = PeopleListAdapter()
-        recyclerView.layoutManager = GridLayoutManager(context, 3)
+        recyclerView.layoutManager = LinearLayoutManager(context)
 
         val support: RecyclerViewItemClickSupport = RecyclerViewItemClickSupport.addTo(recyclerView)
         support.setOnItemClickListener { recyclerView, position, _ ->
@@ -64,6 +66,24 @@ class GridFragment : Fragment() {
         (activity as MainActivity).setTitle("People Management")
 
         return root
+    }
+
+    var mOnSearchListener = object: MainActivity.OnSearchListener {
+        override fun search(query: String?) {
+            (recyclerView.adapter as PeopleListAdapter).setList(mFaceList.filter {
+                if(query == null) true else it.Name.toLowerCase().contains(query!!.toLowerCase())
+            })
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (activity as MainActivity).onSearchListener = this.mOnSearchListener
+    }
+
+    override fun onStop() {
+        (activity as MainActivity).onSearchListener = null
+        super.onStop()
     }
 
     lateinit var takePhotoIntentUri: Uri
@@ -130,7 +150,8 @@ class GridFragment : Fragment() {
         }
         PeopleServiceTCP(selectedTCPClient).getAll()
             .subscribe({ faceList: List<Face> ->
-                (recyclerView.adapter as PeopleListAdapter).setList(faceList)
+                mFaceList = faceList
+                (recyclerView.adapter as PeopleListAdapter).setList(mFaceList)
                 swipeRefreshLayout.isRefreshing = false
             }, { error: Throwable ->
                 Log.d(MainActivityTag, error.localizedMessage)
