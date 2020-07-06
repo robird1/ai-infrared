@@ -23,11 +23,12 @@ class ChangePeople(face: Face, oldName: String?, changeType: ChangeType) {
             fileExtension = arr[arr.size-1]
         }
 
-        val dotIdx = str[0].indexOfFirst { it == '.' }
+        val idx = str.size - 1
+        val dotIdx = str[idx].indexOfFirst { it == '.' }
         if (dotIdx < 0) {
-            Name[0] = str[0]+"."+fileExtension
+            Name[idx] = str[idx]+"."+fileExtension
         } else if (dotIdx == str.size-1) {
-            Name[0] += fileExtension
+            Name[idx] += fileExtension
         }
     }
 }
