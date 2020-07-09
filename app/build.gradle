@@ -81,4 +81,7 @@ dependencies {
 
     // Add the Firebase Crashlytics SDK.
     implementation 'com.google.firebase:firebase-crashlytics:17.1.0'
+
+    // facecode
+    implementation project(':facecode')
 }
