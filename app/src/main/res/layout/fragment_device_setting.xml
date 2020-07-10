@@ -91,6 +91,7 @@
                 android:orientation="vertical">
 
                 <androidx.appcompat.widget.SwitchCompat
+                    android:visibility="gone"
                     android:id="@+id/switch_facerecognition"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
