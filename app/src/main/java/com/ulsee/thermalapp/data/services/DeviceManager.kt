@@ -135,6 +135,7 @@ class DeviceManager(device: Device) {
     val device = device
     var settings : Settings? = null
     var tcpClient = TCPClient(device.getIP(), DeviceManager.TCP_PORT)
+    var mIsIDNotMatched = false
 
     init {
         listenData()
@@ -156,7 +157,7 @@ class DeviceManager(device: Device) {
             while(true) {
                 // log("isConnected: "+(if(tcpClient.isConnected())"Y" else "N"))
                 if (!tcpClient.isConnected()) connectUntilSuccess()
-                Thread.sleep(1000)
+                Thread.sleep(if (mIsIDNotMatched) 10000 else 1000)
             }
         }).start()
     }
@@ -231,6 +232,12 @@ class DeviceManager(device: Device) {
                     settings = gson.fromJson<Settings>(responseString, itemType)
                     if (settings!!.Deviation > 10) settings?.Deviation = 0.0
                     if (settings!!.Deviation < -10) settings?.Deviation = 0.0
+                    if (settings!!.ID != device.getID()) {
+                        Log.w(javaClass.name, "device connected but id not match...")
+                        mIsIDNotMatched = true;
+                        tcpClient.close();
+                        return true;
+                    }
                     if (settings?.IsFirstActivate == true) {
                         val isJustJoinedDevice = Service.shared.justJoinedDeviceIDList.contains(device.getID())
                         Log.i(javaClass.name, "find first settings device: "+device.getID()+", is just joined:"+isJustJoinedDevice)
