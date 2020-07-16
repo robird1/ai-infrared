@@ -84,4 +84,8 @@ dependencies {
 
     // facecode
     implementation project(':facecode')
+
+    // facerecognition
+    implementation project(':libFaceRecognition')
+    implementation project(':libTracker')
 }

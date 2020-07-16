@@ -1,0 +1,10 @@
+依赖的so文件放在外围jniUtils目录下(key验证等),以及src/main/jni/libs目录下(opencv等)
+mk文件是src/jni/Android.mk文件
+
+如果修改了src/main/jni/Android.mk，需要在jni目录下执行
+ndk-build NDK_APPLICATION_MK=Application_MultiFaceTracker.mk -B
+以重新生成src/main/libs下的so文件
+
+NO_AUTH flag的使用:
+NO_AUTH表示不需要key验证,方法是将Application_MultiFaceTracker.mk里的#APP_CXXFLAGS += -DNO_AUTH flag打开,
+然后在此目录下执行ndk-build, 编译新的JNI的so文件

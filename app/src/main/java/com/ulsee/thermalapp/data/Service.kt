@@ -1,6 +1,7 @@
 package com.ulsee.thermalapp.data
 
 import android.util.Log
+import com.ulsee.sdk.faceverification.ULSeeFaceVerificationMgr
 import com.ulsee.thermalapp.data.model.Device
 import com.ulsee.thermalapp.data.model.RealmDevice
 import com.ulsee.thermalapp.data.services.*
@@ -15,6 +16,8 @@ class Service {
     interface DeviceSearchedListener {
         fun onNewDevice(device: Device)
     }
+    var isULSeeFaceVerificationManagerInited = false
+    var ULSeeFaceVerificationManager: ULSeeFaceVerificationMgr? = null
 
     var deviceManagerList : ArrayList<DeviceManager> = ArrayList<DeviceManager>()
     val udpBroadcastService = UDPBroadcastService()

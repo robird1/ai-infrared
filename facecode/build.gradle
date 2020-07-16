@@ -17,9 +17,7 @@ android {
 
         externalNativeBuild {
             cmake {
-                //cppFlags ""
                 cppFlags "-std=c++11"
-                //cppFlags += "-DNO_AUTH"
                 arguments = ['-DANDROID_ARM_NEON=TRUE', '-DANDROID_STL=c++_static']
             }
         }

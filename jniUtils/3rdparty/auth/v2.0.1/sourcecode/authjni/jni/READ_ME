@@ -1,0 +1,2 @@
+在本目录打开终端, 执行ndk-build, 会在目录auth/v2.0.1/sourcecode/authjni/libs 生成新的so;
+然后再把so文件拷贝到auth/v2.0.1/libs目录下,即可.

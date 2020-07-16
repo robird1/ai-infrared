@@ -1,0 +1,4 @@
+TVSTRACKER {
+ global: JNI_*;
+ local: *;
+ };

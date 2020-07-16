@@ -1,6 +1,7 @@
 package com.ulsee.thermalapp
 
 import android.app.Application
+import com.ulsee.sdk.faceverification.ULSeeFaceVerificationMgr
 import com.ulsee.thermalapp.data.Service
 import io.realm.Realm
 import io.realm.RealmConfiguration
@@ -25,6 +26,7 @@ class App : Application() {
 //            } // Migration to run
             .build()
         Realm.setDefaultConfiguration(config)
+        Service.shared.ULSeeFaceVerificationManager = ULSeeFaceVerificationMgr(applicationContext)
         Service.shared.udpBroadcastService.initialize(applicationContext)
     }
 }
