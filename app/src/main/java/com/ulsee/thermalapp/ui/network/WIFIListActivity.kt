@@ -70,7 +70,7 @@ class WIFIListActivity : AppCompatActivity() {
             finish()
         }, {
             it.printStackTrace()
-            Toast.makeText(this, "Error to switch to wifi: "+it.message, Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Error to switch to Wi-Fi: "+it.message, Toast.LENGTH_LONG).show()
         })
     }
 
@@ -100,7 +100,7 @@ class WIFIListActivity : AppCompatActivity() {
             switchToWIFI(wifiInfo)
         }, {
             it.printStackTrace()
-            Toast.makeText(this, "Error to switch to wifi: "+it.message, Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Error to switch to Wi-Fi: "+it.message, Toast.LENGTH_LONG).show()
         })
     }
 
@@ -118,9 +118,9 @@ class WIFIListActivity : AppCompatActivity() {
                 startActivity(Intent(this, MainActivity::class.java))
                 finish()
             } else if (resultCode != Activity.RESULT_CANCELED) {
-                Toast.makeText(this, "Error: failed to switch to specified wifi", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Error: failed to switch to specified Wi-Fi", Toast.LENGTH_LONG).show()
             } else {
-                Toast.makeText(this, "Error: failed to set specified wifi", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Error: failed to set specified Wi-Fi", Toast.LENGTH_LONG).show()
             }
         }
         super.onActivityResult(requestCode, resultCode, data)
@@ -186,16 +186,16 @@ class WIFIListActivity : AppCompatActivity() {
                     }
 
                     wifiInfo.capabilities = result.capabilities
-                    Log.i(javaClass.name, String.format("got wifi, ssid=%s, bssid=%s, capabilities=%s", result.SSID, result.BSSID, result.capabilities))
+                    Log.i(javaClass.name, String.format("got Wi-Fi, ssid=%s, bssid=%s, capabilities=%s", result.SSID, result.BSSID, result.capabilities))
                     wifiInfoList.add(wifiInfo)
                 }
                 (recyclerView.adapter as WIFIListAdapter).setList(wifiInfoList)
                 if (results.size == 0) {
-                    Toast.makeText(this@WIFIListActivity, "There is no wifif scanned", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@WIFIListActivity, "There is no Wi-Fi scanned", Toast.LENGTH_LONG).show()
                     finish()
                 }
             } else {
-                Toast.makeText(this@WIFIListActivity, "Failed to scan wifi", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@WIFIListActivity, "Failed to scan Wi-Fi", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -215,7 +215,7 @@ class WIFIListActivity : AppCompatActivity() {
         val success = wifiManager.startScan()
         if (!success) {
             swipeRefreshLayout.isRefreshing = false
-            Toast.makeText(this, "Failed to scan wifi", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Failed to scan Wi-Fi", Toast.LENGTH_LONG).show()
         }
     }
 }

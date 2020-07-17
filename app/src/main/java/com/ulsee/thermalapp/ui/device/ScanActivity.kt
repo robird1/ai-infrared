@@ -32,6 +32,8 @@ import com.ulsee.thermalapp.data.model.RealmDevice
 import com.ulsee.thermalapp.data.model.Settings
 import com.ulsee.thermalapp.data.services.DeviceManager
 import io.realm.Realm
+import io.realm.RealmResults
+import io.realm.kotlin.where
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.Socket
@@ -255,6 +257,7 @@ class ScanActivity : AppCompatActivity() {
         device.setName(obj.getName())
         device.setIP(obj.getIP())
         device.setCreatedAt(obj.getCreatedAt())
+        device.setIsFRVisible(obj.getIsFRVisible())
         realm.commitTransaction()
 
         if (!isDuplicated) {
@@ -264,9 +267,22 @@ class ScanActivity : AppCompatActivity() {
     }
 
     private fun goMain () {
-        startActivity(Intent(this, MainActivity::class.java))
+        val intent = Intent(this, MainActivity::class.java)
+//        intent.putExtra("isFRInvisible", containFRInvisible())
+        intent.putExtra("isFromScanActivity", true)
+        startActivity(intent)
         finish()
     }
+
+//    private fun containFRInvisible() : Boolean {
+//        val devices: RealmResults<RealmDevice> = Realm.getDefaultInstance().where<RealmDevice>().findAll()
+//        for (d in devices) {
+//            if (!d.getIsFRVisible()) {
+//                return true
+//            }
+//        }
+//        return false
+//    }
 
     private fun getLocalIP () : String {
         val wm = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
@@ -300,6 +316,7 @@ class ScanActivity : AppCompatActivity() {
                     val responseString = String(buffer, 0, readLen)
                     Log.i(javaClass.name, "try to connect to IP.1, received:")
                     Log.i(javaClass.name, responseString)
+                    Log.d(TAG, "responseString: "+ responseString)
                     // 4. try to get settings
                     val itemType = object : TypeToken<Settings>() {}.type
                     mAPSettings = gson.fromJson<Settings>(responseString, itemType)
@@ -308,6 +325,8 @@ class ScanActivity : AppCompatActivity() {
                     mAPDevice?.setID(mAPSettings!!.ID)
                     mAPDevice?.setIP(ip)
                     mAPDevice?.setCreatedAt(System.currentTimeMillis())
+                    mAPDevice?.setIsFRVisible(mAPSettings!!.IsFRVisible)
+
 
                     mIsConnectedToAPTCP = true
                     // 5. check device

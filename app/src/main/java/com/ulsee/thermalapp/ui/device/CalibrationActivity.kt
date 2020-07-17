@@ -213,13 +213,13 @@ class CalibrationActivity : AppCompatActivity() {
 
         // 1. size
         val layoutParams = thermalIV.layoutParams
-        layoutParams.width = (mTwoPictureInfo!!.W * screenWidth / 640)
-        layoutParams.height = (mTwoPictureInfo!!.H * screenWidth / 640 )
+        layoutParams.width = (mTwoPictureInfo!!.WCali * screenWidth / 640)
+        layoutParams.height = (mTwoPictureInfo!!.HCali * screenWidth / 640 )
         thermalIV.layoutParams = layoutParams
         mInitThermalIVSize = Size(layoutParams.width, layoutParams.height)
         // 2. point
-        thermalIV.x = (mTwoPictureInfo!!.X * screenWidth / 640).toFloat()
-        thermalIV.y = (mTwoPictureInfo!!.Y * screenWidth / 640).toFloat()
+        thermalIV.x = (mTwoPictureInfo!!.XCali * screenWidth / 640).toFloat()
+        thermalIV.y = (mTwoPictureInfo!!.YCali * screenWidth / 640).toFloat()
 
 //        val initScale = 0.5
 //        // 1. 設定thermal圖片寬度是 rgb的一半，高度維持比例
@@ -278,8 +278,10 @@ class CalibrationActivity : AppCompatActivity() {
         widthSlider.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 val layoutParams = thermalIV.layoutParams
-                layoutParams.width = (mInitThermalIVSize.width * widthSlider.progress / 50).toInt()
-                layoutParams.height = (mInitThermalIVSize.height * heightSlider.progress / 50).toInt()
+//                layoutParams.width = (mInitThermalIVSize.width * widthSlider.progress / 50).toInt()
+//                layoutParams.height = (mInitThermalIVSize.height * heightSlider.progress / 50).toInt()
+                layoutParams.width = widthSlider.progress *10
+                layoutParams.height = heightSlider.progress *10
                 if (layoutParams.width <= 0)layoutParams.width = 1
                 if (layoutParams.height <= 0)layoutParams.height = 1
                 thermalIV.layoutParams = layoutParams
@@ -292,8 +294,10 @@ class CalibrationActivity : AppCompatActivity() {
         heightSlider.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 val layoutParams = thermalIV.layoutParams
-                layoutParams.width = (mInitThermalIVSize.width * widthSlider.progress / 50).toInt()
-                layoutParams.height = (mInitThermalIVSize.height * heightSlider.progress / 50).toInt()
+//                layoutParams.width = (mInitThermalIVSize.width * widthSlider.progress / 50).toInt()
+//                layoutParams.height = (mInitThermalIVSize.height * heightSlider.progress / 50).toInt()
+                layoutParams.width = widthSlider.progress *10
+                layoutParams.height = heightSlider.progress *10
                 if (layoutParams.width <= 0)layoutParams.width = 1
                 if (layoutParams.height <= 0)layoutParams.height = 1
                 thermalIV.layoutParams = layoutParams

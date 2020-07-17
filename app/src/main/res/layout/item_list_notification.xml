@@ -21,8 +21,6 @@
         android:layout_margin="10dp"
         app:layout_constraintStart_toEndOf="@+id/imageView"
         app:layout_constraintEnd_toEndOf="parent"
-        android:lines="1"
-        android:singleLine="true"
         android:textAlignment="textStart"
         android:gravity="center|start"></TextView>
 

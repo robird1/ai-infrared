@@ -35,4 +35,13 @@ open class RealmDevice : RealmObject() {
     open fun getCreatedAt(): Long {
         return mCreatedAt
     }
+
+    private var mIsFRVisible: Boolean = true
+    open fun setIsFRVisible(value: Boolean) {
+        mIsFRVisible = value
+    }
+    open fun getIsFRVisible(): Boolean {
+        return mIsFRVisible
+    }
+
 }

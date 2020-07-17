@@ -50,12 +50,6 @@ open class Notification : Serializable {
             return mHasMask!!
         }
 
-//    var peopleName = ""
-//    var createdAt = Date()
-//    var tempratureUnit = ""
-//    var temprature = ""
-//    var hasMask = false
-//
     fun parseFileName() {
         val arr= Name.split("_")
         if (arr.size != 6) {

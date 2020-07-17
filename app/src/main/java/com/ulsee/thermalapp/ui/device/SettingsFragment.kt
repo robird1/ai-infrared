@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
@@ -50,6 +51,10 @@ class SettingsFragment(deviceID: String, autoFinish: Boolean) : Fragment() {
         segmentedButtonGroup = root.findViewById<SegmentedButtonGroup>(R.id.segmentedButton)
         val tabLayout = root.findViewById<TabLayout>(R.id.tabLayout)
         val viewPager = root.findViewById<ViewPager2>(R.id.viewPager)
+
+        if (settings?.IsFRVisible == false) {
+            faceRecognitionSwitch.visibility = View.GONE
+        }
 
         settingsNumberPadAdapter = SettingsNumberPadAdapter(this)
         viewPager.adapter = settingsNumberPadAdapter

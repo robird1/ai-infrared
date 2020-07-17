@@ -30,6 +30,7 @@ class Service {
     var justJoinedDeviceIDList = ArrayList<String>()
 
     init {
+        Log.d("Service", "[Enter] init")
         udpBroadcastService.subscribeSearchedDevice().subscribe{
             // if device ip changed
             for (deviceManager in deviceManagerList) {

@@ -22,7 +22,7 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_network_settings)
 
         if (!intent.hasExtra("wifi")) {
-            Toast.makeText(this, "Error: no wifi specified", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Error: no Wi-Fi specified", Toast.LENGTH_LONG).show()
             finish()
             return
         }
@@ -83,7 +83,7 @@ class SettingsActivity : AppCompatActivity() {
 
     fun endWithSuccess () {
         setResult(RESULT_OK)
-        Toast.makeText(this, "Succeed switch WIFI!!", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Succeed switch Wi-Fi!!", Toast.LENGTH_LONG).show()
         finish()
     }
 
@@ -92,9 +92,9 @@ class SettingsActivity : AppCompatActivity() {
         exception?.printStackTrace()
         runOnUiThread{
             if (exception != null) {
-                Toast.makeText(this, "Error to switch to wifi (ACK): "+exception!!.message, Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Error to switch to Wi-Fi (ACK): "+exception!!.message, Toast.LENGTH_LONG).show()
             } else {
-                Toast.makeText(this, "Error to switch to wifi (ACK) ", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Error to switch to Wi-Fi (ACK) ", Toast.LENGTH_LONG).show()
             }
             finish()
         }

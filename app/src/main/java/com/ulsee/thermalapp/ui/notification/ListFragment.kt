@@ -16,6 +16,7 @@ import com.ulsee.thermalapp.MainActivityTag
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Notification
+import com.ulsee.thermalapp.data.model.Notification2
 import com.ulsee.thermalapp.data.services.NotificationServiceTCP
 import com.ulsee.thermalapp.ui.device.DeviceListAdapter
 import com.ulsee.thermalapp.ui.people.EditorActivity
@@ -33,6 +34,7 @@ class ListFragment  : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        Log.d("ListFragment", "[Enter] onCreateView")
         val root = inflater.inflate(R.layout.fragment_notification_list, container, false)
 
         swipeRefreshLayout = root.findViewById<SwipeRefreshLayout>(R.id.swipeRefreshLayout)
@@ -50,7 +52,7 @@ class ListFragment  : Fragment() {
 
         loadNotifications()
 
-        (activity as MainActivity).setTitle("Notification")
+        (activity as MainActivity).setTitle("Records")
 
         return root
     }
@@ -63,25 +65,31 @@ class ListFragment  : Fragment() {
         }
         Log.i(javaClass.name, "call list")
         NotificationServiceTCP(deviceManager).getAll()
-            .subscribe({ notificationList: List<Notification> ->
-                (activity as MainActivity).setTitle("Notification("+notificationList.size+")")
+            .subscribe({ notificationList: List<Notification2> ->
+                Log.d("ListFragment", "[Enter] OnNext()")
+
+                (activity as MainActivity).setTitle("Records("+notificationList.size+")")
                 Log.i(javaClass.name, "got list")
                 val sortedList = notificationList.sortedByDescending {
-                    it.createdAt.time
+                    it.timeDate.time
                 }
                 Log.i(javaClass.name, "sort list")
                 (recyclerView.adapter as NotificationListAdapter).setList(sortedList)
                 swipeRefreshLayout.isRefreshing = false
                 Log.i(javaClass.name, "set list")
             }, { error: Throwable ->
+                Log.d("ListFragment", "[Enter] OnError()")
+
                 Log.d(MainActivityTag, error.localizedMessage)
                 Toast.makeText(context, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
                 swipeRefreshLayout.isRefreshing = false
             })
     }
 
-    private fun show(notification: Notification) {
-        val intent = Intent(context, NotificationActivity::class.java)
+    private fun show(notification: Notification2) {
+        Log.d("ListFragment", "[Enter] show")
+
+        val intent = Intent(context, NotificationActivity2::class.java)
         if (notification != null) {
             intent.putExtra("notification", notification as Serializable)
         }

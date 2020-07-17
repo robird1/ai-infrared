@@ -111,7 +111,7 @@ class UDPBroadcastService {
     var mEmitter : Emitter<Device>? = null
 
     fun subscribeSearchedDevice() : Observable<Device> {
-        val handler: ObservableOnSubscribe<Device> = ObservableOnSubscribe<Device> { emitter ->
+        val handler = ObservableOnSubscribe<Device> { emitter ->
             mEmitter = emitter
         }
 

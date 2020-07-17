@@ -56,7 +56,7 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
             mPopup = PopupMenu(itemView?.context, menuLayout)
             mPopup.menu.add("a").setTitle("Calibration")
             mPopup.menu.add("b").setTitle("Device Setting")
-            mPopup.menu.add("c").setTitle("WIFI Setting")
+            mPopup.menu.add("c").setTitle("Wi-Fi Setting")
             mPopup.menu.add("d").setTitle("Remove")
 
             mPopup.setOnMenuItemClickListener{ item: MenuItem? ->
@@ -71,7 +71,7 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
                         intent.putExtra("device", deviceID)
                         itemView.context.startActivity(intent)
                     }
-                    "WIFI Setting" -> {
+                    "Wi-Fi Setting" -> {
                         val intent = Intent(itemView.context, WIFIListActivity::class.java)
                         intent.putExtra("device", deviceID)
                         itemView.context.startActivity(intent)

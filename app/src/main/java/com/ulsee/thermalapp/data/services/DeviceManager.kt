@@ -6,12 +6,14 @@ import com.google.gson.reflect.TypeToken
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Device
 import com.ulsee.thermalapp.data.model.Notification
+import com.ulsee.thermalapp.data.model.Notification2
 import com.ulsee.thermalapp.data.model.Settings
 import com.ulsee.thermalapp.data.response.*
 import io.reactivex.Observable
 import io.reactivex.ObservableOnSubscribe
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.StringBuilder
 import kotlin.collections.ArrayList
@@ -98,7 +100,7 @@ class DeviceManager(device: Device) {
     }
 
     interface OnGotNotificationListListener{
-        fun onGotNotificationList(falceList: List<com.ulsee.thermalapp.data.model.Notification>)
+        fun onGotNotificationList(falceList: List<com.ulsee.thermalapp.data.model.Notification2>)
     }
     var mOnGotNotificationListListener : OnGotNotificationListListener? = null
     fun setOnGotNotificationListListener(listener: OnGotNotificationListListener?) {
@@ -122,7 +124,7 @@ class DeviceManager(device: Device) {
     }
 
     interface OnNotificationListener{
-        fun onNotification(notification: Notification)
+        fun onNotification(notification: Notification2)
     }
     var mOnNotificationListener : OnNotificationListener? = null
     fun setOnNotificationListener(listener: OnNotificationListener?) {
@@ -215,6 +217,8 @@ class DeviceManager(device: Device) {
         val action = obj.getInt("Action")
 
         log("onData, got action"+action)
+        Log.d("DeviceManager", "onData, got action"+action)
+        Log.d("DeviceManager", "responseString: "+responseString)
 
         // 3. parse content
         when(action) {
@@ -227,6 +231,8 @@ class DeviceManager(device: Device) {
             Action.requestFace.ordinal -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
             Action.modifyWifi.ordinal -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
             Action.settingsResponse.ordinal -> {
+                Log.d("DeviceManager", "[Enter] when() -> Action.settingsResponse")
+
                 val itemType = object : TypeToken<Settings>() {}.type
                 try {
                     settings = gson.fromJson<Settings>(responseString, itemType)
@@ -319,6 +325,11 @@ class DeviceManager(device: Device) {
                 }
             }
             Action.notificationListResponse.ordinal -> {
+                Log.d("DeviceManager", "[Enter] when() -> Action.notificationListResponse")
+
+//                responseString = createNotifyListString()
+//                Log.d("DeviceManager", "responseString:　"+ responseString)
+
                 val itemType = object : TypeToken<NotificationList>() {}.type
                 try {
                     val list = gson.fromJson<NotificationList>(responseString, itemType)
@@ -333,6 +344,8 @@ class DeviceManager(device: Device) {
                 }
             }
             Action.notificationImageResponse.ordinal -> {
+                Log.d("DeviceManager", "[Enter] when() -> Action.notificationImageResponse")
+
                 val itemType = object : TypeToken<NotificationImage>() {}.type
                 try {
                     val response = gson.fromJson<NotificationImage>(responseString, itemType)
@@ -346,7 +359,7 @@ class DeviceManager(device: Device) {
                         }
                         // for (listener in mOnGotFaceListenerList) result = result || listener.onFace(response)
                         if (result == false) {
-                            Log.e(javaClass.name, "Error got notification image of "+response.Name+", but no one handle")
+                            Log.e(javaClass.name, "Error got notification image of "+response.ID+", but no one handle")
                         }
                     }
                 } catch(e: java.lang.Exception) {
@@ -355,9 +368,12 @@ class DeviceManager(device: Device) {
                 }
             }
             Action.notification.ordinal -> {
-                val itemType = object : TypeToken<Notification>() {}.type
+                Log.d("DeviceManager", "[Enter] when() -> Action.notification")
+                Log.d("DeviceManager", "responseString:　"+ responseString)
+
+                val itemType = object : TypeToken<Notification2>() {}.type
                 try {
-                    val response = gson.fromJson<Notification>(responseString, itemType)
+                    val response = gson.fromJson<Notification2>(responseString, itemType)
                     if (mOnNotificationListener== null) {
                         Log.e(javaClass.name, "Error no listener of action "+action)
                     }
@@ -375,13 +391,42 @@ class DeviceManager(device: Device) {
         return true
     }
 
+    fun createNotifyListString () : String {
+        val obj = JSONObject()
+        obj.put("ID", 1)
+        obj.put("Name", "Steve")
+        obj.put("TempUnit", 0)
+        obj.put("TempValue", 40)
+        obj.put("IsMask", false)
+        obj.put("Time", "2020-06-20 12:02:22")
+
+        val obj2 = JSONObject()
+        obj2.put("ID", 2)
+        obj2.put("Name", "Steve_su")
+        obj2.put("TempUnit", 1)
+        obj2.put("TempValue", 50)
+        obj2.put("IsMask", true)
+        obj2.put("Time", "2020-06-22 11:01:11")
+
+        val ja = JSONArray()
+        ja.put(obj)
+        ja.put(obj2)
+
+        val mainObj = JSONObject()
+        mainObj.put("FaceList", ja)
+
+        return mainObj.toString()
+    }
+
     fun listenData () {
         val stringBuilder = StringBuilder();
 
         tcpClient.setOnReceivedDataListener(object: TCPClient.OnReceivedDataListener{
             override fun onData(data: CharArray, size: Int) {
+                Log.d("DeviceManager", "[Enter] TCPClient.OnReceivedDataListener.onData")
                 stringBuilder.append(data, 0, size)
                 log("onData, size = "+size)
+//                Log.d("DeviceManager", "[Enter] OnReceivedDataListener.onData")
 
                 while (processBuffer(stringBuilder))continue
             }
