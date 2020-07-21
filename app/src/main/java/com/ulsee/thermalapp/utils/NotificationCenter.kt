@@ -42,7 +42,7 @@ class NotificationCenter {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val pendingIntent = PendingIntent.getActivity(
             ctx, 0 /* Request code */, intent,
-            PendingIntent.FLAG_ONE_SHOT
+            PendingIntent.FLAG_UPDATE_CURRENT
         )
         val channelId = "channel_id_singleton"
         val defaultSoundUri: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
@@ -85,10 +85,10 @@ class NotificationCenter {
         notification: Notification2?
     ) {
         Log.d("NotificationCenter", "[Enter] show2")
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        //intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val pendingIntent = PendingIntent.getActivity(
-            ctx, 0 /* Request code */, intent,
-            PendingIntent.FLAG_ONE_SHOT
+            ctx, id /* Request code */, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT
         )
         val channelId = "channel_id_singleton"
         val defaultSoundUri: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
