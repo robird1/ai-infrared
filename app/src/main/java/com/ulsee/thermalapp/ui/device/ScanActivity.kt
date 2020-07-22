@@ -11,9 +11,7 @@ import android.util.Log
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.View
-import android.widget.EditText
-import android.widget.ProgressBar
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.vision.CameraSource
@@ -81,6 +79,13 @@ class ScanActivity : AppCompatActivity() {
 
         Service.shared.mDeviceSearchedListener = mOnDeviceSearchedListener
         keepTryConenctToAPTCP()
+
+        this@ScanActivity.runOnUiThread { findViewById<TextView>(R.id.textView2).text = getLocalIP()}
+
+        findViewById<Button>(R.id.button2).setOnClickListener {
+            val qrCode = findViewById<EditText>(R.id.editText2).text.toString()
+            processQRCode(qrCode)
+        }
     }
 
     override fun onDestroy() {
@@ -92,6 +97,7 @@ class ScanActivity : AppCompatActivity() {
         override fun onNewDevice(device: Device) {
             device.setCreatedAt(System.currentTimeMillis())
             mScannedDeviceList.add(device)
+            this@ScanActivity.runOnUiThread { findViewById<TextView>(R.id.textView2).text = getLocalIP()+mScannedDeviceList.map { it.getID() }.joinToString("\n") }
             if (mStatus == ScanActivity.Status.searchingDevice) {
                 if (device.getID() == mSearchingDeviceID) {
                     // 找到了
@@ -103,10 +109,10 @@ class ScanActivity : AppCompatActivity() {
     }
 
     private fun initZxingScanner () {
-        val integrator = IntentIntegrator(this)
-        integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
-        integrator.setPrompt("Scan device QRCode");
-        integrator.initiateScan()
+//        val integrator = IntentIntegrator(this)
+//        integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
+//        integrator.setPrompt("Scan device QRCode");
+//        integrator.initiateScan()
         //IntentIntegrator(this).initiateScan()
     }
 
