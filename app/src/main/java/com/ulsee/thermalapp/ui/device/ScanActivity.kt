@@ -92,8 +92,11 @@ class ScanActivity : AppCompatActivity() {
 
     val mOnDeviceSearchedListener = object : Service.DeviceSearchedListener {
         override fun onNewDevice(device: Device) {
-            device.setCreatedAt(System.currentTimeMillis())
-            mScannedDeviceList.add(device)
+            if (!isDeviceDuplicated(device)) {
+                device.setCreatedAt(System.currentTimeMillis())
+                mScannedDeviceList.add(device)
+            }
+
             if (mStatus == ScanActivity.Status.searchingDevice) {
                 if (device.getID() == mSearchingDeviceID) {
                     // 找到了
@@ -102,6 +105,15 @@ class ScanActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun isDeviceDuplicated(device: Device): Boolean {
+        for (d in mScannedDeviceList) {
+            if (d.getID().equals(device.getID()) && d.getIP().equals(device.getIP())) {
+                return true
+            }
+        }
+        return false
     }
 
     private fun initZxingScanner () {
@@ -301,6 +313,8 @@ class ScanActivity : AppCompatActivity() {
         Thread(Runnable {
             while(!isFinishing) {
                 try {
+                    Thread.sleep(1000)
+
                     if (mIsConnectedToAPTCP) {
                         Thread.sleep(1000)
                         continue
@@ -337,7 +351,6 @@ class ScanActivity : AppCompatActivity() {
                             this@ScanActivity.runOnUiThread { mSearchingDeviceProgressDialog.dismiss(); askDeviceName(mAPDevice!!) }
                         }
                     }
-                    Thread.sleep(1000)
                 } catch(e: SocketException) {
                     Log.i(javaClass.name, "try to connect to IP.1 (AP TCP), but failed, isn't AP mode")
 //                    e.printStackTrace()
