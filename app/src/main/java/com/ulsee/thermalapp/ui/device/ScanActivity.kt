@@ -97,7 +97,7 @@ class ScanActivity : AppCompatActivity() {
         override fun onNewDevice(device: Device) {
             device.setCreatedAt(System.currentTimeMillis())
             mScannedDeviceList.add(device)
-            this@ScanActivity.runOnUiThread { findViewById<TextView>(R.id.textView2).text = getLocalIP()+mScannedDeviceList.map { it.getID() }.joinToString("\n") }
+            this@ScanActivity.runOnUiThread { findViewById<TextView>(R.id.textView2).text = getLocalIP()+(if (mAPDevice != null) mAPDevice!!.getID() else "")+"\n"+mScannedDeviceList.map { it.getID() }.joinToString("\n") }
             if (mStatus == ScanActivity.Status.searchingDevice) {
                 if (device.getID() == mSearchingDeviceID) {
                     // 找到了
