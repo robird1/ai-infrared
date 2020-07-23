@@ -23,7 +23,7 @@
     <string name="add_first_device">add first device</string>
     <string name="device_connected_click_to_watch_camera">Device connected</string>
     <string name="device_not_connected_yet">Device Not Connected</string>
-    <string name="confirm_remove_device">sure to remove device</string>
+    <string name="confirm_remove_device">Confirm Device Removal?</string>
 
     <!-- device relative -->
     <!-- wifi -->
