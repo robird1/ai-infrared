@@ -12,6 +12,7 @@ import android.util.Size
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.SeekBar
@@ -52,6 +53,10 @@ class CalibrationActivity : AppCompatActivity() {
     // scale
     private var mScaleFactor = 1f
     var mIsScaling = false
+
+    enum class ThermalAction {
+        MOVE, SCALE_WIDTH, SCALE_HEIGHT
+    }
 
     private val scaleListener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
         override fun onScale(detector: ScaleGestureDetector): Boolean {
@@ -132,6 +137,9 @@ class CalibrationActivity : AppCompatActivity() {
                         val offset = Point(point.x - lastPoint.x, point.y - lastPoint.y)
                         thermalIV.x = thermalIV.x + offset.x
                         thermalIV.y = thermalIV.y + offset.y
+
+                        checkThermalViewBoarder(ThermalAction.MOVE)
+
                         // 4. record the last touch point
                         lastPoint = point
                     }
@@ -139,6 +147,27 @@ class CalibrationActivity : AppCompatActivity() {
                 return true
             }
         })
+    }
+
+    private fun checkThermalViewBoarder(action: ThermalAction, layoutParams: ViewGroup.LayoutParams = thermalIV.layoutParams) {
+        when(action) {
+            ThermalAction.MOVE -> {
+                if (thermalIV.x < 0) thermalIV.x = 0F
+                if (thermalIV.y < 0) thermalIV.y = 0F
+                if (thermalIV.x > rgbSize.width - thermalIV.width) thermalIV.x =
+                    (rgbSize.width - thermalIV.width).toFloat()
+                if (thermalIV.y > rgbSize.height - thermalIV.height) thermalIV.y =
+                    (rgbSize.height - thermalIV.height).toFloat()
+            }
+            ThermalAction.SCALE_WIDTH -> {
+                if ((thermalIV.x + layoutParams.width) > rgbSize.width) thermalIV.x = (rgbSize.width - layoutParams.width).toFloat()
+
+            }
+            ThermalAction.SCALE_HEIGHT -> {
+                if ((thermalIV.y + layoutParams.height) > rgbSize.height) thermalIV.y = (rgbSize.height - layoutParams.height).toFloat()
+            }
+
+        }
     }
 
     private fun loadImages () {
@@ -263,6 +292,7 @@ class CalibrationActivity : AppCompatActivity() {
         val move = { x :Int, y :Int ->
             thermalIV.x = thermalIV.x + x
             thermalIV.y = thermalIV.y + y
+            checkThermalViewBoarder(ThermalAction.MOVE)
             true}
         findViewById<Button>(R.id.button_up).setOnTouchListener { _, _ -> move(0, -1)  }
         findViewById<Button>(R.id.button_left).setOnTouchListener { _, _ -> move(-1, 0)  }
@@ -278,13 +308,11 @@ class CalibrationActivity : AppCompatActivity() {
         widthSlider.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 val layoutParams = thermalIV.layoutParams
-//                layoutParams.width = (mInitThermalIVSize.width * widthSlider.progress / 50).toInt()
-//                layoutParams.height = (mInitThermalIVSize.height * heightSlider.progress / 50).toInt()
-                layoutParams.width = widthSlider.progress *10
-                layoutParams.height = heightSlider.progress *10
+                layoutParams.width = rgbSize.width * progress / 100
                 if (layoutParams.width <= 0)layoutParams.width = 1
-                if (layoutParams.height <= 0)layoutParams.height = 1
                 thermalIV.layoutParams = layoutParams
+
+                checkThermalViewBoarder(ThermalAction.SCALE_WIDTH, layoutParams)
             }
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
@@ -294,13 +322,12 @@ class CalibrationActivity : AppCompatActivity() {
         heightSlider.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 val layoutParams = thermalIV.layoutParams
-//                layoutParams.width = (mInitThermalIVSize.width * widthSlider.progress / 50).toInt()
-//                layoutParams.height = (mInitThermalIVSize.height * heightSlider.progress / 50).toInt()
-                layoutParams.width = widthSlider.progress *10
-                layoutParams.height = heightSlider.progress *10
-                if (layoutParams.width <= 0)layoutParams.width = 1
+                layoutParams.height = rgbSize.height * progress / 100
                 if (layoutParams.height <= 0)layoutParams.height = 1
                 thermalIV.layoutParams = layoutParams
+
+                checkThermalViewBoarder(ThermalAction.SCALE_HEIGHT, layoutParams)
+
             }
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
