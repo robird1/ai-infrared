@@ -58,10 +58,11 @@ class PeopleListAdapter: RecyclerView.Adapter<PeopleListAdapter.ViewHolder>() {
                 return
             }
 
+            iv.setImageResource(0)
             if (face.Image.isNullOrEmpty() == false) {
                 Glide.with(itemView.context).load(Base64.decode(face.Image, Base64.DEFAULT)).into(iv);
             } else {
-                disposable = PeopleServiceTCP(deviceManager!!).getSingleFace(face.Name).subscribe{
+                disposable = PeopleServiceTCP(deviceManager!!).getSingleFace(face).subscribe{
                     disposable = null
                     face.Image = it
                     Glide.with(itemView.context).load(Base64.decode(it, Base64.DEFAULT)).into(iv);

@@ -17,8 +17,8 @@ interface PeopleAPI {
 
     @Headers("Content-Type: application/json","Accept: application/json")
     @PUT("api/people/{id}")
-    fun update(@Path("id") id: Int, @Body value: Face) : Completable
+    fun update(@Path("id") id: String, @Body value: Face) : Completable
 
     @DELETE("api/people/{id}")
-    fun delete(@Path("id") id: Int) : Completable
+    fun delete(@Path("id") id: String) : Completable
 }

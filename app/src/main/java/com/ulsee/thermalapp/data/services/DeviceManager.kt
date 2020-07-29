@@ -47,6 +47,9 @@ class DeviceManager(device: Device) {
         notificationImageResponse,
         notification,// 18
         notifyActivated,
+//        requestFaceDB, // 20
+//        requestFaceList, // 21
+//        faceListResponse // 22
     }
 
     private val mLock = Object()
@@ -79,7 +82,7 @@ class DeviceManager(device: Device) {
     }
 
     interface OnGotFaceListener{
-        fun onFace(face: Face) : Boolean
+        fun onFace(face: com.ulsee.thermalapp.data.model.Face) : Boolean
     }
     var mOnGotFaceListener : OnGotFaceListener? = null
     fun setOnGotFaceListener(listener: OnGotFaceListener?) {
@@ -299,9 +302,9 @@ class DeviceManager(device: Device) {
                 }
             }
             Action.faceResponse.ordinal -> {
-                val itemType = object : TypeToken<Face>() {}.type
+                val itemType = object : TypeToken<com.ulsee.thermalapp.data.model.Face>() {}.type
                 try {
-                    val response = gson.fromJson<Face>(responseString, itemType)
+                    val response = gson.fromJson<com.ulsee.thermalapp.data.model.Face>(responseString, itemType)
 //                            if (mOnGotFaceListener== null) {
 //                                Log.e(javaClass.name, "Error no listener of action "+action)
 //                            }

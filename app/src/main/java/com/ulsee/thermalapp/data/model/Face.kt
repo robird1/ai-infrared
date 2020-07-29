@@ -4,10 +4,15 @@ import java.io.Serializable
 
 open class Face: Serializable {
 
-    var ID : Int = 0
+    var ID : String = "-1"
     var Name : String = ""
     var Image : String? = null
+    var Data : String? = null
     var oldName: String? = null
+    var Gender : String = "Female"
+    var Age : Int = 0
+    var EmployeeID = "AAA"
+    var Remark = "Engineer"
     val NameWihtoutFileType : String
         get() {
             val arr = Name.split(".")
