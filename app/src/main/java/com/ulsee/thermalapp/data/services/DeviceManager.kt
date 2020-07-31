@@ -137,7 +137,7 @@ class DeviceManager(device: Device) {
     val haveOnNotificationListener : Boolean
         get() = mOnNotificationListener != null
 
-    val device = device
+    var device = device
     var settings : Settings? = null
     var tcpClient = TCPClient(device.getIP(), DeviceManager.TCP_PORT)
     var mIsIDNotMatched = false
@@ -394,33 +394,6 @@ class DeviceManager(device: Device) {
         return true
     }
 
-    fun createNotifyListString () : String {
-        val obj = JSONObject()
-        obj.put("ID", 1)
-        obj.put("Name", "Steve")
-        obj.put("TempUnit", 0)
-        obj.put("TempValue", 40)
-        obj.put("IsMask", false)
-        obj.put("Time", "2020-06-20 12:02:22")
-
-        val obj2 = JSONObject()
-        obj2.put("ID", 2)
-        obj2.put("Name", "Steve_su")
-        obj2.put("TempUnit", 1)
-        obj2.put("TempValue", 50)
-        obj2.put("IsMask", true)
-        obj2.put("Time", "2020-06-22 11:01:11")
-
-        val ja = JSONArray()
-        ja.put(obj)
-        ja.put(obj2)
-
-        val mainObj = JSONObject()
-        mainObj.put("FaceList", ja)
-
-        return mainObj.toString()
-    }
-
     fun listenData () {
         val stringBuilder = StringBuilder();
 
@@ -468,5 +441,12 @@ class DeviceManager(device: Device) {
 
         return io.reactivex.Observable.create(handler).subscribeOn(Schedulers.newThread())
             .observeOn(AndroidSchedulers.mainThread())
+    }
+
+    /**
+     *  Updating device if user add the same device and rename it.
+     */
+    fun updateDevice(d: Device) {
+        device = d
     }
 }

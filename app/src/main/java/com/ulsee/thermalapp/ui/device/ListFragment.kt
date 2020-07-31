@@ -33,7 +33,9 @@ class ListFragment : Fragment() {
 
         loadDevices()
 
-        root.findViewById<View>(R.id.fab).setOnClickListener { openScanner() }
+        root.findViewById<View>(R.id.fab).setOnClickListener {
+            AddDeviceController(requireActivity()).execute()
+        }
 
         (activity as MainActivity).setTitle("Device")
 
@@ -46,14 +48,11 @@ class ListFragment : Fragment() {
         context?.unregisterReceiver(deviceChangedReceiver)
         super.onDestroy()
     }
-    val deviceChangedReceiver = object: BroadcastReceiver(){
+
+    private val deviceChangedReceiver = object: BroadcastReceiver(){
         override fun onReceive(context: Context?, intent: Intent?) {
             loadDevices()
         }
-    }
-
-    private fun openScanner () {
-        startActivityForResult(Intent(context, ScanActivity::class.java), REQUEST_CODE_ACTIVITY_SCAN)
     }
 
     private fun loadDevices() {

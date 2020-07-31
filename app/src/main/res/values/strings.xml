@@ -24,6 +24,8 @@
     <string name="device_connected_click_to_watch_camera">Device connected</string>
     <string name="device_not_connected_yet">Device Not Connected</string>
     <string name="confirm_remove_device">Confirm Device Removal?</string>
+    <string name="dialog_add_device">Add Device</string>
+    <string name="dialog_connect_hotspot">Connect to Hotspot...</string>
 
     <!-- device relative -->
     <!-- wifi -->

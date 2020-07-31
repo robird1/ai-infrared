@@ -7,6 +7,8 @@ import com.ulsee.thermalapp.data.services.*
 import io.realm.Realm
 import io.realm.kotlin.where
 
+val TAG = "Service"
+
 class Service {
     companion object {
         val shared = Service()
@@ -17,10 +19,12 @@ class Service {
     }
 
     var deviceManagerList : ArrayList<DeviceManager> = ArrayList<DeviceManager>()
+    var mScannedDeviceList = ArrayList<Device>() // IP, ID, Timestamp
     val udpBroadcastService = UDPBroadcastService()
     var mDeviceSearchedListener : DeviceSearchedListener? = null
     val isScanning: Boolean
         get() = mDeviceSearchedListener != null
+    var isStarterActivity: Boolean = false
 
     // tutorial
     fun requestTutorial(deviceID: String) {
@@ -53,9 +57,27 @@ class Service {
             }
             // if scanning
             mDeviceSearchedListener?.onNewDevice(it)
+            
+            updateScannedDeviceList(it)
         }
         getDeviceList()
         keepSearchingDevice()
+    }
+
+    private fun updateScannedDeviceList(device: Device) {
+        if (!isDeviceDuplicated(device)) {
+            device.setCreatedAt(System.currentTimeMillis())
+            mScannedDeviceList.add(device)
+        }
+    }
+
+    private fun isDeviceDuplicated(device: Device): Boolean {
+        for (d in mScannedDeviceList) {
+            if (d.getID().equals(device.getID()) && d.getIP().equals(device.getIP())) {
+                return true
+            }
+        }
+        return false
     }
 
     // device
@@ -107,7 +129,10 @@ class Service {
                 try {
                     isAnyDeviceNotConnected =
                         deviceManagerList.indexOfFirst { !it.tcpClient.isConnected() } >= 0
-                    udpBroadcastService.shouldBroadcasting = isAnyDeviceNotConnected || isScanning
+                    udpBroadcastService.shouldBroadcasting = isAnyDeviceNotConnected || isScanning || isStarterActivity
+
+                    Log.d(TAG, "udpBroadcastService.shouldBroadcasting: "+ udpBroadcastService.shouldBroadcasting)
+
                     Thread.sleep(1000)
                 } catch (e: Exception) {
                     Log.e(javaClass.name, "Error: Service keepSearchingDevice:")
