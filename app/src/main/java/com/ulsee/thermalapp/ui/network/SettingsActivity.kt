@@ -43,7 +43,7 @@ class SettingsActivity : AppCompatActivity() {
             val deviceManager = Service.shared.getManagerOfDeviceID(mDeviceID)
             Thread(Runnable {
                 deviceManager!!.tcpClient.close()
-                while(tryTimes <= MAX_TRY_CONNECT_TIMES && sendTimes< 5) {
+                while(tryTimes <= MAX_TRY_CONNECT_TIMES && sendTimes< 5 || SettingsActivity@this.isFinishing) {
                     Log.i(javaClass.name, "try connect , isConnected = "+deviceManager!!.tcpClient.isConnected()+", times="+tryTimes)
                     if (deviceManager.tcpClient.isConnected()) {
                         SettingsServiceTCP(deviceManager!!).ackWIFI().subscribe( {
@@ -51,7 +51,8 @@ class SettingsActivity : AppCompatActivity() {
                             Log.i(javaClass.name, "ACK sent!!")
                             tryTimes += 1
                             sendTimes += 1
-                            if (sendTimes >= 5) endWithSuccess()
+                            endWithSuccess()
+                            //if (sendTimes >= 5) endWithSuccess()
                         }, {
                             tryTimes += 1
                             Log.i(javaClass.name, "failed to ack "+tryTimes)
@@ -82,9 +83,11 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     fun endWithSuccess () {
-        setResult(RESULT_OK)
-        Toast.makeText(this, "Succeed switch Wi-Fi!!", Toast.LENGTH_LONG).show()
-        finish()
+        this.runOnUiThread {
+            setResult(RESULT_OK)
+            Toast.makeText(this, "Succeed switch Wi-Fi!!", Toast.LENGTH_LONG).show()
+            finish()
+        }
     }
 
     fun endWithError (exception: Throwable?) {

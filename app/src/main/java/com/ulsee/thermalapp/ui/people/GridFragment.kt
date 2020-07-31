@@ -97,10 +97,9 @@ class GridFragment : Fragment() {
             if (resultCode == RESULT_OK) {
                 val file = FilePickerHelper.shared().putPickedFile(requireContext(), takePhotoIntentUri);
 
-                var bm = BitmapFactory.decodeFile(file.path)
-                bm = Bitmap.createScaledBitmap(bm, bm.width/2, bm.height/2, false)
+                val bm = BitmapFactory.decodeFile(file.path)
                 val bOut = ByteArrayOutputStream()
-                bm.compress(Bitmap.CompressFormat.JPEG, 80, bOut)
+                bm.compress(Bitmap.CompressFormat.JPEG, 100, bOut)
                 val imageBase64 = Base64.encodeToString(
                     bOut.toByteArray(),
                     Base64.DEFAULT

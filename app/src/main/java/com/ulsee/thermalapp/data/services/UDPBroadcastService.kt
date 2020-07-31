@@ -26,7 +26,7 @@ class UDPBroadcastService {
     var mUDPSocket = DatagramSocket()
     var mUDPServerSocket = DatagramSocket(UDP_BROADCAST_IPC_MESSAGE_PORT)
     var mBroadcaseSendCounter = 1 // 數到0就送出
-    var mBroadcaseSendInterval = 3 // 數幾下才送出，平常是3，已經掃到有效的QRCode時是1
+    var mBroadcaseSendInterval = 1 // 數幾下才送出，平常是3，已經掃到有效的QRCode時是1
 
     var shouldBroadcasting = false
 
@@ -92,12 +92,13 @@ class UDPBroadcastService {
                 try {
                     if(shouldBroadcasting && --mBroadcaseSendCounter==0) {
                         mUDPSocket.send(sendPacket)
-                        mBroadcaseSendCounter = mBroadcaseSendInterval
                     }
                     log("sent: "+String(sendData))
-                    Thread.sleep(1000)
                 } catch (e: Exception) {
                     e.printStackTrace()
+                } finally {
+                    Thread.sleep(1000)
+                    if(mBroadcaseSendCounter<=0)mBroadcaseSendCounter = mBroadcaseSendInterval
                 }
             }
         }).start()

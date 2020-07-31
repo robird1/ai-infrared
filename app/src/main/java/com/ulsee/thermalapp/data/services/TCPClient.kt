@@ -6,6 +6,7 @@ import java.io.BufferedWriter
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.lang.Exception
+import java.net.InetSocketAddress
 import java.net.Socket
 
 class TCPClient(ip: String, port: Int) {
@@ -23,8 +24,11 @@ class TCPClient(ip: String, port: Int) {
     var bufferedReader : BufferedReader? = null
 
     fun connect () {
-        TCPClientSocket = Socket(ip, port)
+        val remoteAddress = InetSocketAddress(ip,port)
+        val timeout = 3000
+        TCPClientSocket = Socket()
         TCPClientSocket?.keepAlive = true
+        TCPClientSocket?.connect(remoteAddress, timeout)
         listenData()
     }
 

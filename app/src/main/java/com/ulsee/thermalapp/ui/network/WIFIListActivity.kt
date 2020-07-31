@@ -101,6 +101,7 @@ class WIFIListActivity : AppCompatActivity() {
         }, {
             it.printStackTrace()
             Toast.makeText(this, "Error to switch to Wi-Fi: "+it.message, Toast.LENGTH_LONG).show()
+            mProgressDialog.dismiss()
         })
     }
 
@@ -115,7 +116,7 @@ class WIFIListActivity : AppCompatActivity() {
         if (requestCode == REQUEST_CODE_SWITCH_WIFI) {
             mProgressDialog.dismiss()
             if (resultCode == RESULT_OK) {
-                startActivity(Intent(this, MainActivity::class.java))
+                //startActivity(Intent(this, MainActivity::class.java))
                 finish()
             } else if (resultCode != Activity.RESULT_CANCELED) {
                 Toast.makeText(this, "Error: failed to switch to specified Wi-Fi", Toast.LENGTH_LONG).show()
