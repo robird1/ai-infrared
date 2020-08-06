@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -51,8 +52,15 @@ class ListFragment : Fragment() {
 
     private val deviceChangedReceiver = object: BroadcastReceiver(){
         override fun onReceive(context: Context?, intent: Intent?) {
+            unregisterDeviceHandler(intent)
             loadDevices()
         }
+    }
+
+    private fun unregisterDeviceHandler(intent: Intent?) {
+        val deviceID = intent?.getStringExtra("device_id")
+        Log.d("ListFragment", "[Enter] unregisterDeviceHandler() deviceID: $deviceID")
+        Service.shared.getManagerOfDeviceID(deviceID!!)?.unregisterHandler()
     }
 
     private fun loadDevices() {

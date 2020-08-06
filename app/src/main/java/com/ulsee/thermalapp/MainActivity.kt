@@ -4,10 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.util.Base64
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -16,14 +13,9 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.ulsee.thermalapp.data.AppPreference
 import com.ulsee.thermalapp.data.Service
-import com.ulsee.thermalapp.data.model.Notification2
 import com.ulsee.thermalapp.data.model.RealmDevice
-import com.ulsee.thermalapp.data.services.DeviceManager
-import com.ulsee.thermalapp.ui.notification.NotificationActivity2
 import com.ulsee.thermalapp.ui.tutorial.TutorialStep1Activity
-import com.ulsee.thermalapp.utils.NotificationCenter
 import io.realm.Realm
 import io.realm.RealmResults
 import io.realm.kotlin.where
@@ -61,7 +53,6 @@ class MainActivity : AppCompatActivity() {
         registerReceiver(deviceChangedReceiver, IntentFilter("Device removed"))
 
         keepCheckingTutorialDevice()
-        keepCheckingNotification()
 
         Service.shared.isStarterActivity = false
     }
@@ -105,39 +96,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }, 1000, 1000)
-    }
-
-    fun keepCheckingNotification () {
-        Thread(Runnable {
-            if(!isFinishing) {
-                for(deviceManager in Service.shared.deviceManagerList) {
-                    if (!deviceManager.haveOnNotificationListener) {
-                        deviceManager.setOnNotificationListener(object: DeviceManager.OnNotificationListener{
-                            override fun onNotification(notification: Notification2) {
-                                if (!AppPreference(this@MainActivity.getSharedPreferences("app", Context.MODE_PRIVATE)).isFeverNotificationEnabled()) return
-                                val intent = Intent(this@MainActivity, NotificationActivity2::class.java)
-                                intent.putExtra("notification", notification)
-
-                                var bitImage : Bitmap? = null
-                                try {
-                                    val decodedString: ByteArray = Base64.decode(notification.Data, Base64.DEFAULT)
-                                    bitImage = BitmapFactory.decodeByteArray(
-                                        decodedString,
-                                        0,
-                                        decodedString.size
-                                    )
-                                } catch(e:Exception) {
-
-                                }
-
-//                                NotificationCenter.shared.show(this@MainActivity, intent, this@MainActivity.getString(R.string.title_alert_notification),notification.Name, bitImage)
-                                NotificationCenter.shared.show2(this@MainActivity, intent, this@MainActivity.getString(R.string.title_alert_notification), notification)
-                            }
-                        })
-                    }
-                }
-            }
-        }).start()
     }
 
     private fun containFRInvisible() : Boolean {

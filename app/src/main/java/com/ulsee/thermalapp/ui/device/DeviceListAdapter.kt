@@ -93,7 +93,9 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
                                     rows.deleteAllFromRealm()
                                     realm.commitTransaction()
                                     // 2. broadcast
-                                    ctx.sendBroadcast(Intent("Device removed"))
+                                    val intent = Intent("Device removed")
+                                    intent.putExtra("device_id", device!!.getID())
+                                    ctx.sendBroadcast(intent)
                                 }
                                 .setNegativeButton("Cancel"
                                 ) { dialog, whichButton ->

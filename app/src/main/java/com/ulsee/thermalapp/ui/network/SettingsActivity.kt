@@ -43,7 +43,7 @@ class SettingsActivity : AppCompatActivity() {
             val deviceManager = Service.shared.getManagerOfDeviceID(mDeviceID)
             Thread(Runnable {
                 deviceManager!!.tcpClient.close()
-                while(tryTimes <= MAX_TRY_CONNECT_TIMES && sendTimes< 5 || SettingsActivity@this.isFinishing) {
+                while(tryTimes <= MAX_TRY_CONNECT_TIMES && !onceACKSent && !SettingsActivity@this.isFinishing) {
                     Log.i(javaClass.name, "try connect , isConnected = "+deviceManager!!.tcpClient.isConnected()+", times="+tryTimes)
                     if (deviceManager.tcpClient.isConnected()) {
                         SettingsServiceTCP(deviceManager!!).ackWIFI().subscribe( {

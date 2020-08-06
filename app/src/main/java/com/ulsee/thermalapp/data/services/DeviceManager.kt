@@ -1,14 +1,25 @@
 package com.ulsee.thermalapp.data.services
 
+import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.os.Handler
+import android.os.HandlerThread
+import android.util.Base64
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.ulsee.thermalapp.R
+import com.ulsee.thermalapp.data.AppPreference
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Device
 import com.ulsee.thermalapp.data.model.Notification
 import com.ulsee.thermalapp.data.model.Notification2
 import com.ulsee.thermalapp.data.model.Settings
 import com.ulsee.thermalapp.data.response.*
+import com.ulsee.thermalapp.ui.notification.NotificationActivity2
+import com.ulsee.thermalapp.utils.NotificationCenter
 import io.reactivex.Observable
 import io.reactivex.ObservableOnSubscribe
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -18,7 +29,7 @@ import org.json.JSONObject
 import java.lang.StringBuilder
 import kotlin.collections.ArrayList
 
-class DeviceManager(device: Device) {
+class DeviceManager(context: Context, device: Device) {
 
     companion object {
         val TCP_PORT = 13888
@@ -141,6 +152,10 @@ class DeviceManager(device: Device) {
     var settings : Settings? = null
     var tcpClient = TCPClient(device.getIP(), DeviceManager.TCP_PORT)
     var mIsIDNotMatched = false
+    private var mHandler: Handler? = null
+    private var mThread: HandlerThread? = null
+    private lateinit var mTask: Runnable
+    val mContext = context
 
     init {
         listenData()
@@ -156,26 +171,68 @@ class DeviceManager(device: Device) {
         if (isDebug) Log.i(javaClass.name, str)
     }
 
+    private fun initHandler() {
+        mThread = HandlerThread("add_device_thread")
+        mThread?.start()
+        mHandler = Handler(mThread?.looper!!)
+    }
+
+    fun unregisterHandler() {
+        mHandler?.removeCallbacks(mTask)
+        mHandler = null
+        mThread?.quit()
+        mThread = null
+    }
+
     fun keepConnection () {
         Thread(Runnable {
+//            Log.d("DeviceManager", "[Enter] connectUntilSuccess")
             connectUntilSuccess()
             while(true) {
                 // log("isConnected: "+(if(tcpClient.isConnected())"Y" else "N"))
-                if (!tcpClient.isConnected()) connectUntilSuccess()
+                if (!tcpClient.isConnected()) {
+//                    Log.d("DeviceManager", "[Enter] !tcpClient.isConnected() ip: ${tcpClient.ip}")
+//                    Log.d("DeviceManager", "[Enter] connectUntilSuccess")
+                    connectUntilSuccess()
+                }
                 Thread.sleep(if (mIsIDNotMatched) 10000 else 1000)
             }
         }).start()
+
+//        initHandler()
+//
+//        mTask = Runnable {
+//            try {
+//                Log.d("DeviceManager", "[Before] tcpClient.connect()")
+//                tcpClient.connect()
+////                Log.d("DeviceManager", "device connected!!!:" + tcpClient.ip)
+//                Log.d("DeviceManager", "[After] tcpClient.connect() tcpClient.isConnected(): "+ tcpClient.isConnected())
+//
+//                if (!tcpClient.isConnected()) {
+//                    mHandler?.post(mTask)
+//                }
+//            }
+//            catch (e: Exception) {
+//                Log.d("DeviceManager", "[Enter] Exception e.message: "+e.message)
+//                mHandler?.postDelayed(mTask, 1000)
+//            }
+//        }
+//        mHandler?.post(mTask)
+
     }
+
 
     fun connectUntilSuccess () {
         while(true) {
             try {
                 tcpClient.connect()
                 log("device connected!!!:"+tcpClient.ip)
+//                Log.d("DeviceManager", "device connected!!!:"+tcpClient.ip)
                 break;
             } catch(e:Exception) {
 //                Log.e(javaClass.name, "connectUntilSuccess error:"+tcpClient.ip)
 //                e.printStackTrace()
+//                Log.d("DeviceManager", "[Enter] Exception")
                 Thread.sleep(1000)
             }
         }
@@ -220,7 +277,6 @@ class DeviceManager(device: Device) {
         val action = obj.getInt("Action")
 
         log("onData, got action"+action)
-        Log.d("DeviceManager", "onData, got action"+action)
         Log.d("DeviceManager", "responseString: "+responseString)
 
         // 3. parse content
@@ -242,6 +298,7 @@ class DeviceManager(device: Device) {
                     if (settings!!.Deviation > 10) settings?.Deviation = 0.0
                     if (settings!!.Deviation < -10) settings?.Deviation = 0.0
                     if (settings!!.ID != device.getID()) {
+                        Log.d(TAG, "device.getID(): "+ device.getID()+" settings.ID: "+ settings!!.ID)
                         Log.w(javaClass.name, "device connected but id not match...")
                         mIsIDNotMatched = true;
                         tcpClient.close();
@@ -372,7 +429,7 @@ class DeviceManager(device: Device) {
             }
             Action.notification.ordinal -> {
                 Log.d("DeviceManager", "[Enter] when() -> Action.notification")
-                Log.d("DeviceManager", "responseString:　"+ responseString)
+//                Log.d("DeviceManager", "responseString:　"+ responseString)
 
                 val itemType = object : TypeToken<Notification2>() {}.type
                 try {
@@ -380,7 +437,8 @@ class DeviceManager(device: Device) {
                     if (mOnNotificationListener== null) {
                         Log.e(javaClass.name, "Error no listener of action "+action)
                     }
-                    mOnNotificationListener?.onNotification(response)
+//                    mOnNotificationListener?.onNotification(response)
+                    doNotify(response)
                 } catch(e: java.lang.Exception) {
                     Log.e(javaClass.name, "Error parse action "+action)
                     e.printStackTrace()
@@ -399,7 +457,7 @@ class DeviceManager(device: Device) {
 
         tcpClient.setOnReceivedDataListener(object: TCPClient.OnReceivedDataListener{
             override fun onData(data: CharArray, size: Int) {
-                Log.d("DeviceManager", "[Enter] TCPClient.OnReceivedDataListener.onData")
+//                Log.d("DeviceManager", "[Enter] TCPClient.OnReceivedDataListener.onData")
                 stringBuilder.append(data, 0, size)
                 log("onData, size = "+size)
 //                Log.d("DeviceManager", "[Enter] OnReceivedDataListener.onData")
@@ -449,4 +507,15 @@ class DeviceManager(device: Device) {
     fun updateDevice(d: Device) {
         device = d
     }
+
+    private fun doNotify(notification: Notification2) {
+        Log.d("DeviceManager", "[Enter] doNotify")
+        val isNotificationEnabled = AppPreference(mContext.getSharedPreferences("app", Context.MODE_PRIVATE)).isFeverNotificationEnabled()
+        if (isNotificationEnabled) {
+            val intent = Intent(mContext, NotificationActivity2::class.java)
+            intent.putExtra("notification", notification)
+            NotificationCenter.shared.show2(mContext, intent, mContext.getString(R.string.title_alert_notification), notification)
+        }
+    }
+
 }

@@ -1,7 +1,6 @@
 package com.ulsee.thermalapp.data.model
 
 import java.io.Serializable
-import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -32,18 +31,14 @@ open class Notification2 : Serializable {
     private var mDate : Date? = null
     val timeDate : Date
         get() {
-            if (mDate!=null) return mDate!!
-//            val pattern = "yyyy-MM-dd HH:mm:ss"
-            val pattern = "EEE MMM dd HH:mm:ss YYYY"
+//            if (mDate!=null) return mDate!!
+            val pattern = "yyyy-MM-dd"
             val simpleDateFormat = SimpleDateFormat(pattern)
-            var dateString: Date
-            dateString = try {
+            return try {
                 simpleDateFormat.parse(Time)
             } catch (e: Exception) {
-//                simpleDateFormat.parse("Mon Jan 01 00:00:00 1970")
-                Date(1970,1,1)
+                simpleDateFormat.parse("1970-01-01")
             }
-            return dateString
         }
 
     var Data  : String = ""
