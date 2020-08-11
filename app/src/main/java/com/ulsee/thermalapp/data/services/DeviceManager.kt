@@ -178,6 +178,10 @@ class DeviceManager(context: Context, device: Device) {
     }
 
     fun unregisterHandler() {
+        Log.d("DeviceManager", "[Enter] unregisterHandler")
+        Log.d("DeviceManager", "[Before] tcpClient.close()")
+        tcpClient.close()
+        Log.d("DeviceManager", "[After] tcpClient.close()")
         mHandler?.removeCallbacks(mTask)
         mHandler = null
         mThread?.quit()
@@ -185,58 +189,56 @@ class DeviceManager(context: Context, device: Device) {
     }
 
     fun keepConnection () {
-        Thread(Runnable {
-//            Log.d("DeviceManager", "[Enter] connectUntilSuccess")
-            connectUntilSuccess()
-            while(true) {
-                // log("isConnected: "+(if(tcpClient.isConnected())"Y" else "N"))
-                if (!tcpClient.isConnected()) {
-//                    Log.d("DeviceManager", "[Enter] !tcpClient.isConnected() ip: ${tcpClient.ip}")
-//                    Log.d("DeviceManager", "[Enter] connectUntilSuccess")
-                    connectUntilSuccess()
-                }
-                Thread.sleep(if (mIsIDNotMatched) 10000 else 1000)
-            }
-        }).start()
-
-//        initHandler()
-//
-//        mTask = Runnable {
-//            try {
-//                Log.d("DeviceManager", "[Before] tcpClient.connect()")
-//                tcpClient.connect()
-////                Log.d("DeviceManager", "device connected!!!:" + tcpClient.ip)
-//                Log.d("DeviceManager", "[After] tcpClient.connect() tcpClient.isConnected(): "+ tcpClient.isConnected())
-//
+//        Thread(Runnable {
+////            Log.d("DeviceManager", "[Enter] connectUntilSuccess")
+//            connectUntilSuccess()
+//            while(true) {
+//                // log("isConnected: "+(if(tcpClient.isConnected())"Y" else "N"))
 //                if (!tcpClient.isConnected()) {
-//                    mHandler?.post(mTask)
+//                    Log.d("DeviceManager", "[Enter] !tcpClient.isConnected() ip: ${tcpClient.ip}")
+////                    Log.d("DeviceManager", "[Enter] connectUntilSuccess")
+//                    connectUntilSuccess()
 //                }
+//                Thread.sleep(if (mIsIDNotMatched) 10000 else 1000)
 //            }
-//            catch (e: Exception) {
-//                Log.d("DeviceManager", "[Enter] Exception e.message: "+e.message)
-//                mHandler?.postDelayed(mTask, 1000)
-//            }
-//        }
-//        mHandler?.post(mTask)
+//        }).start()
 
-    }
+        initHandler()
 
-
-    fun connectUntilSuccess () {
-        while(true) {
+        mTask = Runnable {
             try {
+                Log.d("DeviceManager", "[Before] tcpClient.connect()")
                 tcpClient.connect()
-                log("device connected!!!:"+tcpClient.ip)
-//                Log.d("DeviceManager", "device connected!!!:"+tcpClient.ip)
-                break;
-            } catch(e:Exception) {
-//                Log.e(javaClass.name, "connectUntilSuccess error:"+tcpClient.ip)
-//                e.printStackTrace()
-//                Log.d("DeviceManager", "[Enter] Exception")
-                Thread.sleep(1000)
+                Log.d("DeviceManager", "[After] tcpClient.connect() tcpClient.isConnected(): "+ tcpClient.isConnected())
+
+                // Device is not connected after finishing tcpClient.connect()
+                mHandler?.post(mTask)
+            }
+            catch (e: Exception) {
+                Log.d("DeviceManager", "[Enter] Exception e.message: "+e.message)
+                mHandler?.postDelayed(mTask, 1000)
             }
         }
+
+        mHandler?.post(mTask)
     }
+
+
+//    fun connectUntilSuccess () {
+//        while(true) {
+//            try {
+//                tcpClient.connect()
+//                log("device connected!!!:"+tcpClient.ip)
+////                Log.d("DeviceManager", "device connected!!!:"+tcpClient.ip)
+//                break;
+//            } catch(e:Exception) {
+////                Log.e(javaClass.name, "connectUntilSuccess error:"+tcpClient.ip)
+////                e.printStackTrace()
+////                Log.d("DeviceManager", "[Enter] Exception")
+//                Thread.sleep(1000)
+//            }
+//        }
+//    }
 
     fun processBuffer (stringBuilder: StringBuilder) : Boolean {
         var hasAtLeastOnePacket = false

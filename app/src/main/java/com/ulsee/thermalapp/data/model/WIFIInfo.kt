@@ -16,6 +16,7 @@ open class WIFIInfo : Serializable {
     var signal = "100"
     var bars = "▂▄▆█"
     var security = "WPA2" // [WPA2] [--] [WPA1 WPA2]
+    var bssid = ""
 
     // [WPA2-PSK-CCMP][ESS]
     // [WPA2-PSK-CCMP][ESS][WPS]

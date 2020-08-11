@@ -50,7 +50,7 @@ class TCPClient(ip: String, port: Int) {
 
     fun listenData () {
         Log.d(TAG, "[Enter] listenData")
-        Thread(Runnable {
+//        Thread(Runnable {
             var buffer = CharArray(4096)
             var readLen = 0
             while(isConnected()) {
@@ -83,7 +83,7 @@ class TCPClient(ip: String, port: Int) {
                     e.printStackTrace()
                 }
             }
-        }).start()
+//        }).start()
     }
 
     fun isConnected():Boolean {
@@ -109,6 +109,7 @@ class TCPClient(ip: String, port: Int) {
     }
 
     fun send(str: String) {
+        Log.d("TCPClient2", "[Enter] TCPClient.send() str: "+ str)
         if (TCPClientSocket?.isConnected == false) {
             throw Exception("error send: socket not connected")
         }

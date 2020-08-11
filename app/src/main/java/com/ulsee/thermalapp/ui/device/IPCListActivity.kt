@@ -89,6 +89,8 @@ class IPCListActivity : AppCompatActivity() {
         if (!isSwipeRefresh)
             mProgressView.visibility = View.VISIBLE
 
+        mDeviceList.clear()
+
         mHandler?.postDelayed({
             (recyclerView.adapter as IPCListAdapter).setList(mDeviceList)
             swipeRefreshLayout.isRefreshing = false
