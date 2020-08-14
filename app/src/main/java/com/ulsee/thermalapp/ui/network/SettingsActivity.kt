@@ -35,6 +35,11 @@ class SettingsActivity : AppCompatActivity() {
             finish()
             return
         }
+        if (!intent.hasExtra("old_ip")) {
+            Toast.makeText(this, "Error: no old ip specified", Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
         mDeviceID = intent.getStringExtra("device")
 
 
@@ -93,14 +98,15 @@ class SettingsActivity : AppCompatActivity() {
     private fun switchAndSendACK() {
         val wifiInfo = intent.getSerializableExtra("wifi") as WIFIInfo
         var tryTimes = 0
+
         if (connect(wifiInfo)) {
             val deviceManager = Service.shared.getManagerOfDeviceID(mDeviceID)
             Thread(Runnable {
-                deviceManager!!.tcpClient.close()
                 while (tryTimes <= MAX_TRY_CONNECT_TIMES && !SettingsActivity@ this.isFinishing) {
                     Log.d(TAG, "try connect , isConnected = " + deviceManager!!.tcpClient.isConnected() + ", times=" + tryTimes)
 
-                    if (deviceManager.tcpClient.isConnected()) {
+//                    if (deviceManager.tcpClient.isConnected()) {
+                    if (isStateCorrect()) {
 
                         sendACK(tryTimes)
 
@@ -114,8 +120,19 @@ class SettingsActivity : AppCompatActivity() {
                 }
             }).start()
         } else {
-            Log.d(TAG, "Switch wifi unsuccessfully...")
+            Log.d(TAG, "wifiManager.getConfiguredNetworks() is empty.")
+            Toast.makeText(this, "Error to switch to Wi-Fi", Toast.LENGTH_LONG).show()
+            finish()
         }
+    }
+
+    private fun isStateCorrect(): Boolean {
+        val deviceManager = Service.shared.getManagerOfDeviceID(mDeviceID)
+        val specifiedIP = deviceManager!!.tcpClient.ip
+        val oldIP = intent.getStringExtra("old_ip")
+        Log.d(TAG, "old ip: $oldIP specified ip: $specifiedIP")
+
+        return (specifiedIP != oldIP) && deviceManager.tcpClient.isConnected()
     }
 
     private fun sendACK(tryTimes: Int){
@@ -200,7 +217,7 @@ class SettingsActivity : AppCompatActivity() {
                 }
             }
         }
-        Log.d(TAG, "[Before] wifiManager.getConfiguredNetworks() is empty. return False !!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
+        Log.d(TAG, "wifiManager.getConfiguredNetworks() is empty.")
         return false
     }
 }

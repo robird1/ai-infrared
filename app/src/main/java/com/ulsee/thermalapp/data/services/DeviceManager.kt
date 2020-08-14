@@ -150,7 +150,7 @@ class DeviceManager(context: Context, device: Device) {
 
     var device = device
     var settings : Settings? = null
-    var tcpClient = TCPClient(device.getIP(), DeviceManager.TCP_PORT)
+    val tcpClient = TCPClient(device.getIP(), DeviceManager.TCP_PORT)
     var mIsIDNotMatched = false
     private var mHandler: Handler? = null
     private var mThread: HandlerThread? = null

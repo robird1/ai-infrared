@@ -2,22 +2,28 @@ package com.ulsee.thermalapp.ui.network
 
 import android.app.Activity
 import android.app.ProgressDialog
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
+import android.location.LocationManager
 import android.net.wifi.WifiManager
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.ulsee.thermalapp.MainActivity
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.location.LocationSettingsStatusCodes
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.WIFIInfo
@@ -25,6 +31,8 @@ import com.ulsee.thermalapp.data.request.SetWIFI
 import com.ulsee.thermalapp.data.services.DeviceManager
 import com.ulsee.thermalapp.data.services.SettingsServiceTCP
 import com.ulsee.thermalapp.utils.RecyclerViewItemClickSupport
+
+const val REQUEST_LOCATION_SETTINGS = 5678
 
 class WIFIListActivity : AppCompatActivity() {
 
@@ -35,6 +43,7 @@ class WIFIListActivity : AppCompatActivity() {
     lateinit var mProgressDialog : ProgressDialog
     var deviceID = ""
     var mDeviceManager : DeviceManager? = null
+    private lateinit var mProgressView: ConstraintLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,11 +89,12 @@ class WIFIListActivity : AppCompatActivity() {
 
     private fun initRecyclerView () {
         swipeRefreshLayout = findViewById<SwipeRefreshLayout>(R.id.swipeRefreshLayout)
-        swipeRefreshLayout.setOnRefreshListener { loadWIFIList() }
+        swipeRefreshLayout.setOnRefreshListener { loadWIFIList(true) }
 
         recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
         recyclerView.adapter = WIFIListAdapter()
         recyclerView.layoutManager = LinearLayoutManager(this)
+        mProgressView = findViewById(R.id.progress_view)
 
         val support: RecyclerViewItemClickSupport = RecyclerViewItemClickSupport.addTo(recyclerView)
         support.setOnItemClickListener { recyclerView, position, view ->
@@ -116,6 +126,7 @@ class WIFIListActivity : AppCompatActivity() {
         val intent = Intent(this, SettingsActivity::class.java)
         intent.putExtra("wifi", wifiInfo)
         intent.putExtra("device", deviceID)
+        intent.putExtra("old_ip", mDeviceManager!!.tcpClient.ip)
         startActivityForResult(intent, REQUEST_CODE_SWITCH_WIFI)
     }
 
@@ -132,6 +143,12 @@ class WIFIListActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(this, "Error: failed to set specified Wi-Fi", Toast.LENGTH_LONG).show()
                 Log.d("WIFIListActivity", "[onActivityResult] Error: failed to set specified Wi-Fi")
+            }
+        } else if (requestCode == REQUEST_LOCATION_SETTINGS) {
+            if (resultCode == RESULT_OK) {
+                loadWIFIList()
+            } else {
+                finish()
             }
         }
         super.onActivityResult(requestCode, resultCode, data)
@@ -207,14 +224,17 @@ class WIFIListActivity : AppCompatActivity() {
                 }
                 (recyclerView.adapter as WIFIListAdapter).setList(wifiInfoList)
                 if (results.size == 0) {
-                    Toast.makeText(this@WIFIListActivity, "There is no Wi-Fi scanned", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@WIFIListActivity, "There is no Wi-Fi scanned", Toast.LENGTH_SHORT).show()
                     Log.d("WIFIListActivity", "[wifiScanReceiver.onReceive] There is no Wi-Fi scanned")
-                    finish()
+//                    finish()
                 }
             } else {
                 Toast.makeText(this@WIFIListActivity, "Failed to scan Wi-Fi", Toast.LENGTH_LONG).show()
                 Log.d("WIFIListActivity", "[wifiScanReceiver.onReceive] Failed to scan Wi-Fi")
             }
+
+            mProgressView.visibility = View.INVISIBLE
+
         }
     }
 
@@ -227,16 +247,73 @@ class WIFIListActivity : AppCompatActivity() {
         unregisterReceiver(wifiScanReceiver)
     }
 
-    private fun loadWIFIList() {
-        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+    private fun loadWIFIList(isSwipeRefresh: Boolean = false) {
+        if (!isSwipeRefresh)
+            mProgressView.visibility = View.VISIBLE
 
+        checkLocationSetting()
+
+        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         val success = wifiManager.startScan()
         if (!success) {
             swipeRefreshLayout.isRefreshing = false
+            mProgressView.visibility = View.INVISIBLE
             Toast.makeText(this, "Failed to scan Wi-Fi", Toast.LENGTH_LONG).show()
             Log.d("WIFIListActivity", "[loadWIFIList] Failed to scan Wi-Fi")
-        } else {
-            Log.d("WIFIListActivity", "[loadWIFIList] Success to scan Wi-Fi")
         }
     }
+
+    fun isLocationEnabled(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            // This is new method provided in API 28
+            val lm = getSystemService(LOCATION_SERVICE) as LocationManager
+            lm.isLocationEnabled
+        } else {
+            // This is Deprecated in API 28
+            val mode = Settings.Secure.getInt(this.contentResolver, Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF);
+            (mode != Settings.Secure.LOCATION_MODE_OFF);
+        }
+    }
+
+    fun checkLocationSetting() {
+        val mLocationRequest = LocationRequest.create()
+            .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+            .setInterval(10 * 1000)
+            .setFastestInterval(1 * 1000)
+
+        val settingsBuilder = LocationSettingsRequest.Builder().addLocationRequest(mLocationRequest)
+        settingsBuilder.setAlwaysShow(true)
+
+        val result = LocationServices.getSettingsClient(this).checkLocationSettings(settingsBuilder.build())
+
+        result.addOnCompleteListener {
+            try {
+                val response = it.getResult(ApiException::class.java)
+                Log.d("WIFIListActivity", "response: "+ response.toString())
+
+            } catch (ex: ApiException) {
+                when (ex.statusCode) {
+                    LocationSettingsStatusCodes.RESOLUTION_REQUIRED -> {
+                        Log.d("WIFIListActivity","Location settings are not satisfied. Show the user a dialog to upgrade location settings.")
+                        try {
+                            val resolvableApiException = ex as ResolvableApiException
+                            resolvableApiException.startResolutionForResult(this, REQUEST_LOCATION_SETTINGS)
+
+                        } catch (e: IntentSender.SendIntentException) {
+                            Log.d("WIFIListActivity", "PendingIntent unable to execute request.")
+                            Toast.makeText(this, "Failed to switch Wi-Fi...", Toast.LENGTH_LONG).show()
+                            finish()
+                        }
+                    }
+                    LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE -> {
+                        Log.d("WIFIListActivity", "Location settings are inadequate, and cannot be fixed here. Dialog not created.")
+                        Toast.makeText(this, "Failed to switch Wi-Fi...", Toast.LENGTH_LONG).show()
+                        finish()
+                    }
+                }
+            }
+        }
+
+    }
+
 }

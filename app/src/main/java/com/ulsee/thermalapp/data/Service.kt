@@ -51,6 +51,7 @@ class Service {
             for (deviceManager in deviceManagerList) {
                 if (deviceManager.device.getID().equals(it.getID()) && !deviceManager.device.getIP().equals(it.getIP())) {
                     Log.i(javaClass.name, "found device ip changed, old ip: "+deviceManager.device.getIP()+", new ip: "+it.getIP())
+                    Log.d(TAG, "found device ip changed, old ip: "+deviceManager.device.getIP()+", new ip: "+it.getIP())
                     if (!deviceManager.tcpClient.isConnected()){
                         Thread(Runnable {
                             try {

@@ -32,12 +32,12 @@ open class Notification2 : Serializable {
     val timeDate : Date
         get() {
 //            if (mDate!=null) return mDate!!
-            val pattern = "yyyy-MM-dd"
+            val pattern = "yyyy-MM-dd HH:mm:ss"
             val simpleDateFormat = SimpleDateFormat(pattern)
             return try {
                 simpleDateFormat.parse(Time)
             } catch (e: Exception) {
-                simpleDateFormat.parse("1970-01-01")
+                simpleDateFormat.parse("1970-01-01 00:00:00")
             }
         }
 

@@ -40,6 +40,7 @@ class TCPClient(ip: String, port: Int) {
 //        Log.d(TAG, "[Enter] close socket")
         TCPClientSocket?.close()
         bufferedReader = null
+        bufferedWriter = null
     }
 
     fun resetIP(ip: String) {
@@ -119,6 +120,7 @@ class TCPClient(ip: String, port: Int) {
         if (bufferedWriter == null) {
             bufferedWriter = BufferedWriter(OutputStreamWriter(TCPClientSocket?.getOutputStream()));
         }
+        Log.d("TCPClient", "[Enter] bufferedWriter?.write(str): ")
         bufferedWriter?.write(str)
         bufferedWriter?.flush()
     }
