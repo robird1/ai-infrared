@@ -31,6 +31,7 @@ class TutorialStep1Activity : AppCompatActivity() {
     fun doTutorial () {
         val intent = Intent(this, StreamingActivity::class.java)
         intent.putExtra("device", Service.shared.tutorialDeviceID!!)
+        intent.putExtra("is_tutorial", true)
         startActivityForResult(intent, REQUEST_CODE_DO_TUTORIAL)
     }
 

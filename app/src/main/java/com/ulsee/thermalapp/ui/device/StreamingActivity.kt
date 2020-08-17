@@ -42,13 +42,19 @@ class StreamingActivity : AppCompatActivity() {
         setContentView(R.layout.activity_device_streaming)
 
         thermalSwitch = findViewById(R.id.switch_thermal)
-        thermalSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
-            if (isChecked) {
-                switchToThermalStreaming()
-            } else {
-                switchToRGBStreaming()
+        val isCalledFromTutorial = intent.getBooleanExtra("is_tutorial", false)
+        if (!isCalledFromTutorial) {
+            thermalSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
+                if (isChecked) {
+                    switchToThermalStreaming()
+                } else {
+                    switchToRGBStreaming()
+                }
             }
+        } else {
+            thermalSwitch.visibility = View.GONE
         }
+
         surfaceView =  findViewById<StreamingSurfaceView>(R.id.surfaceView) as StreamingSurfaceView
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
@@ -77,13 +83,19 @@ class StreamingActivity : AppCompatActivity() {
         if (Service.shared.tutorialDeviceID != null) {
             findViewById<View>(R.id.button_next).visibility = View.VISIBLE
             findViewById<View>(R.id.button_next).setOnClickListener{setResult(RESULT_OK);finish()}
-            thermalSwitch.isChecked = true
+            if (!isCalledFromTutorial) {
+                thermalSwitch.isChecked = true
+            }
         }
 
-        if (thermalSwitch.isChecked) {
+        if (isCalledFromTutorial) {
             startThermalStreaming()
         } else {
-            startRGBStreaming()
+            if (thermalSwitch.isChecked) {
+                startThermalStreaming()
+            } else {
+                startRGBStreaming()
+            }
         }
 
 //        val fragment = SettingsFragment(deviceID, false)
