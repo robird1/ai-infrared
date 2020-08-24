@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/my_search"
+        android:title="Search"
+        android:icon="@drawable/ic_toolbar_search_gray"
+        app:showAsAction="always|collapseActionView"
+        app:actionViewClass="com.ulsee.thermalapp.ui.people.PeopleSearchView" />
+
+<!--    <item-->
+<!--        android:id="@+id/people_delete"-->
+<!--        android:icon="@drawable/ic_toolbar_delete_gray"-->
+<!--        android:title="Delete"-->
+<!--        app:showAsAction="always|collapseActionView" />-->
+
+</menu>

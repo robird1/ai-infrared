@@ -6,6 +6,7 @@ import android.view.MotionEvent
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.ulsee.thermalapp.R
+import com.ulsee.thermalapp.data.Service
 
 class StarterActivity : AppCompatActivity() {
 
@@ -15,11 +16,17 @@ class StarterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_device_starter)
 
-        findViewById<View>(R.id.button).setOnClickListener { startScan() }
+        findViewById<View>(R.id.button).setOnClickListener {
+//            startScan()
+            AddDeviceController(this).execute()
+        }
+
+        Service.shared.isStarterActivity = true
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        startScan()
+//        startScan()
+        AddDeviceController(this).execute()
         return true
     }
 

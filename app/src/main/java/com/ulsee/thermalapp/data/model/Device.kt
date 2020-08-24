@@ -36,6 +36,14 @@ open class Device {
           return mCreatedAt
      }
 
+     private var mIsFRVisible: Boolean = true
+     open fun setIsFRVisible(value: Boolean) {
+          mIsFRVisible = value
+     }
+     open fun getIsFRVisible(): Boolean {
+          return mIsFRVisible
+     }
+
      public companion object {
           fun clone (realmDevice: RealmDevice) : Device {
                val device = Device()
@@ -43,6 +51,7 @@ open class Device {
                device.setIP(realmDevice.getIP())
                device.setName(realmDevice.getName())
                device.setCreatedAt(realmDevice.getCreatedAt())
+               device.setIsFRVisible(realmDevice.getIsFRVisible())
                return device
           }
      }

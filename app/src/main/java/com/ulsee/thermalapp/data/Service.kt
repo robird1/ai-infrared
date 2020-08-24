@@ -1,5 +1,6 @@
 package com.ulsee.thermalapp.data
 
+import android.content.Context
 import android.util.Log
 import com.ulsee.thermalapp.data.model.Device
 import com.ulsee.thermalapp.data.model.RealmDevice
@@ -7,20 +8,34 @@ import com.ulsee.thermalapp.data.services.*
 import io.realm.Realm
 import io.realm.kotlin.where
 
+val TAG = "Service"
+
 class Service {
     companion object {
         val shared = Service()
     }
-    
+
+    lateinit var mContext: Context
+    fun setContext(context: Context) {
+        mContext = context
+    }
+
     interface DeviceSearchedListener {
+        fun onNewDevice(device: Device)
+    }
+    interface DeviceSearchedListener2 {
         fun onNewDevice(device: Device)
     }
 
     var deviceManagerList : ArrayList<DeviceManager> = ArrayList<DeviceManager>()
+    var mScannedDeviceList = ArrayList<Device>() // IP, ID, Timestamp
     val udpBroadcastService = UDPBroadcastService()
     var mDeviceSearchedListener : DeviceSearchedListener? = null
     val isScanning: Boolean
         get() = mDeviceSearchedListener != null
+    var isStarterActivity: Boolean = false
+    var mDeviceSearchedListener2 : DeviceSearchedListener2? = null
+
 
     // tutorial
     fun requestTutorial(deviceID: String) {
@@ -30,16 +45,19 @@ class Service {
     var justJoinedDeviceIDList = ArrayList<String>()
 
     init {
+//        Log.d("Service", "[Enter] init")
         udpBroadcastService.subscribeSearchedDevice().subscribe{
             // if device ip changed
             for (deviceManager in deviceManagerList) {
                 if (deviceManager.device.getID().equals(it.getID()) && !deviceManager.device.getIP().equals(it.getIP())) {
                     Log.i(javaClass.name, "found device ip changed, old ip: "+deviceManager.device.getIP()+", new ip: "+it.getIP())
+                    Log.d(TAG, "found device ip changed, old ip: "+deviceManager.device.getIP()+", new ip: "+it.getIP())
                     if (!deviceManager.tcpClient.isConnected()){
                         Thread(Runnable {
                             try {
                                 deviceManager.resetIP(it.getIP())
                                 Log.i(javaClass.name, "reset to new IP!")
+                                Log.d(TAG, "[Enter] deviceManager.resetIP(it.getIP()) ip: ${it.getIP()}")
                             } catch (e: java.lang.Exception) {
                                 Log.i(javaClass.name, "failed to reset to new IP:")
                                 e.printStackTrace()
@@ -52,9 +70,19 @@ class Service {
             }
             // if scanning
             mDeviceSearchedListener?.onNewDevice(it)
+            mDeviceSearchedListener2?.onNewDevice(it)
         }
-        getDeviceList()
+//        getDeviceList()
         keepSearchingDevice()
+    }
+
+    private fun isDeviceDuplicated(device: Device): Boolean {
+        for (d in mScannedDeviceList) {
+            if (d.getID().equals(device.getID()) && d.getIP().equals(device.getIP())) {
+                return true
+            }
+        }
+        return false
     }
 
     // device
@@ -76,7 +104,7 @@ class Service {
                 }
             }
             if (!isDeviceManagerExists) {
-                deviceManagerList.add(DeviceManager(device))
+                deviceManagerList.add(DeviceManager(mContext, device))
             }
         }
 
@@ -106,7 +134,10 @@ class Service {
                 try {
                     isAnyDeviceNotConnected =
                         deviceManagerList.indexOfFirst { !it.tcpClient.isConnected() } >= 0
-                    udpBroadcastService.shouldBroadcasting = isAnyDeviceNotConnected || isScanning
+                    udpBroadcastService.shouldBroadcasting = isAnyDeviceNotConnected || isScanning || isStarterActivity
+
+//                    Log.d(TAG, "udpBroadcastService.shouldBroadcasting: "+ udpBroadcastService.shouldBroadcasting)
+
                     Thread.sleep(1000)
                 } catch (e: Exception) {
                     Log.e(javaClass.name, "Error: Service keepSearchingDevice:")

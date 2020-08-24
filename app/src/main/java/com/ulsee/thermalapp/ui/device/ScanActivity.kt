@@ -1,12 +1,9 @@
 package com.ulsee.thermalapp.ui.device
 
-import android.app.ProgressDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
-import android.net.wifi.WifiManager
 import android.os.Bundle
-import android.text.format.Formatter
 import android.util.Log
 import android.view.SurfaceHolder
 import android.view.SurfaceView
@@ -23,15 +20,12 @@ import com.google.android.gms.vision.barcode.BarcodeDetector
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.google.zxing.integration.android.IntentIntegrator
-import com.ulsee.thermalapp.MainActivity
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.AppPreference
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Device
-import com.ulsee.thermalapp.data.model.RealmDevice
 import com.ulsee.thermalapp.data.model.Settings
 import com.ulsee.thermalapp.data.services.DeviceManager
-import io.realm.Realm
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.Socket
@@ -50,6 +44,7 @@ class ScanActivity : AppCompatActivity() {
     var mIsConnectedToAPTCP = false
     var mAPSettings : Settings? = null
     var mAPDevice : Device? = null
+    private lateinit var mAddDeviceController: AddDeviceController
 
     enum class Status {
         scanningQRCode, searchingDevice, askingName
@@ -80,6 +75,7 @@ class ScanActivity : AppCompatActivity() {
         // initQRCodeScanner()
 
         Service.shared.mDeviceSearchedListener = mOnDeviceSearchedListener
+        mAddDeviceController = AddDeviceController(this)
         keepTryConenctToAPTCP()
     }
 
@@ -90,8 +86,11 @@ class ScanActivity : AppCompatActivity() {
 
     val mOnDeviceSearchedListener = object : Service.DeviceSearchedListener {
         override fun onNewDevice(device: Device) {
-            device.setCreatedAt(System.currentTimeMillis())
-            mScannedDeviceList.add(device)
+            if (!isDeviceDuplicated(device)) {
+                device.setCreatedAt(System.currentTimeMillis())
+                mScannedDeviceList.add(device)
+            }
+
             if (mStatus == ScanActivity.Status.searchingDevice) {
                 if (device.getID() == mSearchingDeviceID) {
                     // 找到了
@@ -100,6 +99,15 @@ class ScanActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun isDeviceDuplicated(device: Device): Boolean {
+        for (d in mScannedDeviceList) {
+            if (d.getID().equals(device.getID()) && d.getIP().equals(device.getIP())) {
+                return true
+            }
+        }
+        return false
     }
 
     private fun initZxingScanner () {
@@ -224,9 +232,7 @@ class ScanActivity : AppCompatActivity() {
                     Toast.makeText(ctx, ctx.getString(R.string.hint_input_device_name), Toast.LENGTH_SHORT).show()
                 } else {
                     device.setName(deviceName)
-                    saveDevice(device, isDuplicated)
-                    AppPreference(getSharedPreferences("app", Context.MODE_PRIVATE)).setOnceCreateFirstDevice()
-                    goMain()
+                    mAddDeviceController.save(device, isDuplicated)
                 }
             }
             .setNegativeButton("Cancel"
@@ -247,50 +253,19 @@ class ScanActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun saveDevice (obj: Device, isDuplicated: Boolean) {
-        val realm = Realm.getDefaultInstance()
-        realm.beginTransaction()
-        val device: RealmDevice = if(isDuplicated) realm.where(RealmDevice::class.java).equalTo("mID", obj.getID()).findFirst()!! else realm.createObject(RealmDevice::class.java)
-        device.setID(obj.getID())
-        device.setName(obj.getName())
-        device.setIP(obj.getIP())
-        device.setCreatedAt(obj.getCreatedAt())
-        realm.commitTransaction()
-
-        if (!isDuplicated) {
-            Log.i(javaClass.name, "found new joined device: "+device.getID())
-            Service.shared.justJoinedDeviceIDList.add(device.getID())
-        }
-    }
-
-    private fun goMain () {
-        startActivity(Intent(this, MainActivity::class.java))
-        finish()
-    }
-
-    private fun getLocalIP () : String {
-        val wm = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        val ip: String = Formatter.formatIpAddress(wm.connectionInfo.ipAddress)
-        return ip
-    }
-
-    private fun getAPTCPIP () : String {
-        var localIP = getLocalIP()
-        var arr = localIP.split(".")
-        return String.format("%s.%s.%s.1",arr[0],arr[1],arr[2])
-    }
-
     private fun keepTryConenctToAPTCP () {
         val gson = Gson()
         Thread(Runnable {
             while(!isFinishing) {
                 try {
+                    Thread.sleep(1000)
+
                     if (mIsConnectedToAPTCP) {
                         Thread.sleep(1000)
                         continue
                     }
                     // 1. get ip
-                    val ip = getAPTCPIP()
+                    val ip = mAddDeviceController.getAPTCPIP()
                     // 2. try connect
                     mAPTCPSocket = Socket(ip, DeviceManager.TCP_PORT)
                     // 3. try to get settings ID
@@ -300,6 +275,7 @@ class ScanActivity : AppCompatActivity() {
                     val responseString = String(buffer, 0, readLen)
                     Log.i(javaClass.name, "try to connect to IP.1, received:")
                     Log.i(javaClass.name, responseString)
+                    Log.d(TAG, "responseString: "+ responseString)
                     // 4. try to get settings
                     val itemType = object : TypeToken<Settings>() {}.type
                     mAPSettings = gson.fromJson<Settings>(responseString, itemType)
@@ -308,6 +284,8 @@ class ScanActivity : AppCompatActivity() {
                     mAPDevice?.setID(mAPSettings!!.ID)
                     mAPDevice?.setIP(ip)
                     mAPDevice?.setCreatedAt(System.currentTimeMillis())
+                    mAPDevice?.setIsFRVisible(mAPSettings!!.IsFRVisible)
+
 
                     mIsConnectedToAPTCP = true
                     // 5. check device
@@ -318,9 +296,9 @@ class ScanActivity : AppCompatActivity() {
                             this@ScanActivity.runOnUiThread { mSearchingDeviceProgressDialog.dismiss(); askDeviceName(mAPDevice!!) }
                         }
                     }
-                    Thread.sleep(1000)
                 } catch(e: SocketException) {
                     Log.i(javaClass.name, "try to connect to IP.1 (AP TCP), but failed, isn't AP mode")
+                    Log.d(TAG, "try to connect to IP.1 (AP TCP), but failed, isn't AP mode")
 //                    e.printStackTrace()
                     mAPTCPSocket?.close()
                     mAPTCPSocket = null

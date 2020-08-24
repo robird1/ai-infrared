@@ -9,7 +9,7 @@ open class Settings {
     var IsFR: Boolean = false
     var IsFlip: Boolean = false
     var IsOnlyROI: Boolean = false
-
+    var IsFRVisible: Boolean = true
     var AutoSaveDir = ""
     var IsAutoSave = false
     var IsDeveloper = false

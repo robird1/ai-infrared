@@ -25,6 +25,8 @@ class App : Application() {
 //            } // Migration to run
             .build()
         Realm.setDefaultConfiguration(config)
+        Service.shared.setContext(applicationContext)
+        Service.shared.getDeviceList()
         Service.shared.udpBroadcastService.initialize(applicationContext)
     }
 }

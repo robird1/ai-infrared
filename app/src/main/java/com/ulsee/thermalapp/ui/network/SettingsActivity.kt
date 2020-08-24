@@ -13,6 +13,10 @@ import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.WIFIInfo
 import com.ulsee.thermalapp.data.services.SettingsServiceTCP
 
+val TAG = "SettingsActivity"
+
+const val MAX_TRY_CONNECT_TIMES = 30
+
 class SettingsActivity : AppCompatActivity() {
 
     var mDeviceID = ""
@@ -22,7 +26,7 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_network_settings)
 
         if (!intent.hasExtra("wifi")) {
-            Toast.makeText(this, "Error: no wifi specified", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Error: no Wi-Fi specified", Toast.LENGTH_LONG).show()
             finish()
             return
         }
@@ -31,60 +35,130 @@ class SettingsActivity : AppCompatActivity() {
             finish()
             return
         }
+        if (!intent.hasExtra("old_ip")) {
+            Toast.makeText(this, "Error: no old ip specified", Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
         mDeviceID = intent.getStringExtra("device")
 
-        val wifiInfo = intent.getSerializableExtra("wifi") as WIFIInfo
 
+//        var tryTimes = 0
+//        var sendTimes = 0
+//        val MAX_TRY_CONNECT_TIMES = 30
+//        var onceACKSent = false
+//        if (connect(wifiInfo)) {
+//            val deviceManager = Service.shared.getManagerOfDeviceID(mDeviceID)
+//            Thread(Runnable {
+//                deviceManager!!.tcpClient.close()
+//                while(tryTimes <= MAX_TRY_CONNECT_TIMES && !onceACKSent && !SettingsActivity@this.isFinishing) {
+//                    Log.i(javaClass.name, "try connect , isConnected = "+deviceManager!!.tcpClient.isConnected()+", times="+tryTimes)
+//                    if (deviceManager.tcpClient.isConnected()) {
+//                        SettingsServiceTCP(deviceManager!!).ackWIFI().subscribe( {
+//                            onceACKSent = true
+//                            Log.i(javaClass.name, "ACK sent!!")
+//                            tryTimes += 1
+//                            sendTimes += 1
+//                            endWithSuccess()
+//                            //if (sendTimes >= 5) endWithSuccess()
+//                        }, {
+//                            tryTimes += 1
+//                            Log.i(javaClass.name, "failed to ack "+tryTimes)
+//                            if (tryTimes >= MAX_TRY_CONNECT_TIMES) {
+//                                if (onceACKSent) {
+//                                    endWithSuccess()
+//                                } else {
+//                                    endWithError(it)
+//                                }
+//                            }
+//                            deviceManager.tcpClient.reconnect()
+//                        })
+//                    } else {
+//                        tryTimes += 1
+//                        if (tryTimes >= MAX_TRY_CONNECT_TIMES) {
+//                            if (onceACKSent) {
+//                                endWithSuccess()
+//                            } else {
+//                                endWithError(null)
+//                            }
+//                            break
+//                        }
+//                    }
+//                    Thread.sleep(1000)
+//                }
+//            }).start()
+//        }
+        switchAndSendACK()
+    }
+
+    /**
+     * The UDP Service will try to find the device and reconnect the device again (i.e. close the original socket and reset IP)
+     * when the network of the cell phone is successfully switched,
+     */
+    private fun switchAndSendACK() {
+        val wifiInfo = intent.getSerializableExtra("wifi") as WIFIInfo
         var tryTimes = 0
-        var sendTimes = 0
-        val MAX_TRY_CONNECT_TIMES = 30
-        var onceACKSent = false
+
         if (connect(wifiInfo)) {
             val deviceManager = Service.shared.getManagerOfDeviceID(mDeviceID)
             Thread(Runnable {
-                deviceManager!!.tcpClient.close()
-                while(tryTimes <= MAX_TRY_CONNECT_TIMES && sendTimes< 5) {
-                    Log.i(javaClass.name, "try connect , isConnected = "+deviceManager!!.tcpClient.isConnected()+", times="+tryTimes)
-                    if (deviceManager.tcpClient.isConnected()) {
-                        SettingsServiceTCP(deviceManager!!).ackWIFI().subscribe( {
-                            onceACKSent = true
-                            Log.i(javaClass.name, "ACK sent!!")
-                            tryTimes += 1
-                            sendTimes += 1
-                            if (sendTimes >= 5) endWithSuccess()
-                        }, {
-                            tryTimes += 1
-                            Log.i(javaClass.name, "failed to ack "+tryTimes)
-                            if (tryTimes >= MAX_TRY_CONNECT_TIMES) {
-                                if (onceACKSent) {
-                                    endWithSuccess()
-                                } else {
-                                    endWithError(it)
-                                }
-                            }
-                            deviceManager.tcpClient.reconnect()
-                        })
+                while (tryTimes <= MAX_TRY_CONNECT_TIMES && !SettingsActivity@ this.isFinishing) {
+                    Log.d(TAG, "try connect , isConnected = " + deviceManager!!.tcpClient.isConnected() + ", times=" + tryTimes)
+
+//                    if (deviceManager.tcpClient.isConnected()) {
+                    if (isStateCorrect()) {
+
+                        sendACK(tryTimes)
+
                     } else {
-                        tryTimes += 1
                         if (tryTimes >= MAX_TRY_CONNECT_TIMES) {
-                            if (onceACKSent) {
-                                endWithSuccess()
-                            } else {
-                                endWithError(null)
-                            }
-                            break
+                            endWithError(null)
                         }
                     }
+                    tryTimes += 1
                     Thread.sleep(1000)
                 }
             }).start()
+        } else {
+            Log.d(TAG, "wifiManager.getConfiguredNetworks() is empty.")
+            Toast.makeText(this, "Error to switch to Wi-Fi", Toast.LENGTH_LONG).show()
+            finish()
         }
     }
 
+    private fun isStateCorrect(): Boolean {
+        val deviceManager = Service.shared.getManagerOfDeviceID(mDeviceID)
+        val specifiedIP = deviceManager!!.tcpClient.ip
+        val oldIP = intent.getStringExtra("old_ip")
+        Log.d(TAG, "old ip: $oldIP specified ip: $specifiedIP")
+
+        return (specifiedIP != oldIP) && deviceManager.tcpClient.isConnected()
+    }
+
+    private fun sendACK(tryTimes: Int){
+        Log.d(TAG, "[Enter] sendACK")
+        val deviceManager = Service.shared.getManagerOfDeviceID(mDeviceID)
+        SettingsServiceTCP(deviceManager!!).ackWIFI().subscribe( {
+            Log.d(TAG, "[Enter] endWithSuccess")
+            endWithSuccess()
+
+        }, {
+            Log.d(TAG, "[onError] ackWIFI it.message: "+it.message)
+
+            if (tryTimes >= MAX_TRY_CONNECT_TIMES) {
+                endWithError(it)
+            }
+//            deviceManager.tcpClient.reconnect()
+        })
+    }
+
     fun endWithSuccess () {
-        setResult(RESULT_OK)
-        Toast.makeText(this, "Succeed switch WIFI!!", Toast.LENGTH_LONG).show()
-        finish()
+        this.runOnUiThread {
+            setResult(RESULT_OK)
+            Toast.makeText(this, "Succeed switch Wi-Fi!!", Toast.LENGTH_LONG).show()
+            Log.d(TAG, "Succeed switch Wi-Fi!!")
+            finish()
+        }
     }
 
     fun endWithError (exception: Throwable?) {
@@ -92,9 +166,11 @@ class SettingsActivity : AppCompatActivity() {
         exception?.printStackTrace()
         runOnUiThread{
             if (exception != null) {
-                Toast.makeText(this, "Error to switch to wifi (ACK): "+exception!!.message, Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Error to switch to Wi-Fi (ACK): "+exception!!.message, Toast.LENGTH_LONG).show()
+                Log.d(TAG, "Error to switch to Wi-Fi (ACK): "+exception!!.message)
             } else {
-                Toast.makeText(this, "Error to switch to wifi (ACK) ", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Error to switch to Wi-Fi (ACK) ", Toast.LENGTH_LONG).show()
+                Log.d(TAG, "Error to switch to Wi-Fi (ACK) ")
             }
             finish()
         }
@@ -136,10 +212,12 @@ class SettingsActivity : AppCompatActivity() {
                 if (result) {
                     return true
                 } else {
+                    Log.d(TAG, "[Before] setResult(Activity.RESULT_FIRST_USER) !!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
                     setResult(Activity.RESULT_FIRST_USER)
                 }
             }
         }
+        Log.d(TAG, "wifiManager.getConfiguredNetworks() is empty.")
         return false
     }
 }

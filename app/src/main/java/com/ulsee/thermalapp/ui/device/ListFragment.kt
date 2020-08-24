@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -33,7 +34,9 @@ class ListFragment : Fragment() {
 
         loadDevices()
 
-        root.findViewById<View>(R.id.fab).setOnClickListener { openScanner() }
+        root.findViewById<View>(R.id.fab).setOnClickListener {
+            AddDeviceController(requireActivity()).execute()
+        }
 
         (activity as MainActivity).setTitle("Device")
 
@@ -46,14 +49,18 @@ class ListFragment : Fragment() {
         context?.unregisterReceiver(deviceChangedReceiver)
         super.onDestroy()
     }
-    val deviceChangedReceiver = object: BroadcastReceiver(){
+
+    private val deviceChangedReceiver = object: BroadcastReceiver(){
         override fun onReceive(context: Context?, intent: Intent?) {
+            unregisterDeviceHandler(intent)
             loadDevices()
         }
     }
 
-    private fun openScanner () {
-        startActivityForResult(Intent(context, ScanActivity::class.java), REQUEST_CODE_ACTIVITY_SCAN)
+    private fun unregisterDeviceHandler(intent: Intent?) {
+        val deviceID = intent?.getStringExtra("device_id")
+        Log.d("ListFragment", "[Enter] unregisterDeviceHandler() deviceID: $deviceID")
+        Service.shared.getManagerOfDeviceID(deviceID!!)?.unregisterHandler()
     }
 
     private fun loadDevices() {

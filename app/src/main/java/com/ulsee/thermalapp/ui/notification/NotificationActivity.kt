@@ -47,5 +47,6 @@ class NotificationActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.textView_temperature).text = notification.temprature + notification.tempratureUnit
         findViewById<TextView>(R.id.textView_time).text = notification.createdAt.toString()
         findViewById<TextView>(R.id.textView_mask).text = if(notification.hasMask) "Yes" else "No"
+
     }
 }

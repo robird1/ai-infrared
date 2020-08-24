@@ -83,7 +83,7 @@ class EditorActivity : AppCompatActivity() {
                     finish()
                     return
                 }
-                PeopleServiceTCP(deviceManager!!).getSingleFace(oldValue!!.Name).subscribe{
+                PeopleServiceTCP(deviceManager!!).getSingleFace(oldValue!!).subscribe{
                     oldValue!!.Image = it
                     Glide.with(this).load(Base64.decode(it, Base64.DEFAULT)).into(imageView);
                 }
@@ -209,15 +209,15 @@ class EditorActivity : AppCompatActivity() {
             val people = Face()
             people.ID = oldValue!!.ID
             people.Name = name
-            people.Image = base64
+            people.Image = base64!!
             people.oldName = oldValue!!.Name
             editPeople(people)
         } else {
             val people = Face()
-            people.ID = 0
+            people.ID = "99999"           // TODO
             people.Name = name
-            people.Image = oldValue?.Image
-            if (imageBase64 != null) people.Image = imageBase64
+            people.Image = oldValue!!.Image
+            if (imageBase64 != null) people.Image = imageBase64!!
             addPeople(people)
         }
     }

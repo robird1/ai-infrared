@@ -48,7 +48,7 @@ class GridFragment : Fragment() {
         swipeRefreshLayout = root.findViewById<SwipeRefreshLayout>(R.id.swipeRefreshLayout)
         swipeRefreshLayout.setOnRefreshListener { loadPeopleList() }
         recyclerView = root.findViewById<RecyclerView>(R.id.recyclerView)
-        recyclerView.adapter = PeopleListAdapter()
+//        recyclerView.adapter = PeopleListAdapter(this)
         recyclerView.layoutManager = GridLayoutManager(context, 3)
 
         val support: RecyclerViewItemClickSupport = RecyclerViewItemClickSupport.addTo(recyclerView)

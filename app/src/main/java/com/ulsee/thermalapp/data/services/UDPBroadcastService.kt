@@ -1,12 +1,8 @@
 package com.ulsee.thermalapp.data.services
 
 import android.content.Context
-import android.net.wifi.WifiManager
 import android.util.Log
 import com.ulsee.thermalapp.data.model.Device
-import com.ulsee.thermalapp.data.request.GetFace
-import com.ulsee.thermalapp.data.response.Face
-import com.ulsee.thermalapp.ui.device.ScanActivity
 import io.reactivex.Emitter
 import io.reactivex.Observable
 import io.reactivex.ObservableOnSubscribe
@@ -26,7 +22,7 @@ class UDPBroadcastService {
     var mUDPSocket = DatagramSocket()
     var mUDPServerSocket = DatagramSocket(UDP_BROADCAST_IPC_MESSAGE_PORT)
     var mBroadcaseSendCounter = 1 // 數到0就送出
-    var mBroadcaseSendInterval = 3 // 數幾下才送出，平常是3，已經掃到有效的QRCode時是1
+    var mBroadcaseSendInterval = 1 // 數幾下才送出，平常是3，已經掃到有效的QRCode時是1
 
     var shouldBroadcasting = false
 
@@ -36,13 +32,17 @@ class UDPBroadcastService {
     }
 
     fun getBroadcastAddress(ctx: Context): InetAddress? {
-        val wifi = ctx.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        val dhcp = wifi.dhcpInfo
-        // handle null somehow
-        val broadcast = dhcp.ipAddress and dhcp.netmask or dhcp.netmask.inv()
-        val quads = ByteArray(4)
-        for (k in 0..3) quads[k] = (broadcast shr k * 8 and 0xFF).toByte()
-        return InetAddress.getByAddress(quads)
+//        val wifi = ctx.getSystemService(Context.WIFI_SERVICE) as WifiManager
+//        val dhcp = wifi.dhcpInfo
+//        // handle null somehow
+//        val broadcast = dhcp.ipAddress and dhcp.netmask or dhcp.netmask.inv()
+//        val quads = ByteArray(4)
+//        for (k in 0..3) quads[k] = (broadcast shr k * 8 and 0xFF).toByte()
+//        val inetAddr = InetAddress.getByAddress(quads)
+//        Log.d("UDPBroadcastService", "inetAddr: $inetAddr")
+//        Log.d("UDPBroadcastService", "inetAddr.hostAddress: ${inetAddr.hostAddress}")
+        val inetAddr = InetAddress.getByName("255.255.255.255")
+        return inetAddr
     }
 
     // 每3秒傳送廣播，如果掃到qrcode,無法匹配，跳出progress表示無法連線，並改為每1秒傳送
@@ -90,14 +90,15 @@ class UDPBroadcastService {
         Thread(Runnable {
             while (!mUDPSocket.isClosed) {
                 try {
-                    if(shouldBroadcasting && --mBroadcaseSendCounter==0) {
+//                    if(shouldBroadcasting && --mBroadcaseSendCounter==0) {
                         mUDPSocket.send(sendPacket)
-                        mBroadcaseSendCounter = mBroadcaseSendInterval
-                    }
-                    log("sent: "+String(sendData))
-                    Thread.sleep(1000)
+//                    }
+//                    log("sent: "+String(sendData))
                 } catch (e: Exception) {
                     e.printStackTrace()
+                } finally {
+                    Thread.sleep(1000)
+                    if(mBroadcaseSendCounter<=0)mBroadcaseSendCounter = mBroadcaseSendInterval
                 }
             }
         }).start()
@@ -111,7 +112,7 @@ class UDPBroadcastService {
     var mEmitter : Emitter<Device>? = null
 
     fun subscribeSearchedDevice() : Observable<Device> {
-        val handler: ObservableOnSubscribe<Device> = ObservableOnSubscribe<Device> { emitter ->
+        val handler = ObservableOnSubscribe<Device> { emitter ->
             mEmitter = emitter
         }
 
