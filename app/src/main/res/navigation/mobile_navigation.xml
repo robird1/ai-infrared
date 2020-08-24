@@ -13,9 +13,9 @@
 
     <fragment
         android:id="@+id/navigation_people"
-        android:name="com.ulsee.thermalapp.ui.people.GridFragment"
+        android:name="com.ulsee.thermalapp.ui.people.ListFragment"
         android:label="@string/title_people"
-        tools:layout="@layout/fragment_people_grid" />
+        tools:layout="@layout/fragment_people_list" />
 
     <fragment
         android:id="@+id/navigation_notification"
