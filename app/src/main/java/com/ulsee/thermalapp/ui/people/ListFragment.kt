@@ -19,7 +19,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ulsee.thermalapp.MainActivity
-import com.ulsee.thermalapp.MainActivityTag
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Face
@@ -28,7 +27,6 @@ import com.ulsee.thermalapp.utils.FilePickerHelper
 import com.ulsee.thermalapp.utils.RecyclerViewItemClickSupport
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.Serializable
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -99,26 +97,6 @@ class ListFragment : Fragment() {
         (activity as MainActivity).setTitle("People Management")
 
         return root
-    }
-
-    override fun onPause() {
-        Log.d(TAG, "[Enter] onPause")
-        super.onPause()
-    }
-
-    override fun onStop() {
-        Log.d(TAG, "[Enter] onStop")
-        super.onStop()
-    }
-
-    override fun onDestroyView() {
-        Log.d(TAG, "[Enter] onDestroyView")
-        super.onDestroyView()
-    }
-
-    override fun onDestroy() {
-        Log.d(TAG, "[Enter] onDestroy")
-        super.onDestroy()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

@@ -46,6 +46,10 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
+        navController.addOnDestinationChangedListener { _, _, _ ->
+            toolbar.collapseActionView()
+        }
+
         if (containFRInvisible()) {
 //            navView.menu.removeItem(R.id.navigation_people)
             navView.menu.findItem(R.id.navigation_people).isVisible = false
