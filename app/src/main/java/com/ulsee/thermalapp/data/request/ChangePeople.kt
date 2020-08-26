@@ -15,8 +15,11 @@ class ChangePeople(face: Face, oldName: String?, changeType: ChangeType) {
     val ID = face.ID
 //    val str = if(oldName != null && changeType==ChangeType.update && oldName.equals(face.Name)==false) arrayOf(oldName, face.Name) else arrayOf(face.Name)
     var Name = face.Name
+    // this is facecode
     val Data : String? = if (changeType.flag == ChangeType.delete.flag) null else face.Image
+    val ImageBase64 : String? = face.Data
     val Flag = changeType.flag
+    var TestFloatArr : String? = face.TestFloatArr?.contentToString()
 
     // TODO
     val Gender = "Female"

@@ -21,4 +21,5 @@ open class Face: Serializable {
             if (arr.size < 2) return Name
             return Name.substring(0, Name.length - arr[arr.size-1].length - 1)
         }
+    var TestFloatArr : FloatArray? = null
 }

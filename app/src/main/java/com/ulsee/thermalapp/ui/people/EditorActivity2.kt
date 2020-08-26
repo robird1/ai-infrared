@@ -1,5 +1,6 @@
 package com.ulsee.thermalapp.ui.people
 
+import android.app.ProgressDialog
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -18,12 +19,16 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.ulsee.facecode.Facecode
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.services.PeopleServiceTCP
 import com.ulsee.thermalapp.utils.FilePickerHelper
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.InputStream
+import java.lang.Exception
 
 private val TAG = "EditorActivity2"
 
@@ -32,6 +37,7 @@ class EditorActivity2 : AppCompatActivity() {
     lateinit var toolbar: Toolbar
     private lateinit var mProgressView: ConstraintLayout
     lateinit var takePhotoIntentUri: Uri
+    var TestFloatArr : FloatArray? = null
     private val isEditingMode : Boolean
         get() {
             return intent.getBooleanExtra("is_edit_mode", true)
@@ -67,6 +73,38 @@ class EditorActivity2 : AppCompatActivity() {
             findViewById<TextView>(R.id.textView_toolbar_title).text = "Edit People"
         }
 
+
+        //  init FR
+        if (!Service.shared.isULSeeFaceVerificationManagerInited) {
+            mProgressView.visibility = View.VISIBLE
+            Thread(Runnable {
+                val initResult = Service.shared.ULSeeFaceVerificationManager?.init("==============$$$================")
+                runOnUiThread {
+                    if (initResult != 0) {
+                        Toast.makeText(this, "failed to init sdk", Toast.LENGTH_LONG).show()
+                        finish()
+                    }
+                    mProgressView.visibility = View.INVISIBLE
+                }
+            }).start()
+        }
+    }
+    private fun imageBase64TOFaceCodeBase64 (imageBase64: String) : String? {
+        val decodedString: ByteArray = Base64.decode(imageBase64, Base64.DEFAULT)
+        val selectedBitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
+
+        // 1. base64 -> get 256 features
+        val faceInfos = Service.shared.ULSeeFaceVerificationManager?.extractFeature(selectedBitmap!!)
+        if (faceInfos == null) {
+            return null
+        }
+        if (faceInfos!!.size <= 0) {
+            return null
+        }
+        val features = faceInfos!![0].features
+        TestFloatArr = features
+        val faceCode = Facecode.shared.generateFacecode(features)
+        return faceCode
     }
 
     private fun save() {
@@ -80,6 +118,18 @@ class EditorActivity2 : AppCompatActivity() {
         }
     }
 
+    fun pickImageFromAlbum () {
+        val getIntent = Intent(Intent.ACTION_GET_CONTENT)
+        getIntent.type = "image/*"
+        val pickIntent = Intent(
+            Intent.ACTION_PICK,
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        )
+        pickIntent.type = "image/*"
+        val chooserIntent = Intent.createChooser(getIntent, "Select Image")
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(pickIntent))
+        startActivityForResult(chooserIntent, REAQUEST_CODE_PICK_IMAGE)
+    }
 
     private fun addPeople () {
         val selectedTCPClient = Service.shared.getFirstConnectedDeviceManager()
@@ -90,8 +140,18 @@ class EditorActivity2 : AppCompatActivity() {
 
         mProgressView.visibility = View.VISIBLE
 
-
-        PeopleServiceTCP(selectedTCPClient).create(AttributeType.getAttributeData())
+        val face = AttributeType.getAttributeData()
+        if (!face.Image.isEmpty()) {
+            val facecode = imageBase64TOFaceCodeBase64(AttributeType.FACE.inputValue)
+            if (facecode == null) {
+                Toast.makeText(this, "no face detected", Toast.LENGTH_LONG).show()
+                return
+            }
+            face.Data = face.Image
+            face.Image = facecode!!
+        }
+        face.TestFloatArr = TestFloatArr
+        PeopleServiceTCP(selectedTCPClient).create(face)
             .subscribe({ newPeople ->
                 Toast.makeText(this, getString(R.string.create_successfully), Toast.LENGTH_LONG).show()
                 setResult(RESULT_OK)
@@ -112,7 +172,18 @@ class EditorActivity2 : AppCompatActivity() {
 
         mProgressView.visibility = View.VISIBLE
 
-        PeopleServiceTCP(selectedTCPClient).update(AttributeType.getAttributeData())
+        val face = AttributeType.getAttributeData()
+        if (!face.Image.isEmpty()) {
+            val facecode = imageBase64TOFaceCodeBase64(AttributeType.FACE.inputValue)
+            if (facecode == null) {
+                Toast.makeText(this, "no face detected", Toast.LENGTH_LONG).show()
+                return
+            }
+            face.Data = face.Image
+            face.Image = facecode!!
+        }
+        face.TestFloatArr = TestFloatArr
+        PeopleServiceTCP(selectedTCPClient).update(face)
             .subscribe({
                 Toast.makeText(this, getString(R.string.update_successfully), Toast.LENGTH_LONG).show()
                 setResult(RESULT_OK)
@@ -165,6 +236,48 @@ class EditorActivity2 : AppCompatActivity() {
 //            val photo = data!!.extras!!["data"] as Bitmap?
 
         }
+        if (requestCode == REAQUEST_CODE_PICK_IMAGE) {
+            if (resultCode != RESULT_OK) return;
+            var uri : Uri? = data?.data
+            if (uri == null) {
+                Toast.makeText(this, "error get file uri", Toast.LENGTH_LONG ).show()
+                return
+            } else {
+                val inputStream: InputStream? = getContentResolver().openInputStream(uri)
+                if (inputStream == null) {
+                    Toast.makeText(this, "error open input stream", Toast.LENGTH_LONG ).show()
+                    return
+                }
+                val bm = BitmapFactory.decodeStream(inputStream);
+                val bOut = ByteArrayOutputStream()
+                bm.compress(Bitmap.CompressFormat.JPEG, 100, bOut)
+                val imageBase64 = Base64.encodeToString(
+                    bOut.toByteArray(),
+                    Base64.DEFAULT
+                )
+
+//                val stringBuilder = StringBuilder()
+//                var readLen = 0
+//                val bufferLen = 1026 // 為了base64, bufferLen*4/3 必須是4的倍數
+//                val buffer = ByteArray(bufferLen)
+//
+//                while (true) {
+//                    readLen = inputStream.read(buffer, 0, bufferLen)
+//                    if (readLen < 0) break;
+//                    val base64 = Base64.encodeToString(buffer, 0, readLen, Base64.NO_WRAP)// comment or Base64.URL_SAFE
+//                    stringBuilder.append(base64)
+//                }
+//
+//                while (stringBuilder.length %4 != 0) {
+//                    stringBuilder.append("=")
+//                }
+//
+//                val imageBase64 = stringBuilder.toString()
+                AttributeType.FACE.inputValue = imageBase64
+                recyclerView.adapter?.notifyItemChanged(AttributeType.FACE.position)
+            }
+
+        }
         super.onActivityResult(requestCode, resultCode, data)
     }
 
@@ -191,6 +304,7 @@ class EditorActivity2 : AppCompatActivity() {
 
     companion object {
         const val REQUEST_TAKE_PHOTO = 1235
+        const val REAQUEST_CODE_PICK_IMAGE = 1236
     }
 
 

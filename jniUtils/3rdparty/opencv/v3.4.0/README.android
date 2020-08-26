@@ -1,0 +1,20 @@
+c++_static stl opencv libs are compiled in opencv-3.4.3/platforms/android by cmd:
+$python build_sdk.py  --ndk_path=/home/hower/Android/android-ndk-r17c --sdk_path=/home/hower/Android/Sdk  ../../build ../.. --no_ccache
+
+building tips:
+
+1.zlib:
+    remove zlip in the 3rdparty directory in case of include newer version head files by link older libs in the ndk
+
+2.replace android.toolchain.cmake/build_sdk.py/ndk-17.config.py in opencv-3.4.0/platforms/android directory
+
+    android.toolchain.cmake: for ndk-r17c
+
+    replace android sdk-tools with tools_r25.2.5-linux.zip  in sdk tools dir
+
+    build_sdk.py:comment out for Building engine
+        cmake_vars：BUILD_ANDROID_EXAMPLES="OFF", INSTALL_ANDROID_EXAMPLES="OFF", BUILD_ANDROID_PROJECTS="OFF"
+
+3. enable java module to build libopencv_java3.so
+    comment out line 10:
+    #ocv_module_disable(java)

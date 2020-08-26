@@ -1,6 +1,7 @@
 package com.ulsee.thermalapp
 
 import android.app.Application
+import com.ulsee.sdk.faceverification.ULSeeFaceVerificationMgr
 import com.ulsee.thermalapp.data.Service
 import io.realm.Realm
 import io.realm.RealmConfiguration
@@ -11,7 +12,7 @@ class App : Application() {
         super.onCreate()
         Realm.init(this)
         val config = RealmConfiguration.Builder()
-            .name("appv1.realm")
+            .name("appv2.realm")
             .schemaVersion(1) // Must be bumped when the schema changes
 //            .migration { realm, oldVersion, newVersion ->
 //                if (oldVersion == 0L) {
@@ -27,6 +28,7 @@ class App : Application() {
         Realm.setDefaultConfiguration(config)
         Service.shared.setContext(applicationContext)
         Service.shared.getDeviceList()
+        Service.shared.ULSeeFaceVerificationManager = ULSeeFaceVerificationMgr(applicationContext)
         Service.shared.udpBroadcastService.initialize(applicationContext)
     }
 }

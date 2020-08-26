@@ -229,6 +229,7 @@ class PeopleEditorAdapter(private val context: Context, private val isEditingMod
                 Glide.with(context).load(bm).into(faceImage)
 //            }
             faceImage.setOnClickListener {
+//                (context as EditorActivity2).pickImageFromAlbum()
                 (context as EditorActivity2).pickImageFromTakePhoto()
             }
         }

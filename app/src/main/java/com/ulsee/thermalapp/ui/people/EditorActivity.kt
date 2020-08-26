@@ -20,6 +20,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.FileProvider
 import com.bumptech.glide.Glide
+import com.uls.multifacetrackerlib.bean.FaceInfo
+import com.ulsee.facecode.Facecode
+import com.ulsee.sdk.faceverification.ULSeeFaceVerificationMgr
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Face
@@ -28,6 +31,7 @@ import com.ulsee.thermalapp.utils.FilePickerHelper
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.InputStream
+import java.lang.Exception
 
 
 class EditorActivity : AppCompatActivity() {
@@ -36,7 +40,9 @@ class EditorActivity : AppCompatActivity() {
     var REAQUEST_CODE_TAKE_PHOTO = 1235
 
     var oldValue : Face? = null
-    var imageBase64 : String? = null
+//    var imageBase64 : String? = null
+    var newFaceImageBase64: String? = null
+    var facecodeBase64 : String? = null
     lateinit var imageView : ImageView
     lateinit var nameInput : EditText
     lateinit var toolbar : Toolbar
@@ -51,6 +57,21 @@ class EditorActivity : AppCompatActivity() {
         setContentView(R.layout.activity_people_editor)
 
         mProgressDialog = ProgressDialog(this)
+
+        // 1. init
+        if (!Service.shared.isULSeeFaceVerificationManagerInited) {
+            mProgressDialog.show()
+            Thread(Runnable {
+                val initResult = Service.shared.ULSeeFaceVerificationManager?.init("==============$$$================")
+                runOnUiThread {
+                    if (initResult != 0) {
+                        Toast.makeText(this, "failed to init sdk", Toast.LENGTH_LONG).show()
+                        finish()
+                    }
+                    mProgressDialog.dismiss()
+                }
+            }).start()
+        }
 
         toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar);
@@ -75,7 +96,11 @@ class EditorActivity : AppCompatActivity() {
             nameInput.setText(oldValue!!.NameWihtoutFileType)
 
             if (oldValue!!.Image.isNullOrEmpty() == false) {
-                Glide.with(this).load(Base64.decode(oldValue!!.Image, Base64.DEFAULT)).into(imageView);
+                if (!isEditing) {
+                    verifyImageBase64(oldValue!!.Image!!)
+                } else {
+                    Glide.with(this).load(Base64.decode(oldValue!!.Image, Base64.DEFAULT)).into(imageView);
+                }
             } else {
                 val deviceManager = Service.shared.getFirstConnectedDeviceManager()
                 if (deviceManager == null) {
@@ -133,7 +158,7 @@ class EditorActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == REAQUEST_CODE_PICK_IMAGE) {
+        /*if (requestCode == REAQUEST_CODE_PICK_IMAGE) {
             if (resultCode != RESULT_OK) return;
             var uri : Uri? = data?.data
             if (uri == null) {
@@ -167,19 +192,19 @@ class EditorActivity : AppCompatActivity() {
             }
 
         }
-        else if (requestCode == REAQUEST_CODE_TAKE_PHOTO) {
+        else */if (requestCode == REAQUEST_CODE_TAKE_PHOTO) {
             if (resultCode == RESULT_OK) {
                 val file = FilePickerHelper.shared().putPickedFile(this, takePhotoIntentUri);
 
                 val bm = BitmapFactory.decodeFile(file.path)
                 val bOut = ByteArrayOutputStream()
                 bm.compress(Bitmap.CompressFormat.JPEG, 100, bOut)
-                imageBase64 = Base64.encodeToString(
+                val imageBase64 = Base64.encodeToString(
                     bOut.toByteArray(),
                     Base64.DEFAULT
                 )
 
-                imageView.setImageBitmap(bm)
+                verifyImageBase64(imageBase64)
             } else {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show()
             }
@@ -189,8 +214,44 @@ class EditorActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
+    private fun verifyImageBase64(imageBase64: String) {
+        mProgressDialog.show()
+        Thread(Runnable {
+            try {
+                facecodeBase64 = imageBase64TOFaceCodeBase64(imageBase64)
+                runOnUiThread {
+                    Glide.with(this).load(Base64.decode(imageBase64, Base64.DEFAULT)).into(imageView);
+                }
+                newFaceImageBase64 = imageBase64
+            } catch(e: Exception) {
+                e.printStackTrace()
+                if (!isEditing && facecodeBase64 == null) {
+                    runOnUiThread {
+                        Toast.makeText(this, "Failed to detect face", Toast.LENGTH_LONG).show()
+                        pickImageFromTakePhoto()
+                    }
+                }
+            } finally {
+                runOnUiThread {
+                    mProgressDialog.dismiss()
+                }
+            }
+        }).start()
+    }
+
+    private fun imageBase64TOFaceCodeBase64 (imageBase64: String) : String {
+        val decodedString: ByteArray = Base64.decode(imageBase64, Base64.DEFAULT)
+        val selectedBitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
+
+        // 1. base64 -> get 256 features
+        val faceInfos = Service.shared.ULSeeFaceVerificationManager?.extractFeature(selectedBitmap!!)
+        val features = faceInfos!![0].features
+        val faceCode = Facecode.shared.generateFacecode(features)
+        return faceCode
+    }
+
     private fun save () {
-        if (imageBase64 == null && oldValue == null) {
+        if (newFaceImageBase64 == null && oldValue == null) {
             Toast.makeText(this, getString(R.string.please_select_image), Toast.LENGTH_SHORT).show()
             return
         }
@@ -204,20 +265,40 @@ class EditorActivity : AppCompatActivity() {
             Toast.makeText(this, getString(R.string.please_not_enter_special_characters), Toast.LENGTH_SHORT).show()
             return
         }
+
+//        var uploadingImageBase64 : String? = null
+//        if (isEditing) {
+//            uploadingImageBase64 = imageBase64
+//        } else {
+//            uploadingImageBase64 = oldValue?.Image
+//            if (imageBase64 != null) uploadingImageBase64 = imageBase64
+//        }
+        if (newFaceImageBase64 != null) {
+            try {
+                facecodeBase64 = imageBase64TOFaceCodeBase64(newFaceImageBase64!!)
+                // todo 2. use facecode instead upload image base64 (modify api)
+                // todo 3. extract 256 features every time while take picture, and make sure faceinfo extracted
+            } catch(e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
         if (isEditing) {
-            val base64 : String? = if(imageBase64 == null)  null else imageBase64
+//            val base64 : String? = if(imageBase64 == null)  null else imageBase64
             val people = Face()
             people.ID = oldValue!!.ID
             people.Name = name
-            people.Image = base64!!
+//            people.Image = base64!!
+            people.Image = facecodeBase64!!
             people.oldName = oldValue!!.Name
             editPeople(people)
         } else {
             val people = Face()
             people.ID = "99999"           // TODO
             people.Name = name
-            people.Image = oldValue!!.Image
-            if (imageBase64 != null) people.Image = imageBase64!!
+//            people.Image = oldValue!!.Image
+//            if (imageBase64 != null) people.Image = imageBase64!!
+            people.Image = facecodeBase64!!
             addPeople(people)
         }
     }

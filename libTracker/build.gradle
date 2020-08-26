@@ -1,0 +1,81 @@
+apply plugin: 'com.android.library'
+apply plugin: 'maven'
+
+android {
+    compileSdkVersion 28
+    buildToolsVersion "28.0.3"
+    defaultConfig {
+        targetSdkVersion 26
+        minSdkVersion 19
+        versionCode 1
+        versionName "1"
+
+       externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++11"
+                cppFlags += "-DNO_AUTH"
+                arguments = ['-DANDROID_ARM_NEON=TRUE']
+                //arguments += ['-DANDROID_STL=c++_static']
+            }
+        }
+        ndk {
+            abiFilters  'arm64-v8a', 'armeabi-v7a'
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+       /* debug {
+            jniDebuggable true
+        }*/
+    }
+//    externalNativeBuild {
+//        cmake {
+//            path "CMakeLists.txt"
+//        }
+//    }
+
+    sourceSets.main {
+        jni.srcDirs = []
+        jniLibs.srcDir 'src/main/libs'
+    }
+
+    packagingOptions {
+        exclude 'lib/armeabi-v7a/libULSeeAuth.so'
+        exclude 'lib/arm64-v8a/libULSeeAuth.so'
+    }
+
+
+    Properties properties = new Properties()
+    InputStream inputStream = project.rootProject.file('local.properties').newDataInputStream() ;
+    properties.load( inputStream )
+    println(properties)
+    def fileSeparator = System.getProperties().getProperty("file.separator")
+    def ndkDir = properties.getProperty('ndk.dir');
+
+    println('codus: ,,,')
+    println(ndkDir)
+
+    task ndkBuild(type: Exec) {
+        println('codus: ndkBuild type exec')
+        def bin = 'ndk-build';
+        if(org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+            bin += '.cmd';
+        }
+        println(ndkDir + fileSeparator + bin)
+        println('NDK_APPLICATION_MK=Application_MultiFaceTracker.mk')
+        println('-C')
+        println(file('src/main/jni').absolutePath)
+        commandLine ndkDir + fileSeparator + bin, 'NDK_APPLICATION_MK=Application_MultiFaceTracker.mk', '-C', file('src/main/jni').absolutePath
+    }
+
+    tasks.withType(JavaCompile) { compileTask ->
+        println('codus: tasks.withType(JavaCompile)')
+        compileTask.dependsOn ndkBuild
+        println(compileTask.dependsOn)
+    }
+}
+
+
