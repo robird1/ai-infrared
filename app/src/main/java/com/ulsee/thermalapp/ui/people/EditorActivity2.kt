@@ -37,7 +37,6 @@ class EditorActivity2 : AppCompatActivity() {
     lateinit var toolbar: Toolbar
     private lateinit var mProgressView: ConstraintLayout
     lateinit var takePhotoIntentUri: Uri
-    var TestFloatArr : FloatArray? = null
     private val isEditingMode : Boolean
         get() {
             return intent.getBooleanExtra("is_edit_mode", true)
@@ -102,7 +101,6 @@ class EditorActivity2 : AppCompatActivity() {
             return null
         }
         val features = faceInfos!![0].features
-        TestFloatArr = features
         val faceCode = Facecode.shared.generateFacecode(features)
         return faceCode
     }
@@ -147,10 +145,8 @@ class EditorActivity2 : AppCompatActivity() {
                 Toast.makeText(this, "no face detected", Toast.LENGTH_LONG).show()
                 return
             }
-            face.Data = face.Image
             face.Image = facecode!!
         }
-        face.TestFloatArr = TestFloatArr
         PeopleServiceTCP(selectedTCPClient).create(face)
             .subscribe({ newPeople ->
                 Toast.makeText(this, getString(R.string.create_successfully), Toast.LENGTH_LONG).show()
@@ -179,10 +175,8 @@ class EditorActivity2 : AppCompatActivity() {
                 Toast.makeText(this, "no face detected", Toast.LENGTH_LONG).show()
                 return
             }
-            face.Data = face.Image
             face.Image = facecode!!
         }
-        face.TestFloatArr = TestFloatArr
         PeopleServiceTCP(selectedTCPClient).update(face)
             .subscribe({
                 Toast.makeText(this, getString(R.string.update_successfully), Toast.LENGTH_LONG).show()

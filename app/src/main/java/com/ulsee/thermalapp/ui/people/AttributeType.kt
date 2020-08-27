@@ -11,8 +11,7 @@ enum class AttributeType(val fieldName: String, val position: Int, val viewType:
     GENDER("Gender", 3, R.layout.item_list_people_gender, "", true),
     EMPLOYEE_ID("Employee ID", 4, R.layout.item_list_people_text, "", true),
     BIRTHDATE("Birthdate", 5, R.layout.item_list_people_text, "", true),
-    REMARK("Remark", 6, R.layout.item_list_people_text, "", true),
-    TestFloatArr("TestFloatArr", 7, R.layout.item_list_people_text,"",true);
+    REMARK("Remark", 6, R.layout.item_list_people_text, "", true);
 
     companion object {
         fun fromPosition(position: Int):  AttributeType {
