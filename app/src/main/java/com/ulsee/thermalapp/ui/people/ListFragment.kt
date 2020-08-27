@@ -91,7 +91,7 @@ class ListFragment : Fragment() {
         loadPeopleList()
 
         root.findViewById<View>(R.id.fab).setOnClickListener {
-            pickImageFromTakePhoto()
+            openEditor(Face(), false)
         }
 
         (activity as MainActivity).setTitle("People Management")
@@ -198,28 +198,6 @@ class ListFragment : Fragment() {
         }
         super.onActivityResult(requestCode, resultCode, data)
     }
-
-    fun pickImageFromTakePhoto () {
-
-        val imageFileName = "take_photo" //make a better file name
-
-        val storageDir: File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-        val image: File = File.createTempFile(
-            imageFileName,
-            ".jpg",
-            storageDir
-        )
-
-        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        //takePhotoIntentUri = Uri.fromFile(image);
-        takePhotoIntentUri = FileProvider.getUriForFile(
-            requireContext(),
-            context?.getPackageName() + ".fileprovider",
-            image);
-        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, takePhotoIntentUri);
-        startActivityForResult(cameraIntent, EditorActivity2.REQUEST_TAKE_PHOTO)
-    }
-
 
     private fun openEditor (face: Face? = null, isEditMode: Boolean) {
         Log.d(TAG, "[Enter] openEditor")

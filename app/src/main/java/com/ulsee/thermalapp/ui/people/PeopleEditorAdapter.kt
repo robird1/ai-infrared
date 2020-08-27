@@ -3,16 +3,13 @@ package com.ulsee.thermalapp.ui.people
 import android.content.Context
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
-import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.textfield.TextInputLayout
 import com.ulsee.thermalapp.R
@@ -32,9 +29,9 @@ class PeopleEditorAdapter(private val context: Context, private val isEditingMod
         val holder: RecyclerView.ViewHolder
         val layoutInflater = LayoutInflater.from(parent.context)
         holder = when (viewType) {
-            AttributeType.FACE.viewType -> {
-                FaceViewHolder(layoutInflater.inflate(AttributeType.FACE.viewType, parent, false))
-            }
+//            AttributeType.FACE.viewType -> {
+//                FaceViewHolder(layoutInflater.inflate(AttributeType.FACE.viewType, parent, false))
+//            }
             AttributeType.GENDER.viewType -> {
                 GenderViewHolder(
                     layoutInflater.inflate(
@@ -54,9 +51,10 @@ class PeopleEditorAdapter(private val context: Context, private val isEditingMod
     override fun getItemCount(): Int = AttributeType.values().size
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        if (position == AttributeType.FACE.position) {
-            (holder as FaceViewHolder).bind(position)
-        } else if (position == AttributeType.GENDER.position) {
+//        if (position == AttributeType.FACE.position) {
+//            (holder as FaceViewHolder).bind(position)
+//        }
+        if (position == AttributeType.GENDER.position) {
             (holder as GenderViewHolder).bind(position)
         } else {
             (holder as TextViewHolder).bind(position)
@@ -215,24 +213,24 @@ class PeopleEditorAdapter(private val context: Context, private val isEditingMod
         }
     }
 
-    inner class FaceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val faceImage = itemView.findViewById<ImageView>(R.id.face_image)
-        private val faceEdit = itemView.findViewById<ImageView>(R.id.button_edit)
-
-
-        fun bind(position: Int) {
-//            if (isEditingMode) {
-                val bm = Base64.decode(
-                    AttributeType.fromPosition(position).inputValue,
-                    Base64.DEFAULT
-                )
-                Glide.with(context).load(bm).into(faceImage)
+//    inner class FaceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+//        private val faceImage = itemView.findViewById<ImageView>(R.id.face_image)
+//        private val faceEdit = itemView.findViewById<ImageView>(R.id.button_edit)
+//
+//
+//        fun bind(position: Int) {
+////            if (isEditingMode) {
+//            val bm = Base64.decode(
+//                AttributeType2.fromPosition(position).inputValue,
+//                Base64.DEFAULT
+//            )
+//            Glide.with(context).load(bm).into(faceImage)
+////            }
+//            faceImage.setOnClickListener {
+//                (context as EditorActivity2).pickImageFromTakePhoto()
 //            }
-            faceImage.setOnClickListener {
-                (context as EditorActivity2).pickImageFromTakePhoto()
-            }
-        }
-    }
+//        }
+//    }
 
 
 }

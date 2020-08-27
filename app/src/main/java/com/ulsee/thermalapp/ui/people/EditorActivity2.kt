@@ -10,6 +10,7 @@ import android.provider.MediaStore
 import android.util.Base64
 import android.util.Log
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -30,23 +31,14 @@ private val TAG = "EditorActivity2"
 class EditorActivity2 : AppCompatActivity() {
     lateinit var recyclerView: RecyclerView
     lateinit var toolbar: Toolbar
+    private lateinit var mAddFaceBtn: ImageView
     private lateinit var mProgressView: ConstraintLayout
     lateinit var takePhotoIntentUri: Uri
+    private var isPhotoTaken: Boolean = false
     private val isEditingMode : Boolean
         get() {
             return intent.getBooleanExtra("is_edit_mode", true)
         }
-
-//    interface OnEditTextChanged {
-//        fun onTextChanged(position: Int, charSeq: String?, isValid: Boolean)
-//    }
-//
-//    private val onTextChangedListener = object : OnEditTextChanged {
-//        override fun onTextChanged(position: Int, charSeq: String?, isValid: Boolean) {
-//            Log.d(TAG, "[Enter] onTextChanged fieldName: "+ AttributeType.fromPosition(position).fieldName+
-//                    " value: "+ charSeq+ " isValid: "+ isValid)
-//        }
-//    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG, "[Enter] onCreate")
@@ -60,11 +52,17 @@ class EditorActivity2 : AppCompatActivity() {
         recyclerView.adapter = PeopleEditorAdapter(this, isEditingMode)
         recyclerView.layoutManager = LinearLayoutManager(this)
         mProgressView = findViewById(R.id.progress_view)
+        mAddFaceBtn = findViewById(R.id.add_image)
+
+        mAddFaceBtn.setOnClickListener {
+            pickImageFromTakePhoto()
+        }
 
         findViewById<View>(R.id.save_btn).setOnClickListener { save() }
 
         if (isEditingMode) {
             findViewById<TextView>(R.id.textView_toolbar_title).text = "Edit People"
+            mAddFaceBtn.setImageResource(R.drawable.face_code_image)
         }
 
     }
@@ -126,16 +124,7 @@ class EditorActivity2 : AppCompatActivity() {
 
     private fun isInputValid(): Boolean {
         for (attribute in AttributeType.values()) {
-            if (attribute.fieldName != AttributeType.FACE.fieldName) {
-                Log.d(
-                    TAG,
-                    attribute.fieldName + ": " + attribute.inputValue + " isValid: " + attribute.isInputValid
-                )
-            }
-        }
-
-        for (attribute in AttributeType.values()) {
-            if (!attribute.isInputValid)
+            if (!attribute.isInputValid || !isPhotoTaken)
                 return false
         }
         return true
@@ -156,14 +145,11 @@ class EditorActivity2 : AppCompatActivity() {
                     Base64.DEFAULT
                 )
 
-//                mFaceImageView.setImageBitmap(bm)
-                AttributeType.FACE.inputValue = imageBase64
-                recyclerView.adapter?.notifyItemChanged(AttributeType.FACE.position)
+                mAddFaceBtn.setImageBitmap(bm)
+                isPhotoTaken = true
             } else {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show()
             }
-//            val photo = data!!.extras!!["data"] as Bitmap?
-
         }
         super.onActivityResult(requestCode, resultCode, data)
     }
@@ -186,13 +172,11 @@ class EditorActivity2 : AppCompatActivity() {
             getPackageName() + ".fileprovider",
             image);
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, takePhotoIntentUri);
-        startActivityForResult(cameraIntent, EditorActivity2.REQUEST_TAKE_PHOTO)
+        startActivityForResult(cameraIntent, REQUEST_TAKE_PHOTO)
     }
 
     companion object {
         const val REQUEST_TAKE_PHOTO = 1235
     }
-
-
 
 }

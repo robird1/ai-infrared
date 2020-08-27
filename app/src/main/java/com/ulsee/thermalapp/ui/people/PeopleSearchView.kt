@@ -11,15 +11,9 @@ private val TAG = "PeopleSearchView"
 class PeopleSearchView(context: Context?) : SearchView(context),
     SearchView.OnQueryTextListener, MenuItem.OnActionExpandListener {
 
-//    private var mActivity: BrowserActivity? = null
-//    fun setActivity(activity: BrowserActivity?) {
-//        mActivity = activity
-//    }
-
     override fun onQueryTextSubmit(query: String?): Boolean {
         Log.d(TAG, "[Enter] onQueryTextSubmit")
 
-//        mActivity.mMediaControl.search(query)
         return false
     }
 
@@ -43,19 +37,13 @@ class PeopleSearchView(context: Context?) : SearchView(context),
     override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
         Log.d(TAG, "[Enter] onMenuItemActionExpand")
 
-        mIsSearchMode = true
         return true
     }
 
     override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
         Log.d(TAG, "[Enter] onMenuItemActionCollapse")
 
-        mIsSearchMode = false
-//        mActivity.closeSearchResult()
         return true
     }
 
-    companion object {
-        var mIsSearchMode = false
-    }
 }
