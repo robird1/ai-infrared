@@ -5,13 +5,13 @@ import com.ulsee.thermalapp.data.model.Face
 
 enum class AttributeType(val fieldName: String, val position: Int, val viewType: Int, var inputValue: String, var isInputValid: Boolean) {
 
-    FACE("Face", 0, R.layout.item_list_people_face, "", true),
-    NAME("Name", 1, R.layout.item_list_people_text, "", false),
-    AGE("Age", 2, R.layout.item_list_people_text, "", true),
-    GENDER("Gender", 3, R.layout.item_list_people_gender, "", true),
-    EMPLOYEE_ID("Employee ID", 4, R.layout.item_list_people_text, "", true),
-    BIRTHDATE("Birthdate", 5, R.layout.item_list_people_text, "", true),
-    REMARK("Remark", 6, R.layout.item_list_people_text, "", true);
+//    FACE("Face", 0, R.layout.item_list_people_face, "", true),
+    NAME("Name", 0, R.layout.item_list_people_text, "", false),
+    AGE("Age", 1, R.layout.item_list_people_text, "", true),
+    GENDER("Gender", 2, R.layout.item_list_people_gender, "", true),
+    EMPLOYEE_ID("Employee ID", 3, R.layout.item_list_people_text, "", true),
+    BIRTHDATE("Birthdate", 4, R.layout.item_list_people_text, "", true),
+    REMARK("Remark", 5, R.layout.item_list_people_text, "", true);
 
     companion object {
         fun fromPosition(position: Int):  AttributeType {
@@ -37,7 +37,7 @@ enum class AttributeType(val fieldName: String, val position: Int, val viewType:
         }
 
         fun setAttributeData(face: Face) {
-            FACE.inputValue = face.Image            // base64 format
+//            FACE.inputValue = face.Image            // base64 format
             NAME.inputValue = face.Name
             AGE.inputValue = face.Age.toString()
             GENDER.inputValue = face.Gender
@@ -48,7 +48,7 @@ enum class AttributeType(val fieldName: String, val position: Int, val viewType:
 
         fun getAttributeData(): Face {
             val face = Face()
-            face.Image = FACE.inputValue
+//            face.Image = FACE.inputValue
             face.Name = NAME.inputValue
 
             // Input value of age has been checked when user presses save button, so it is valid here and

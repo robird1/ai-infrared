@@ -11,6 +11,7 @@ import android.provider.MediaStore
 import android.util.Base64
 import android.util.Log
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -35,23 +36,15 @@ private val TAG = "EditorActivity2"
 class EditorActivity2 : AppCompatActivity() {
     lateinit var recyclerView: RecyclerView
     lateinit var toolbar: Toolbar
+    private lateinit var mAddFaceBtn: ImageView
     private lateinit var mProgressView: ConstraintLayout
     lateinit var takePhotoIntentUri: Uri
+    private var isPhotoTaken: Boolean = false
+    private var mImageBase64: String? = null
     private val isEditingMode : Boolean
         get() {
             return intent.getBooleanExtra("is_edit_mode", true)
         }
-
-//    interface OnEditTextChanged {
-//        fun onTextChanged(position: Int, charSeq: String?, isValid: Boolean)
-//    }
-//
-//    private val onTextChangedListener = object : OnEditTextChanged {
-//        override fun onTextChanged(position: Int, charSeq: String?, isValid: Boolean) {
-//            Log.d(TAG, "[Enter] onTextChanged fieldName: "+ AttributeType.fromPosition(position).fieldName+
-//                    " value: "+ charSeq+ " isValid: "+ isValid)
-//        }
-//    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG, "[Enter] onCreate")
@@ -65,11 +58,17 @@ class EditorActivity2 : AppCompatActivity() {
         recyclerView.adapter = PeopleEditorAdapter(this, isEditingMode)
         recyclerView.layoutManager = LinearLayoutManager(this)
         mProgressView = findViewById(R.id.progress_view)
+        mAddFaceBtn = findViewById(R.id.add_image)
+
+        mAddFaceBtn.setOnClickListener {
+            pickImageFromTakePhoto()
+        }
 
         findViewById<View>(R.id.save_btn).setOnClickListener { save() }
 
         if (isEditingMode) {
             findViewById<TextView>(R.id.textView_toolbar_title).text = "Edit People"
+            mAddFaceBtn.setImageResource(R.drawable.face_code_image)
         }
 
 
@@ -116,19 +115,6 @@ class EditorActivity2 : AppCompatActivity() {
         }
     }
 
-    fun pickImageFromAlbum () {
-        val getIntent = Intent(Intent.ACTION_GET_CONTENT)
-        getIntent.type = "image/*"
-        val pickIntent = Intent(
-            Intent.ACTION_PICK,
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-        )
-        pickIntent.type = "image/*"
-        val chooserIntent = Intent.createChooser(getIntent, "Select Image")
-        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(pickIntent))
-        startActivityForResult(chooserIntent, REAQUEST_CODE_PICK_IMAGE)
-    }
-
     private fun addPeople () {
         val selectedTCPClient = Service.shared.getFirstConnectedDeviceManager()
         if (selectedTCPClient == null) {
@@ -139,8 +125,8 @@ class EditorActivity2 : AppCompatActivity() {
         mProgressView.visibility = View.VISIBLE
 
         val face = AttributeType.getAttributeData()
-        if (!face.Image.isEmpty()) {
-            val facecode = imageBase64TOFaceCodeBase64(AttributeType.FACE.inputValue)
+        if (mImageBase64?.isEmpty() == false) {
+            val facecode = imageBase64TOFaceCodeBase64(mImageBase64!!)
             if (facecode == null) {
                 Toast.makeText(this, "no face detected", Toast.LENGTH_LONG).show()
                 return
@@ -169,8 +155,8 @@ class EditorActivity2 : AppCompatActivity() {
         mProgressView.visibility = View.VISIBLE
 
         val face = AttributeType.getAttributeData()
-        if (!face.Image.isEmpty()) {
-            val facecode = imageBase64TOFaceCodeBase64(AttributeType.FACE.inputValue)
+        if (mImageBase64?.isEmpty() == false) {
+            val facecode = imageBase64TOFaceCodeBase64(mImageBase64!!)
             if (facecode == null) {
                 Toast.makeText(this, "no face detected", Toast.LENGTH_LONG).show()
                 return
@@ -191,16 +177,7 @@ class EditorActivity2 : AppCompatActivity() {
 
     private fun isInputValid(): Boolean {
         for (attribute in AttributeType.values()) {
-            if (attribute.fieldName != AttributeType.FACE.fieldName) {
-                Log.d(
-                    TAG,
-                    attribute.fieldName + ": " + attribute.inputValue + " isValid: " + attribute.isInputValid
-                )
-            }
-        }
-
-        for (attribute in AttributeType.values()) {
-            if (!attribute.isInputValid)
+            if (!attribute.isInputValid || !isPhotoTaken)
                 return false
         }
         return true
@@ -220,57 +197,13 @@ class EditorActivity2 : AppCompatActivity() {
                     bOut.toByteArray(),
                     Base64.DEFAULT
                 )
+                mImageBase64 = imageBase64
 
-//                mFaceImageView.setImageBitmap(bm)
-                AttributeType.FACE.inputValue = imageBase64
-                recyclerView.adapter?.notifyItemChanged(AttributeType.FACE.position)
+                mAddFaceBtn.setImageBitmap(bm)
+                isPhotoTaken = true
             } else {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show()
             }
-//            val photo = data!!.extras!!["data"] as Bitmap?
-
-        }
-        if (requestCode == REAQUEST_CODE_PICK_IMAGE) {
-            if (resultCode != RESULT_OK) return;
-            var uri : Uri? = data?.data
-            if (uri == null) {
-                Toast.makeText(this, "error get file uri", Toast.LENGTH_LONG ).show()
-                return
-            } else {
-                val inputStream: InputStream? = getContentResolver().openInputStream(uri)
-                if (inputStream == null) {
-                    Toast.makeText(this, "error open input stream", Toast.LENGTH_LONG ).show()
-                    return
-                }
-                val bm = BitmapFactory.decodeStream(inputStream);
-                val bOut = ByteArrayOutputStream()
-                bm.compress(Bitmap.CompressFormat.JPEG, 100, bOut)
-                val imageBase64 = Base64.encodeToString(
-                    bOut.toByteArray(),
-                    Base64.DEFAULT
-                )
-
-//                val stringBuilder = StringBuilder()
-//                var readLen = 0
-//                val bufferLen = 1026 // 為了base64, bufferLen*4/3 必須是4的倍數
-//                val buffer = ByteArray(bufferLen)
-//
-//                while (true) {
-//                    readLen = inputStream.read(buffer, 0, bufferLen)
-//                    if (readLen < 0) break;
-//                    val base64 = Base64.encodeToString(buffer, 0, readLen, Base64.NO_WRAP)// comment or Base64.URL_SAFE
-//                    stringBuilder.append(base64)
-//                }
-//
-//                while (stringBuilder.length %4 != 0) {
-//                    stringBuilder.append("=")
-//                }
-//
-//                val imageBase64 = stringBuilder.toString()
-                AttributeType.FACE.inputValue = imageBase64
-                recyclerView.adapter?.notifyItemChanged(AttributeType.FACE.position)
-            }
-
         }
         super.onActivityResult(requestCode, resultCode, data)
     }
@@ -293,14 +226,12 @@ class EditorActivity2 : AppCompatActivity() {
             getPackageName() + ".fileprovider",
             image);
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, takePhotoIntentUri);
-        startActivityForResult(cameraIntent, EditorActivity2.REQUEST_TAKE_PHOTO)
+        startActivityForResult(cameraIntent, REQUEST_TAKE_PHOTO)
     }
 
     companion object {
         const val REQUEST_TAKE_PHOTO = 1235
         const val REAQUEST_CODE_PICK_IMAGE = 1236
     }
-
-
 
 }
