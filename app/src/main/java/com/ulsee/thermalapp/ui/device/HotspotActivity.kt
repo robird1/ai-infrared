@@ -154,6 +154,8 @@ class HotspotActivity : AppCompatActivity() {
             }
 
             mProgressView.visibility = View.INVISIBLE
+            swipeRefreshLayout.isRefreshing = false
+
         }
     }
 
