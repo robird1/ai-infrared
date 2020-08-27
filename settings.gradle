@@ -1,5 +1,5 @@
 rootProject.name='ThermalApp'
 include ':app'
 include ':facecode'
-include ':libFaceRecognition'
-include ':libTracker'
+//include ':libFaceRecognition'
+//include ':libTracker'

@@ -37,7 +37,9 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-
+    packagingOptions {
+        pickFirst('lib/*/*.so')
+    }
 }
 
 dependencies {
@@ -87,6 +89,9 @@ dependencies {
     implementation project(':facecode')
 
     // facerecognition
-    implementation project(':libFaceRecognition')
-    implementation project(':libTracker')
+//    implementation project(':libFaceRecognition')
+//    implementation project(':libTracker')
+    implementation(name: 'libFaceRecognition-release', ext: 'aar')
+    implementation(name: 'libTracker-release', ext: 'aar')
+    implementation(name: 'openCVLibrary320', ext: 'aar')
 }
