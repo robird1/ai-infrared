@@ -45,7 +45,10 @@
             android:name=".ui.device.IPCListActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"></activity>
-
+        <activity
+            android:name=".ui.device.HotspotActivity"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity"></activity>
         <activity
             android:name=".ui.device.ScanActivity"
             android:screenOrientation="portrait"
