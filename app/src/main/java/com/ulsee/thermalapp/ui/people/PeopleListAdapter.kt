@@ -53,7 +53,7 @@ class PeopleListAdapter(private val fragment: ListFragment): RecyclerView.Adapte
             disposable?.dispose()
 
             nameTV?.text = face.Name
-            ageTV.text = face.Age.toString()
+            ageTV.text = getAgeText(face)
             genderTV.text = face.Gender
 
             deleteButton.setOnClickListener {
@@ -64,6 +64,14 @@ class PeopleListAdapter(private val fragment: ListFragment): RecyclerView.Adapte
             if (deviceManager == null) {
                 Toast.makeText(itemView.context, "Error: no device connected", Toast.LENGTH_SHORT).show()
                 return
+            }
+        }
+
+        private fun getAgeText(face: Face): String {
+            return if (face.Age == 0) {
+                ""
+            } else {
+                face.Age.toString()
             }
         }
 

@@ -56,9 +56,11 @@ enum class AttributeType(val fieldName: String, val position: Int, val viewType:
             face.Data = faceCode
             face.Name = NAME.inputValue
 
-            // Input value of age has been checked when user presses save button, so it is valid here and
-            // can be directly transformed to integer.
-            face.Age = AGE.inputValue.toInt()
+            if (AGE.inputValue == "0" || AGE.inputValue == "") {
+                face.Age = 0
+            } else {
+                face.Age = AGE.inputValue.toInt()
+            }
             face.Gender = GENDER.inputValue
             face.EmployeeID = EMPLOYEE_ID.inputValue
             face.Birthday = BIRTHDAY.inputValue

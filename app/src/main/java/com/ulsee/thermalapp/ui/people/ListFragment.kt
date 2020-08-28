@@ -145,7 +145,7 @@ class ListFragment : Fragment() {
     }
 
     private fun openEditor (face: Face? = null, isEditMode: Boolean) {
-        val intent = Intent(context, EditorActivity2::class.java)
+        val intent = Intent(context, EditorActivity::class.java)
         if (face != null) {
             if (isEditMode) {
                 // TODO refactor

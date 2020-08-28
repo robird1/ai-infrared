@@ -81,6 +81,11 @@ class PeopleEditorAdapter(private val context: Context, private val isEditingMod
 
             if (isEditingMode) {
                 textInputLayout.editText?.setText(AttributeType.fromPosition(position).inputValue)
+                if (position == AttributeType.AGE.position) {
+                    if (AttributeType.AGE.inputValue == "0") {
+                        textInputLayout.editText?.setText("")
+                    }
+                }
             }
 
             textInputLayout.editText?.addTextChangedListener(object : TextWatcher {
@@ -142,7 +147,7 @@ class PeopleEditorAdapter(private val context: Context, private val isEditingMod
 //                builder.setSelection(cal.time.time)
 //            }
             val picker = builder.build()
-            picker.show((context as EditorActivity2).supportFragmentManager, "date_picker_tag")
+            picker.show((context as EditorActivity).supportFragmentManager, "date_picker_tag")
             picker.addOnPositiveButtonClickListener {
                 Log.d(TAG, "Date String = ${picker.headerText}:: Date epoch value = ${it}")
 

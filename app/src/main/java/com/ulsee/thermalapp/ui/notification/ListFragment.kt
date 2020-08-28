@@ -15,12 +15,8 @@ import com.ulsee.thermalapp.MainActivity
 import com.ulsee.thermalapp.MainActivityTag
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
-import com.ulsee.thermalapp.data.model.Notification
 import com.ulsee.thermalapp.data.model.Notification2
 import com.ulsee.thermalapp.data.services.NotificationServiceTCP
-import com.ulsee.thermalapp.ui.device.DeviceListAdapter
-import com.ulsee.thermalapp.ui.people.EditorActivity
-import com.ulsee.thermalapp.ui.people.PeopleListAdapter
 import com.ulsee.thermalapp.utils.RecyclerViewItemClickSupport
 import java.io.Serializable
 
@@ -60,6 +56,7 @@ class ListFragment  : Fragment() {
     private fun loadNotifications() {
         val deviceManager = Service.shared.getFirstConnectedDeviceManager()
         if (deviceManager == null) {
+            swipeRefreshLayout.isRefreshing = false
             Toast.makeText(context, "no connected device", Toast.LENGTH_LONG).show()
             return
         }
