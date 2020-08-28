@@ -16,7 +16,7 @@ import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Device
 import com.ulsee.thermalapp.utils.RecyclerViewItemClickSupport
 
-val TAG = "IPCListActivity"
+private val TAG = "IPCListActivity"
 
 class IPCListActivity : AppCompatActivity() {
 

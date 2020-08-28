@@ -6,14 +6,13 @@ open class Face: Serializable {
 
     var ID : String = "-1"
     var Name : String = ""
-//    var Image : String? = null
     var Image : String = ""
-    var Data : String? = null
+    var Data : String = ""
     var oldName: String? = null
     var Gender : String = ""
     var Age : Int = 0
     var EmployeeID = ""
-    var Birthdate = ""
+    var Birthday = ""
     var Remark = ""
     val NameWihtoutFileType : String
         get() {

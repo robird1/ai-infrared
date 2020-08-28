@@ -18,9 +18,9 @@
     <application
         android:name=".App"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/launcher"
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
         android:resizeableActivity="false"
@@ -45,7 +45,10 @@
             android:name=".ui.device.IPCListActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"></activity>
-
+        <activity
+            android:name=".ui.device.HotspotActivity"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity"></activity>
         <activity
             android:name=".ui.device.ScanActivity"
             android:screenOrientation="portrait"
@@ -66,10 +69,6 @@
             tools:ignore="LockedOrientationActivity"></activity>
         <activity
             android:name=".ui.people.EditorActivity"
-            android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity"></activity>
-        <activity
-            android:name=".ui.people.EditorActivity2"
             android:theme="@style/PeopleEditTheme"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan"

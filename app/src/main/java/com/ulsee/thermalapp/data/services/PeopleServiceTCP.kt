@@ -71,7 +71,7 @@ class PeopleServiceTCP(deviceManager: DeviceManager) : IPeopleService {
         val handler: ObservableOnSubscribe<com.ulsee.thermalapp.data.model.Face> = ObservableOnSubscribe { emitter ->
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true) throw Exception("error: target not connected")
-            apiClient?.send(gson.toJson(ChangePeople(face, null, ChangePeople.ChangeType.create)))
+            apiClient?.send(gson.toJson(ChangePeople(face, ChangePeople.ChangeType.create)))
             val empty = com.ulsee.thermalapp.data.model.Face()
             emitter.onNext(empty)
             emitter.onComplete()
@@ -84,7 +84,7 @@ class PeopleServiceTCP(deviceManager: DeviceManager) : IPeopleService {
         val handler: CompletableOnSubscribe = CompletableOnSubscribe { emitter ->
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true) throw Exception("error: target not connected")
-            apiClient?.send(gson.toJson(ChangePeople(face, face.oldName, ChangePeople.ChangeType.update)))
+            apiClient?.send(gson.toJson(ChangePeople(face, ChangePeople.ChangeType.update)))
             emitter.onComplete()
         }
         return Completable.create(handler).subscribeOn(Schedulers.newThread())
@@ -95,7 +95,7 @@ class PeopleServiceTCP(deviceManager: DeviceManager) : IPeopleService {
         val handler: CompletableOnSubscribe = CompletableOnSubscribe { emitter ->
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true) throw Exception("error: target not connected")
-            apiClient?.send(gson.toJson(ChangePeople(face, null, ChangePeople.ChangeType.delete)))
+            apiClient?.send(gson.toJson(ChangePeople(face, ChangePeople.ChangeType.delete)))
             emitter.onComplete()
         }
         return Completable.create(handler).subscribeOn(Schedulers.newThread())

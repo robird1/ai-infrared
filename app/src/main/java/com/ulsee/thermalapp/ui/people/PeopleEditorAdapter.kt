@@ -21,11 +21,7 @@ private val TAG = "PeopleEditorAdapter"
 
 class PeopleEditorAdapter(private val context: Context, private val isEditingMode: Boolean): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    //    private var onEditTextChanged = listener
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        Log.d(TAG, "isEditingMode: " + isEditingMode)
-
         val holder: RecyclerView.ViewHolder
         val layoutInflater = LayoutInflater.from(parent.context)
         holder = when (viewType) {
@@ -75,8 +71,7 @@ class PeopleEditorAdapter(private val context: Context, private val isEditingMod
             if (position == AttributeType.NAME.position) {
                 textInputLayout.helperText = "*Required"
 
-            } else if (position == AttributeType.BIRTHDATE.position) {
-                Log.d(TAG, "[Enter] position == AttributeType.BIRTHDATE.position")
+            } else if (position == AttributeType.BIRTHDAY.position) {
                 textInputLayout.editText?.isCursorVisible = false
                 textInputLayout.editText?.isFocusableInTouchMode = false
                 textInputLayout.editText?.setOnClickListener {
@@ -86,6 +81,11 @@ class PeopleEditorAdapter(private val context: Context, private val isEditingMod
 
             if (isEditingMode) {
                 textInputLayout.editText?.setText(AttributeType.fromPosition(position).inputValue)
+                if (position == AttributeType.AGE.position) {
+                    if (AttributeType.AGE.inputValue == "0") {
+                        textInputLayout.editText?.setText("")
+                    }
+                }
             }
 
             textInputLayout.editText?.addTextChangedListener(object : TextWatcher {
@@ -100,7 +100,6 @@ class PeopleEditorAdapter(private val context: Context, private val isEditingMod
                 override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
                 override fun afterTextChanged(editable: Editable) {
                     Log.d(TAG, "[Enter] afterTextChanged")
-//                    var isInputValid = true
                     AttributeType.fromPosition(position).inputValue = editable.toString()
 
                     if (position == AttributeType.NAME.position) {
@@ -110,7 +109,6 @@ class PeopleEditorAdapter(private val context: Context, private val isEditingMod
                     } else if (position == AttributeType.AGE.position) {
                         if (!isAgeValid()) {
                             textInputLayout.error = "Error: Invalid Age"
-//                            isInputValid = false
                             AttributeType.fromPosition(position).isInputValid = false
 
                         } else {
@@ -121,7 +119,6 @@ class PeopleEditorAdapter(private val context: Context, private val isEditingMod
                     } else {
                         AttributeType.fromPosition(position).isInputValid = true
                     }
-//                    onEditTextChanged.onTextChanged(position, textInputLayout.editText?.text.toString().trim(), isInputValid)
                 }
             })
         }
@@ -150,7 +147,7 @@ class PeopleEditorAdapter(private val context: Context, private val isEditingMod
 //                builder.setSelection(cal.time.time)
 //            }
             val picker = builder.build()
-            picker.show((context as EditorActivity2).supportFragmentManager, "date_picker_tag")
+            picker.show((context as EditorActivity).supportFragmentManager, "date_picker_tag")
             picker.addOnPositiveButtonClickListener {
                 Log.d(TAG, "Date String = ${picker.headerText}:: Date epoch value = ${it}")
 
@@ -200,8 +197,6 @@ class PeopleEditorAdapter(private val context: Context, private val isEditingMod
                 override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
                 override fun afterTextChanged(editable: Editable) {
                     AttributeType.fromPosition(position).inputValue = editable.toString()
-
-//                    onEditTextChanged.onTextChanged(position, textInputLayout.editText?.text.toString(), true)
                 }
             })
         }

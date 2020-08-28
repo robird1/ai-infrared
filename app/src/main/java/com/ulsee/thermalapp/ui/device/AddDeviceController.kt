@@ -33,7 +33,7 @@ import java.net.SocketException
 
 class AddDeviceController(activity: Activity) {
     private val mActivity = activity
-    private lateinit var mConnectHotspotDialog : AlertDialog
+    private var mConnectHotspotDialog : AlertDialog?= null
     private var mHandler: Handler? = null
     private var mThread: HandlerThread? = null
     private lateinit var mTask: Runnable
@@ -61,9 +61,7 @@ class AddDeviceController(activity: Activity) {
     }
 
     private fun searchHotspot() {
-        initHandler()
-        showConnectHotspotDialog()
-        connectToAPTCP()
+        mActivity.startActivity(Intent(mActivity, HotspotActivity::class.java))
     }
 
     private fun showConnectHotspotDialog() {
@@ -78,7 +76,7 @@ class AddDeviceController(activity: Activity) {
             .setCancelable(false)
             .create()
 
-        mConnectHotspotDialog.show()
+        mConnectHotspotDialog!!.show()
     }
 
     private fun initHandler() {
@@ -105,8 +103,10 @@ class AddDeviceController(activity: Activity) {
         return String.format("%s.%s.%s.1",arr[0],arr[1],arr[2])
     }
 
-    private fun connectToAPTCP () {
+    fun connectToAPTCP () {
         Log.d("AddDeviceController", "[Enter] connectToAPTCP")
+        initHandler()
+
         val gson = Gson()
         var mAPTCPSocket: Socket? = null
         var retryCounter = 0
@@ -130,7 +130,7 @@ class AddDeviceController(activity: Activity) {
                 val mAPSettings = gson.fromJson<Settings>(responseString, itemType)
 
                 cancelTask()
-                mActivity.runOnUiThread { mConnectHotspotDialog.dismiss(); askDeviceName(obtainDevice(mAPSettings, ip))}
+                mActivity.runOnUiThread { mConnectHotspotDialog?.dismiss(); askDeviceName(obtainDevice(mAPSettings, ip))}
 
             } catch(e: SocketException) {
                 Log.d("AddDeviceController", "try to connect to IP.1 (AP TCP), but failed, isn't AP mode")
@@ -176,7 +176,7 @@ class AddDeviceController(activity: Activity) {
 
     private fun showUnableConnectDialog() {
         mActivity.runOnUiThread {
-            mConnectHotspotDialog.dismiss()
+            mConnectHotspotDialog?.dismiss()
 
             AlertDialog
                 .Builder(mActivity)
