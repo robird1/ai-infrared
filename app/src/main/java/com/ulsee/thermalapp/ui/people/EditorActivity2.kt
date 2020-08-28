@@ -1,6 +1,5 @@
 package com.ulsee.thermalapp.ui.people
 
-import android.app.ProgressDialog
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -20,7 +19,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.ulsee.facecode.Facecode
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
@@ -28,8 +26,6 @@ import com.ulsee.thermalapp.data.services.PeopleServiceTCP
 import com.ulsee.thermalapp.utils.FilePickerHelper
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.InputStream
-import java.lang.Exception
 
 private val TAG = "EditorActivity2"
 
@@ -87,6 +83,12 @@ class EditorActivity2 : AppCompatActivity() {
             }).start()
         }
     }
+
+    override fun onDestroy() {
+        AttributeType.clearAttributeData()
+        super.onDestroy()
+    }
+
     private fun imageBase64TOFaceCodeBase64 (imageBase64: String) : String? {
         val decodedString: ByteArray = Base64.decode(imageBase64, Base64.DEFAULT)
         val selectedBitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
@@ -131,7 +133,7 @@ class EditorActivity2 : AppCompatActivity() {
                 Toast.makeText(this, "no face detected", Toast.LENGTH_LONG).show()
                 return
             }
-            face.Image = facecode!!
+            face.Data = facecode!!
         }
         PeopleServiceTCP(selectedTCPClient).create(face)
             .subscribe({ newPeople ->
@@ -161,7 +163,7 @@ class EditorActivity2 : AppCompatActivity() {
                 Toast.makeText(this, "no face detected", Toast.LENGTH_LONG).show()
                 return
             }
-            face.Image = facecode!!
+            face.Data = facecode!!
         }
         PeopleServiceTCP(selectedTCPClient).update(face)
             .subscribe({
@@ -176,10 +178,16 @@ class EditorActivity2 : AppCompatActivity() {
     }
 
     private fun isInputValid(): Boolean {
-        for (attribute in AttributeType.values()) {
-            if (!attribute.isInputValid || !isPhotoTaken)
+        if (!isEditingMode) {
+            if (!isPhotoTaken)
                 return false
         }
+
+        for (attribute in AttributeType.values()) {
+            if (!attribute.isInputValid)
+                return false
+        }
+
         return true
     }
 
@@ -227,6 +235,19 @@ class EditorActivity2 : AppCompatActivity() {
             image);
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, takePhotoIntentUri);
         startActivityForResult(cameraIntent, REQUEST_TAKE_PHOTO)
+    }
+
+    fun pickImageFromAlbum () {
+        val getIntent = Intent(Intent.ACTION_GET_CONTENT)
+        getIntent.type = "image/*"
+        val pickIntent = Intent(
+            Intent.ACTION_PICK,
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        )
+        pickIntent.type = "image/*"
+        val chooserIntent = Intent.createChooser(getIntent, "Select Image")
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(pickIntent))
+        startActivityForResult(chooserIntent, REAQUEST_CODE_PICK_IMAGE)
     }
 
     companion object {

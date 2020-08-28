@@ -2,7 +2,7 @@ package com.ulsee.thermalapp.data.request
 
 import com.ulsee.thermalapp.data.model.Face
 
-class ChangePeople(face: Face, oldName: String?, changeType: ChangeType) {
+class ChangePeople(face: Face, changeType: ChangeType) {
 
     enum class ChangeType(val flag: Int){
         create(0),
@@ -16,14 +16,16 @@ class ChangePeople(face: Face, oldName: String?, changeType: ChangeType) {
 //    val str = if(oldName != null && changeType==ChangeType.update && oldName.equals(face.Name)==false) arrayOf(oldName, face.Name) else arrayOf(face.Name)
     var Name = face.Name
     // this is facecode
-    val Data : String? = if (changeType.flag == ChangeType.delete.flag) null else face.Image
+//    val Data : String? = if (changeType.flag == ChangeType.delete.flag) null else face.Image
+    val Data : String = face.Data
+
     val Flag = changeType.flag
 
-    // TODO
-    val Gender = "Female"
-    val Age = 28
-    val EmployeeID = "333"
-    val Remark = "Engineer"
+    val Gender = face.Gender
+    val Age = face.Age
+    val EmployeeID = face.EmployeeID
+    val Birthday: String = face.Birthday
+    val Remark = face.Remark
 
 
 

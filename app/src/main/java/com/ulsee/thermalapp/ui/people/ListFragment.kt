@@ -2,18 +2,12 @@ package com.ulsee.thermalapp.ui.people
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
-import android.provider.MediaStore
-import android.util.Base64
 import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,10 +17,7 @@ import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Face
 import com.ulsee.thermalapp.data.services.PeopleServiceTCP
-import com.ulsee.thermalapp.utils.FilePickerHelper
 import com.ulsee.thermalapp.utils.RecyclerViewItemClickSupport
-import java.io.ByteArrayOutputStream
-import java.io.File
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -60,16 +51,12 @@ class ListFragment : Fragment() {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
-
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        Log.d(TAG, "[Enter] onCreateView")
-
-        // Inflate the layout for this fragment
         val root = inflater.inflate(R.layout.fragment_people_list, container, false)
 
         swipeRefreshLayout = root.findViewById<SwipeRefreshLayout>(R.id.swipeRefreshLayout)
@@ -86,7 +73,7 @@ class ListFragment : Fragment() {
             openEditor(people, true)
         }
 
-        setHasOptionsMenu(true)
+        setHasOptionsMenu(false)
 
         loadPeopleList()
 
@@ -131,83 +118,36 @@ class ListFragment : Fragment() {
     }
 
     private fun loadPeopleList () {
-        Log.d("ListFragment", "[Enter] loadPeopleList")
-//        val selectedTCPClient = Service.shared.getFirstConnectedDeviceManager()
-//        if (selectedTCPClient == null) {
-//            Toast.makeText(context, "no connected device", Toast.LENGTH_LONG).show()
-//            return
-//        }
-//        PeopleServiceTCP(selectedTCPClient).getAll()
-//            .subscribe({ faceList: List<Face> ->
-////                (recyclerView.adapter as PeopleListAdapter).setList(faceList)
-//                swipeRefreshLayout.isRefreshing = false
-//            }, { error: Throwable ->
-//                Log.d("ListFragment", "[Error] PeopleServiceTCP(selectedTCPClient).getAll()")
-//
-//                Log.d(MainActivityTag, error.localizedMessage)
-//                Toast.makeText(context, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
-//                swipeRefreshLayout.isRefreshing = false
-//            })
-
-        val list = ArrayList<Face>()
-        val face = Face()
-        face.Name = "steve"
-        face.Age = 33
-        face.Gender = "male"
-        face.Birthdate = "1985/01/01"
-        val face1 = Face()
-        face1.Name = "steve1"
-        face1.Age = 34
-        face1.Gender = "male"
-        face1.Birthdate = "1986/02/02"
-        val face2 = Face()
-        face2.Name = "steve2"
-        face2.Age = 35
-        face2.Gender = "female"
-        face2.Birthdate = "1987/03/03"
-        list.add(face)
-        list.add(face1)
-        list.add(face2)
-        (recyclerView.adapter as PeopleListAdapter).setList(list)
-
+        val selectedTCPClient = Service.shared.getFirstConnectedDeviceManager()
+        if (selectedTCPClient == null) {
+            swipeRefreshLayout.isRefreshing = false
+            Toast.makeText(context, "no connected device", Toast.LENGTH_LONG).show()
+            return
+        }
+        PeopleServiceTCP(selectedTCPClient).getAll()
+            .subscribe({ faceList: List<Face> ->
+                (recyclerView.adapter as PeopleListAdapter).setList(faceList)
+                swipeRefreshLayout.isRefreshing = false
+            }, { error: Throwable ->
+                Log.d(TAG, error.localizedMessage)
+                Toast.makeText(context, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
+                swipeRefreshLayout.isRefreshing = false
+            })
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        Log.d(TAG, "[Enter] onActivityResult")
-
         if (requestCode == REQUEST_ACTIVITY_EDITOR) {
             if (resultCode == Activity.RESULT_OK) {
                 loadPeopleList()
-            }
-        } else if (requestCode == EditorActivity2.REQUEST_TAKE_PHOTO) {
-            if (resultCode == Activity.RESULT_OK) {
-                val file = FilePickerHelper.shared().putPickedFile(requireContext(), takePhotoIntentUri);
-                val bm = BitmapFactory.decodeFile(file.path)
-                val bOut = ByteArrayOutputStream()
-                bm.compress(Bitmap.CompressFormat.JPEG, 100, bOut)
-                val imageBase64 = Base64.encodeToString(
-                    bOut.toByteArray(),
-                    Base64.DEFAULT
-                )
-                val face = Face()
-                face.Image = imageBase64
-                openEditor(face, false)
-            } else {
-                Toast.makeText(context, "Cancelled", Toast.LENGTH_LONG).show()
             }
         }
         super.onActivityResult(requestCode, resultCode, data)
     }
 
     private fun openEditor (face: Face? = null, isEditMode: Boolean) {
-        Log.d(TAG, "[Enter] openEditor")
-
         val intent = Intent(context, EditorActivity2::class.java)
         if (face != null) {
-//            intent.putExtra("people", face as Serializable)
-            if (!isEditMode) {
-                AttributeType.clearAttributeData()
-            } else {
+            if (isEditMode) {
                 // TODO refactor
                 AttributeType.NAME.isInputValid = true
             }
@@ -225,7 +165,6 @@ class ListFragment : Fragment() {
         }
 
         mProgressView.visibility = View.VISIBLE
-//        mProgressDialog.show()
         PeopleServiceTCP(selectedTCPClient).delete(face)
             .subscribe({
                 loadPeopleList()

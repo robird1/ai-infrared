@@ -1,31 +1,26 @@
 package com.ulsee.thermalapp.ui.people
 
-import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Face
-import com.ulsee.thermalapp.data.services.PeopleServiceTCP
 import io.reactivex.disposables.Disposable
 
 class PeopleListAdapter(private val fragment: ListFragment): RecyclerView.Adapter<PeopleListAdapter.ViewHolder>() {
 
     var faceList: List<Face> = ArrayList()
+
     fun setList(list: List<Face>) {
-        Log.d("PeopleListAdapter", "[Enter] setList")
         faceList = list
         notifyDataSetChanged()
+
     }
     fun getList():List<Face> {
         return faceList
@@ -54,21 +49,14 @@ class PeopleListAdapter(private val fragment: ListFragment): RecyclerView.Adapte
         private val deleteButton = itemView?.findViewById<ImageView>(R.id.delete_icon)
 
         fun bind(face: Face) {
-            Log.d("PeopleListAdapter", "[Enter] bind")
-
             mFace = face
             disposable?.dispose()
-            Log.d("PeopleListAdapter", "face.Name:　"+ face.Name)
-            Log.d("PeopleListAdapter", "face.age:　"+ face.Age)
-            Log.d("PeopleListAdapter", "face.gender:　"+face.Gender)
-            Log.d("PeopleListAdapter", "face.birth:　"+face.Birthdate)
 
             nameTV?.text = face.Name
             ageTV.text = face.Age.toString()
             genderTV.text = face.Gender
 
             deleteButton.setOnClickListener {
-                Log.d("PeopleListAdapter","[Enter] onClick")
                 confirmDelete(face)
             }
 
@@ -77,24 +65,9 @@ class PeopleListAdapter(private val fragment: ListFragment): RecyclerView.Adapte
                 Toast.makeText(itemView.context, "Error: no device connected", Toast.LENGTH_SHORT).show()
                 return
             }
-
-
-//            iv.setImageResource(0)
-//            if (face.Image.isNullOrEmpty() == false) {
-//                Glide.with(itemView.context).load(Base64.decode(face.Image, Base64.DEFAULT)).into(iv);
-//            } else {
-//                disposable = PeopleServiceTCP(deviceManager!!).getSingleFace(face).subscribe{
-//                    disposable = null
-//                    face.Image = it
-//                    Glide.with(itemView.context).load(Base64.decode(it, Base64.DEFAULT)).into(iv);
-//                }
-//            }
-
         }
 
         private fun confirmDelete (face: Face) {
-            Log.d("PeopleListAdapter","[Enter] confirmDelete")
-
             val ctx = itemView.context
 
             AlertDialog.Builder(ctx)
@@ -110,7 +83,5 @@ class PeopleListAdapter(private val fragment: ListFragment): RecyclerView.Adapte
                 .create()
                 .show()
         }
-
-
     }
 }
