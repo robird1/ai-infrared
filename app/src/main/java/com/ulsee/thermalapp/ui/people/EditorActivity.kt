@@ -19,6 +19,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.ulsee.facecode.Facecode
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
@@ -26,6 +27,7 @@ import com.ulsee.thermalapp.data.services.PeopleServiceTCP
 import com.ulsee.thermalapp.utils.FilePickerHelper
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.InputStream
 
 private val TAG = "EditorActivity"
 
@@ -57,7 +59,8 @@ class EditorActivity : AppCompatActivity() {
         mAddFaceBtn = findViewById(R.id.add_image)
 
         mAddFaceBtn.setOnClickListener {
-            pickImageFromTakePhoto()
+//            pickImageFromTakePhoto()
+            pickImageFromAlbum()
         }
 
         findViewById<View>(R.id.save_btn).setOnClickListener { save() }
@@ -212,6 +215,37 @@ class EditorActivity : AppCompatActivity() {
                 isPhotoTaken = true
             } else {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show()
+            }
+        } else if (requestCode == REAQUEST_CODE_PICK_IMAGE) {
+            if (resultCode != RESULT_OK) return;
+            var uri : Uri? = data?.data
+            if (uri == null) {
+                Toast.makeText(this, "error get file uri", Toast.LENGTH_LONG ).show()
+                return
+            } else {
+                val inputStream: InputStream? = getContentResolver().openInputStream(uri)
+                if (inputStream == null) {
+                    Toast.makeText(this, "error open input stream", Toast.LENGTH_LONG ).show()
+                    return
+                }
+
+                val stringBuilder = StringBuilder()
+                var readLen = 0
+                val bufferLen = 1026 // 為了base64, bufferLen*4/3 必須是4的倍數
+                val buffer = ByteArray(bufferLen)
+
+                while (true) {
+                    readLen = inputStream.read(buffer, 0, bufferLen)
+                    if (readLen < 0) break;
+                    val base64 = Base64.encodeToString(buffer, 0, readLen, Base64.NO_WRAP)// comment or Base64.URL_SAFE
+                    stringBuilder.append(base64)
+                }
+
+                while (stringBuilder.length %4 != 0) {
+                    stringBuilder.append("=")
+                }
+
+                Glide.with(this).load("data:image/jpg;base64,"+stringBuilder.toString()).into(mAddFaceBtn)
             }
         }
         super.onActivityResult(requestCode, resultCode, data)
