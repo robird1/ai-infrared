@@ -1,17 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/view_foreground"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?android:attr/selectableItemBackground">
-
-<!--    <View-->
-<!--        android:id="@+id/listitem_file_manage_background"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="72dp"-->
-<!--        android:visibility="invisible" />-->
-<!--    android:background="@color/colorSelected"-->
-
+    android:background="@android:color/white">
+<!--    android:background="?android:attr/selectableItemBackground">-->
 
     <FrameLayout
         android:id="@+id/face_icon_layout"
@@ -29,27 +23,25 @@
 
     </FrameLayout>
 
-    <FrameLayout
-        android:id="@+id/delete_icon_layout"
-        android:layout_width="72dp"
-        android:layout_height="72dp"
-        android:layout_alignParentRight="true">
+<!--    <FrameLayout-->
+<!--        android:id="@+id/delete_icon_layout"-->
+<!--        android:layout_width="72dp"-->
+<!--        android:layout_height="72dp"-->
+<!--        android:layout_alignParentRight="true">-->
 
-        <ImageView
-            android:id="@+id/delete_icon"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="?selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:padding="20dp"
-            app:srcCompat="@drawable/ic_toolbar_delete_gray" />
-
-    </FrameLayout>
+<!--        <ImageView-->
+<!--            android:id="@+id/delete_icon"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:background="?selectableItemBackgroundBorderless"-->
+<!--            android:clickable="true"-->
+<!--            android:padding="20dp"-->
+<!--            app:srcCompat="@drawable/ic_toolbar_delete_gray" />-->
+<!--    </FrameLayout>-->
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="72dp"
-        android:layout_toLeftOf="@+id/delete_icon_layout"
         android:layout_toRightOf="@+id/face_icon_layout"
         android:orientation="vertical">
 

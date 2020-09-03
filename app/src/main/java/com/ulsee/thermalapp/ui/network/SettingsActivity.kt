@@ -98,7 +98,7 @@ class SettingsActivity : AppCompatActivity() {
     private fun switchAndSendACK() {
         val wifiInfo = intent.getSerializableExtra("wifi") as WIFIInfo
         var tryTimes = 0
-        val result = NetworkUtils.connect(this, wifiInfo)
+        val result = NetworkController(this).requestWifi(wifiInfo)
         if (result) {
             val deviceManager = Service.shared.getManagerOfDeviceID(mDeviceID)
             Thread(Runnable {

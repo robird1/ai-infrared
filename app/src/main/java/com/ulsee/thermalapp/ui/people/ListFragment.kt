@@ -2,13 +2,13 @@ package com.ulsee.thermalapp.ui.people
 
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -32,18 +32,16 @@ private val TAG = "ListFragment"
  * Use the [ListFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class ListFragment : Fragment() {
+class ListFragment : Fragment(), RecyclerItemTouchHelper.ItemTouchListener {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
     lateinit var recyclerView: RecyclerView
     lateinit var swipeRefreshLayout: SwipeRefreshLayout
 
-    lateinit var mMenuSearchItem: MenuItem
-    lateinit var mSearchView: PeopleSearchView
-    lateinit var takePhotoIntentUri: Uri
+    private lateinit var mMenuSearchItem: MenuItem
+    private lateinit var mSearchView: PeopleSearchView
     private lateinit var mProgressView: ConstraintLayout
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,12 +57,14 @@ class ListFragment : Fragment() {
     ): View? {
         val root = inflater.inflate(R.layout.fragment_people_list, container, false)
 
-        swipeRefreshLayout = root.findViewById<SwipeRefreshLayout>(R.id.swipeRefreshLayout)
+        swipeRefreshLayout = root.findViewById(R.id.swipeRefreshLayout)
         swipeRefreshLayout.setOnRefreshListener { loadPeopleList() }
-        recyclerView = root.findViewById<RecyclerView>(R.id.recyclerView)
+        recyclerView = root.findViewById(R.id.recyclerView)
         recyclerView.adapter = PeopleListAdapter(this)
         recyclerView.layoutManager = LinearLayoutManager(context)
         mProgressView = root.findViewById(R.id.progress_view)
+
+        ItemTouchHelper(getItemTouchCallback()).attachToRecyclerView(recyclerView)
 
         val support: RecyclerViewItemClickSupport = RecyclerViewItemClickSupport.addTo(recyclerView)
         support.setOnItemClickListener { recyclerView, position, _ ->
@@ -144,7 +144,7 @@ class ListFragment : Fragment() {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
-    private fun openEditor (face: Face? = null, isEditMode: Boolean) {
+    private fun openEditor(face: Face? = null, isEditMode: Boolean) {
         val intent = Intent(context, EditorActivity::class.java)
         if (face != null) {
             if (isEditMode) {
@@ -157,7 +157,7 @@ class ListFragment : Fragment() {
         startActivityForResult(intent, REQUEST_ACTIVITY_EDITOR)
     }
 
-    fun deletePeople (face: Face) {
+    fun deletePeople(face: Face, position: Int) {
         val selectedTCPClient = Service.shared.getFirstConnectedDeviceManager()
         if (selectedTCPClient == null) {
             Toast.makeText(requireContext(), "no connected device", Toast.LENGTH_LONG).show()
@@ -167,15 +167,34 @@ class ListFragment : Fragment() {
         mProgressView.visibility = View.VISIBLE
         PeopleServiceTCP(selectedTCPClient).delete(face)
             .subscribe({
-                loadPeopleList()
-                Toast.makeText(requireContext(), getString(R.string.remove_successfully), Toast.LENGTH_LONG).show()
+//                loadPeopleList()
+                (recyclerView.adapter as PeopleListAdapter).removeItem(position)
+
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.remove_successfully),
+                    Toast.LENGTH_LONG
+                ).show()
                 mProgressView.visibility = View.INVISIBLE
             }, { error: Throwable ->
                 error.printStackTrace()
                 Log.d(javaClass.name, error.localizedMessage)
-                Toast.makeText(requireContext(), "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Error ${error.localizedMessage}",
+                    Toast.LENGTH_LONG
+                ).show()
                 mProgressView.visibility = View.INVISIBLE
             })
+    }
+
+    private fun getItemTouchCallback(): ItemTouchHelper.SimpleCallback {
+        return RecyclerItemTouchHelper(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT, this)
+    }
+
+    override fun onSwiped(viewHolder: RecyclerView.ViewHolder?, direction: Int, position: Int) {
+        val deletedItem: Face = (recyclerView.adapter as PeopleListAdapter).faceList[position]
+        deletePeople(deletedItem, position)
     }
 
 
@@ -201,4 +220,5 @@ class ListFragment : Fragment() {
                 }
             }
     }
+
 }

@@ -20,6 +20,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.model.Device
 import com.ulsee.thermalapp.data.model.WIFIInfo
+import com.ulsee.thermalapp.ui.network.NetworkController
 import com.ulsee.thermalapp.ui.network.NetworkUtils
 import com.ulsee.thermalapp.utils.RecyclerViewItemClickSupport
 
@@ -94,7 +95,7 @@ class HotspotActivity : AppCompatActivity() {
 
     private fun switchWifi(hotspot: WIFIInfo): Boolean {
         hotspot.password = "ulsee168"
-        return NetworkUtils.connect(this, hotspot)
+        return NetworkController(this).requestWifi(hotspot)
     }
 
     private fun loadWIFIList(isSwipeRefresh: Boolean = false) {

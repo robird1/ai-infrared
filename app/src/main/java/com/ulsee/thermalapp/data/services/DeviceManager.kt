@@ -150,7 +150,7 @@ class DeviceManager(context: Context, device: Device) {
 
     var device = device
     var settings : Settings? = null
-    val tcpClient = TCPClient(device.getIP(), DeviceManager.TCP_PORT)
+    val tcpClient = TCPClient(device, DeviceManager.TCP_PORT)
     var mIsIDNotMatched = false
     private var mHandler: Handler? = null
     private var mThread: HandlerThread? = null
@@ -211,8 +211,12 @@ class DeviceManager(context: Context, device: Device) {
                 tcpClient.connect()
                 Log.d("DeviceManager", "[After] tcpClient.connect() tcpClient.isConnected(): "+ tcpClient.isConnected())
 
-                // Device is not connected after finishing tcpClient.connect()
-                mHandler?.post(mTask)
+                if (!mIsIDNotMatched) {
+                    // Device is not connected after finishing tcpClient.connect()
+                    mHandler?.post(mTask)
+                } else {
+                    mHandler?.postDelayed(mTask, 60000)
+                }
             }
             catch (e: Exception) {
                 Log.d("DeviceManager", "[Enter] Exception e.message: "+e.message)
@@ -305,6 +309,8 @@ class DeviceManager(context: Context, device: Device) {
                         mIsIDNotMatched = true;
                         tcpClient.close();
                         return true;
+                    } else {
+                        mIsIDNotMatched = false
                     }
                     if (settings?.IsFirstActivate == true) {
                         val isJustJoinedDevice = Service.shared.justJoinedDeviceIDList.contains(device.getID())
