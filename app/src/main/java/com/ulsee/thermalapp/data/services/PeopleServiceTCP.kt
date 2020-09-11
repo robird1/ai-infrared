@@ -5,6 +5,7 @@ import com.ulsee.thermalapp.data.model.Face
 import com.ulsee.thermalapp.data.request.ChangePeople
 import com.ulsee.thermalapp.data.request.GetFace
 import com.ulsee.thermalapp.data.request.GetFaceList
+import com.ulsee.thermalapp.data.request.GetSearchList
 import io.reactivex.Completable
 import io.reactivex.CompletableOnSubscribe
 import io.reactivex.Observable
@@ -101,4 +102,24 @@ class PeopleServiceTCP(deviceManager: DeviceManager) : IPeopleService {
         return Completable.create(handler).subscribeOn(Schedulers.newThread())
             .observeOn(AndroidSchedulers.mainThread())
     }
+
+    fun search(keyword: String): Observable<List<Face>> {
+        val handler: ObservableOnSubscribe<List<Face>> = ObservableOnSubscribe { emitter ->
+            if (apiClient == null) throw Exception("error: target not specified")
+            if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
+
+            deviceManager.setOnGotFaceListListener(object: DeviceManager.OnGotFaceListListener{
+                override fun onGotFaceList(falceList: List<Face>) {
+                    deviceManager.setOnGotFaceListListener(null)
+                    emitter.onNext(falceList)
+                    emitter.onComplete()
+                }
+            })
+            apiClient?.send(gson.toJson(GetSearchList(keyword)))
+        }
+
+        return Observable.create(handler).subscribeOn(Schedulers.newThread())
+            .observeOn(AndroidSchedulers.mainThread())
+    }
+
 }
