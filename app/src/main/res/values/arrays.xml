@@ -6,4 +6,46 @@
         <item>Search LAN</item>
     </string-array>
 
+    <string-array name="temperature_range_celsius">
+        <item>33</item>
+        <item>33.5</item>
+        <item>34</item>
+        <item>34.5</item>
+        <item>35</item>
+        <item>35.5</item>
+        <item>36</item>
+        <item>36.5</item>
+        <item>37</item>
+        <item>37.5</item>
+        <item>38</item>
+        <item>38.5</item>
+        <item>39</item>
+        <item>39.5</item>
+        <item>40</item>
+        <item>40.5</item>
+        <item>41</item>
+        <item>41.5</item>
+        <item>42</item>
+    </string-array>
+
+    <string-array name="temperature_range_fahrenheit">
+        <item>92</item>
+        <item>93</item>
+        <item>94</item>
+        <item>95</item>
+        <item>96</item>
+        <item>97</item>
+        <item>98</item>
+        <item>99</item>
+        <item>100</item>
+        <item>101</item>
+        <item>102</item>
+        <item>103</item>
+        <item>104</item>
+        <item>105</item>
+        <item>106</item>
+        <item>107</item>
+        <item>108</item>
+    </string-array>
+
 </resources>

@@ -18,6 +18,7 @@ import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Face
 import com.ulsee.thermalapp.data.services.PeopleServiceTCP
+import com.ulsee.thermalapp.ui.notification.RecordFilterActivity
 import com.ulsee.thermalapp.utils.RecyclerViewItemClickSupport
 
 

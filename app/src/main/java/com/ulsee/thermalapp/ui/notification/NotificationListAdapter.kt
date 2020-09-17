@@ -13,18 +13,17 @@ import com.bumptech.glide.Glide
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Notification
-import com.ulsee.thermalapp.data.model.Notification2
 import com.ulsee.thermalapp.data.services.NotificationServiceTCP
 import io.reactivex.disposables.Disposable
 
 class NotificationListAdapter: RecyclerView.Adapter<NotificationListAdapter.ViewHolder>() {
 
-    var notificationList: List<Notification2> = ArrayList()
-    fun setList(list: List<Notification2>) {
+    var notificationList: List<Notification> = ArrayList()
+    fun setList(list: List<Notification>) {
         notificationList = list
         notifyDataSetChanged()
     }
-    fun getList():List<Notification2> {
+    fun getList():List<Notification> {
         return notificationList
     }
 
@@ -44,9 +43,9 @@ class NotificationListAdapter: RecyclerView.Adapter<NotificationListAdapter.View
         private val nameTV = itemView?.findViewById<TextView>(R.id.textView_peopleName)
         private val iv = itemView?.findViewById<ImageView>(R.id.imageView)
         private var disposable: Disposable? = null
-        private var mNotification: Notification2? = null
+        private var mNotification: Notification? = null
 
-        fun bind(notification: Notification2) {
+        fun bind(notification: Notification) {
             mNotification = notification
             disposable?.dispose()
 

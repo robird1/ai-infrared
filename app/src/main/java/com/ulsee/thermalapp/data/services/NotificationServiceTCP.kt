@@ -2,46 +2,59 @@ package com.ulsee.thermalapp.data.services
 
 import android.util.Log
 import com.google.gson.Gson
+import com.ulsee.thermalapp.data.model.FilteredRecord
 import com.ulsee.thermalapp.data.model.Notification
-import com.ulsee.thermalapp.data.model.Notification2
-import com.ulsee.thermalapp.data.request.ChangePeople
 import com.ulsee.thermalapp.data.request.GetNotificationImage
 import com.ulsee.thermalapp.data.request.GetNotificationList
 import com.ulsee.thermalapp.data.response.NotificationImage
-import io.reactivex.Completable
-import io.reactivex.CompletableOnSubscribe
 import io.reactivex.Observable
 import io.reactivex.ObservableOnSubscribe
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import java.lang.Exception
 
 class NotificationServiceTCP(deviceManager: DeviceManager) {
     val deviceManager = deviceManager
     var apiClient : TCPClient? = deviceManager.tcpClient
     val gson = Gson()
 
-     fun getAll(): Observable<List<Notification2>> {
+     fun getAll(): Observable<List<Notification>> {
          Log.d("NotificationServiceTCP", "[Enter] getAll")
 
-         val handler: ObservableOnSubscribe<List<Notification2>> = ObservableOnSubscribe { emitter ->
+         val handler: ObservableOnSubscribe<List<Notification>> = ObservableOnSubscribe { emitter ->
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
 //            if (apiClient?.isConnected() != true) apiClient?.reconnect()
 
             deviceManager.setOnGotNotificationListListener(object: DeviceManager.OnGotNotificationListListener{
-                override fun onGotNotificationList(falceList: List<Notification2>) {
+                override fun onGotNotificationList(falceList: List<Notification>) {
                     Log.d("NotificationServiceTCP", "[Enter] onGotNotificationList")
 
                     deviceManager.setOnGotNotificationListListener(null)
                     emitter.onNext(falceList)
                     emitter.onComplete()
-
-                    Log.d("NotificationServiceTCP", "[After] emitter.onNext(falceList)")
                 }
             })
             apiClient?.send(gson.toJson(GetNotificationList()))
 
+        }
+
+        return Observable.create(handler).subscribeOn(Schedulers.newThread())
+            .observeOn(AndroidSchedulers.mainThread())
+    }
+
+    fun getFilteredRecord(data: FilteredRecord): Observable<List<Notification>> {
+        val handler: ObservableOnSubscribe<List<Notification>> = ObservableOnSubscribe { emitter ->
+            if (apiClient == null) throw Exception("error: target not specified")
+            if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
+
+            deviceManager.setOnGotNotificationListListener(object: DeviceManager.OnGotNotificationListListener{
+                override fun onGotNotificationList(falceList: List<Notification>) {
+                    deviceManager.setOnGotNotificationListListener(null)
+                    emitter.onNext(falceList)
+                    emitter.onComplete()
+                }
+            })
+            apiClient?.send(gson.toJson(data))
         }
 
         return Observable.create(handler).subscribeOn(Schedulers.newThread())

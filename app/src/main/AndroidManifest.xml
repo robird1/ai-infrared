@@ -101,7 +101,8 @@
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"></activity>
         <activity
-            android:name=".ui.notification.NotificationActivity2"
+            android:name=".ui.notification.RecordFilterActivity"
+            android:theme="@style/PeopleEditTheme"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"></activity>
 

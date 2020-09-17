@@ -15,7 +15,7 @@ import android.util.Base64
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.ulsee.thermalapp.R
-import com.ulsee.thermalapp.data.model.Notification2
+import com.ulsee.thermalapp.data.model.Notification
 import java.lang.Exception
 
 
@@ -82,7 +82,7 @@ class NotificationCenter {
         ctx: Context,
         intent: Intent,
         title: String?,
-        notification: Notification2?
+        notification: Notification?
     ) {
         Log.d("NotificationCenter", "[Enter] show2")
         //intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
@@ -131,7 +131,7 @@ class NotificationCenter {
         id++
     }
 
-    private fun getImageIcon(notification: Notification2?) : Bitmap? {
+    private fun getImageIcon(notification: Notification?) : Bitmap? {
         var bitImage : Bitmap? = null
         try {
             val decodedString: ByteArray = Base64.decode(notification?.Data, Base64.DEFAULT)
@@ -146,7 +146,7 @@ class NotificationCenter {
         return bitImage
     }
 
-    private fun getContentText(notification: Notification2) : String {
+    private fun getContentText(notification: Notification) : String {
         return notification.Time + " Abnormal temperature detected. ("+ notification.displayName+ notification.TempValue + notification.tempratureUnitString+ ")"
     }
 
