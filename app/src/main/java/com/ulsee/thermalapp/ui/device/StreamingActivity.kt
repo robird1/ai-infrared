@@ -105,12 +105,17 @@ class StreamingActivity : AppCompatActivity() {
 //        fragmentTransaction.commit()
     }
 
+    // TODO fix the crash issue temporarily
     override fun finish() {
         val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
         if (streamType == StreamType.RGB) {
-            SettingsServiceTCP(deviceManager!!).closeRGBStream().subscribe({}, {})
+//            SettingsServiceTCP(deviceManager!!).closeRGBStream().subscribe({}, {})
+            val temp = SettingsServiceTCP(deviceManager!!).closeRGBStream()
+            temp?.subscribe({}, {})
         } else  {
-            SettingsServiceTCP(deviceManager!!).closeThermaltream().subscribe({}, {})
+//            SettingsServiceTCP(deviceManager!!).closeThermaltream().subscribe({}, {})
+            val temp = SettingsServiceTCP(deviceManager!!).closeThermaltream()
+            temp.subscribe({}, {})
         }
         disposable?.dispose()
         super.finish()

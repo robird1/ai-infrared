@@ -97,7 +97,9 @@ class ListFragment  : Fragment() {
             .subscribe({ notificationList: List<Notification> ->
                 Log.d("ListFragment", "[Enter] OnNext()")
 
-                (activity as MainActivity).setTitle("Records("+notificationList.size+")")
+                if (activity != null) {
+                    (activity as MainActivity).setTitle("Records(" + notificationList.size + ")")
+                }
                 Log.i(javaClass.name, "got list")
                 val sortedList = notificationList.sortedByDescending {
                     it.timeDate.time
@@ -110,7 +112,9 @@ class ListFragment  : Fragment() {
                 Log.d("ListFragment", "[Enter] OnError()")
 
                 Log.d(MainActivityTag, error.localizedMessage)
-                Toast.makeText(context, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
+                if (context != null) {
+                    Toast.makeText(context, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
+                }
                 swipeRefreshLayout.isRefreshing = false
             })
     }

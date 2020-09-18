@@ -1,10 +1,13 @@
 package com.ulsee.thermalapp
 
 import android.app.Application
+import android.util.Log
 import com.ulsee.sdk.faceverification.ULSeeFaceVerificationMgr
 import com.ulsee.thermalapp.data.Service
 import io.realm.Realm
 import io.realm.RealmConfiguration
+import java.io.PrintWriter
+import java.io.StringWriter
 
 class App : Application() {
 
@@ -30,5 +33,20 @@ class App : Application() {
         Service.shared.getDeviceList()
         Service.shared.ULSeeFaceVerificationManager = ULSeeFaceVerificationMgr(applicationContext)
         Service.shared.udpBroadcastService.initialize(applicationContext)
+
+        initUncaughtExceptionHandler()
+    }
+
+    private fun initUncaughtExceptionHandler() {
+        Thread.setDefaultUncaughtExceptionHandler { _, e ->
+            val report = StringBuilder()
+            val result = StringWriter()
+            val printWriter = PrintWriter(result)
+            // Exception will write all stack trace to string builder
+            e.printStackTrace(printWriter)
+            report.append(result.toString())
+            printWriter.close();
+            Log.d("App", "uncaught exception: $report")
+        }
     }
 }
