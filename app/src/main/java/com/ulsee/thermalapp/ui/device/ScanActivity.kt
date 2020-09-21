@@ -29,6 +29,7 @@ import com.ulsee.thermalapp.data.model.Device
 import com.ulsee.thermalapp.data.model.Settings
 import com.ulsee.thermalapp.data.model.WIFIInfo
 import com.ulsee.thermalapp.data.services.DeviceManager
+import com.ulsee.thermalapp.ui.network.NetworkController
 import com.ulsee.thermalapp.ui.network.NetworkUtils
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -395,7 +396,7 @@ class ScanActivity : AppCompatActivity() {
             if (i.ssid.equals(mSearchingDeviceID)) {
                 i.password = "ulsee168"
                 mIsConnectedToAPTCP = false
-                return NetworkUtils.connect(this, i)
+                return NetworkController(this).requestWifi(i)
             }
         }
         return false

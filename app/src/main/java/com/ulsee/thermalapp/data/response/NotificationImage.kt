@@ -1,6 +1,5 @@
 package com.ulsee.thermalapp.data.response
 
-import com.ulsee.thermalapp.data.model.Notification
 import com.ulsee.thermalapp.data.services.DeviceManager
 
 //class NotificationImage : Notification() {

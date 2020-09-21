@@ -8,21 +8,7 @@ import androidx.appcompat.widget.SearchView
 
 private val TAG = "PeopleSearchView"
 
-class PeopleSearchView(context: Context?) : SearchView(context),
-    SearchView.OnQueryTextListener, MenuItem.OnActionExpandListener {
-
-    override fun onQueryTextSubmit(query: String?): Boolean {
-        Log.d(TAG, "[Enter] onQueryTextSubmit")
-
-        return false
-    }
-
-    override fun onQueryTextChange(newText: String?): Boolean {
-        Log.d(TAG, "[Enter] onQueryTextChange")
-
-        return false
-    }
-
+class PeopleSearchView(context: Context?) : SearchView(context), MenuItem.OnActionExpandListener {
     override fun dispatchKeyEventPreIme(event: KeyEvent): Boolean {
         Log.d(TAG, "[Enter] dispatchKeyEventPreIme")
 

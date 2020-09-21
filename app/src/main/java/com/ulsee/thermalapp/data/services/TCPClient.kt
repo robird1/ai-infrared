@@ -1,6 +1,10 @@
 package com.ulsee.thermalapp.data.services
 
 import android.util.Log
+import com.ulsee.thermalapp.data.model.Device
+import com.ulsee.thermalapp.data.model.RealmDevice
+import io.realm.Realm
+import io.realm.kotlin.where
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.InputStreamReader
@@ -10,9 +14,10 @@ import java.net.InetSocketAddress
 import java.net.Socket
 
 val TAG ="TCPClient"
-class TCPClient(ip: String, port: Int) {
+class TCPClient(device: Device, port: Int) {
 
-    var ip = ip
+    val id = device.getID()
+    var ip = device.getIP()
     val port = port
 
     interface OnReceivedDataListener {
@@ -47,6 +52,7 @@ class TCPClient(ip: String, port: Int) {
         Log.d(TAG, "[Enter] resetIP last ip: "+this.ip+ " set to: "+ip)
         close()
         this.ip = ip
+        updateDB(ip)
     }
 
     fun listenData () {
@@ -124,4 +130,19 @@ class TCPClient(ip: String, port: Int) {
         bufferedWriter?.write(str)
         bufferedWriter?.flush()
     }
+
+    private fun updateDB (ip: String) {
+        val realm = Realm.getDefaultInstance()
+        val device = realm.where(RealmDevice::class.java).equalTo("mID", id).findFirst()
+        if (device != null) {
+            realm.beginTransaction()
+            device.setID(device.getID())
+            device.setName(device.getName())
+            device.setIP(ip)
+            device.setCreatedAt(device.getCreatedAt())
+            device.setIsFRVisible(device.getIsFRVisible())
+            realm.commitTransaction()
+        }
+    }
+
 }

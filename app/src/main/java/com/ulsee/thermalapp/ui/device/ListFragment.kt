@@ -21,6 +21,7 @@ class ListFragment : Fragment() {
 
     val REQUEST_CODE_ACTIVITY_SCAN = 1234
     lateinit var recyclerView : RecyclerView
+    private var deviceChangedReceiver: BroadcastReceiver? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,26 +42,33 @@ class ListFragment : Fragment() {
         (activity as MainActivity).setTitle("Device")
 
         val intentFilter = IntentFilter("Device removed")
+        deviceChangedReceiver = initDeviceChangedReceiver()
         context?.registerReceiver(deviceChangedReceiver, intentFilter)
+
         return root
     }
 
     override fun onDestroy() {
-        context?.unregisterReceiver(deviceChangedReceiver)
-        super.onDestroy()
-    }
-
-    private val deviceChangedReceiver = object: BroadcastReceiver(){
-        override fun onReceive(context: Context?, intent: Intent?) {
-            unregisterDeviceHandler(intent)
-            loadDevices()
+        if (deviceChangedReceiver != null) {
+            context?.unregisterReceiver(deviceChangedReceiver)
+            deviceChangedReceiver = null
         }
+        super.onDestroy()
     }
 
     private fun unregisterDeviceHandler(intent: Intent?) {
         val deviceID = intent?.getStringExtra("device_id")
         Log.d("ListFragment", "[Enter] unregisterDeviceHandler() deviceID: $deviceID")
         Service.shared.getManagerOfDeviceID(deviceID!!)?.unregisterHandler()
+    }
+
+    private fun initDeviceChangedReceiver(): BroadcastReceiver {
+        return object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                unregisterDeviceHandler(intent)
+                loadDevices()
+            }
+        }
     }
 
     private fun loadDevices() {

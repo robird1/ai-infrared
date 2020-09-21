@@ -2,11 +2,8 @@ package com.ulsee.thermalapp.data.services
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Handler
 import android.os.HandlerThread
-import android.util.Base64
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -15,16 +12,14 @@ import com.ulsee.thermalapp.data.AppPreference
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Device
 import com.ulsee.thermalapp.data.model.Notification
-import com.ulsee.thermalapp.data.model.Notification2
 import com.ulsee.thermalapp.data.model.Settings
 import com.ulsee.thermalapp.data.response.*
-import com.ulsee.thermalapp.ui.notification.NotificationActivity2
+import com.ulsee.thermalapp.ui.notification.NotificationActivity
 import com.ulsee.thermalapp.utils.NotificationCenter
 import io.reactivex.Observable
 import io.reactivex.ObservableOnSubscribe
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.StringBuilder
 import kotlin.collections.ArrayList
@@ -114,7 +109,7 @@ class DeviceManager(context: Context, device: Device) {
     }
 
     interface OnGotNotificationListListener{
-        fun onGotNotificationList(falceList: List<com.ulsee.thermalapp.data.model.Notification2>)
+        fun onGotNotificationList(falceList: List<com.ulsee.thermalapp.data.model.Notification>)
     }
     var mOnGotNotificationListListener : OnGotNotificationListListener? = null
     fun setOnGotNotificationListListener(listener: OnGotNotificationListListener?) {
@@ -138,7 +133,7 @@ class DeviceManager(context: Context, device: Device) {
     }
 
     interface OnNotificationListener{
-        fun onNotification(notification: Notification2)
+        fun onNotification(notification: Notification)
     }
     var mOnNotificationListener : OnNotificationListener? = null
     fun setOnNotificationListener(listener: OnNotificationListener?) {
@@ -150,7 +145,7 @@ class DeviceManager(context: Context, device: Device) {
 
     var device = device
     var settings : Settings? = null
-    val tcpClient = TCPClient(device.getIP(), DeviceManager.TCP_PORT)
+    val tcpClient = TCPClient(device, DeviceManager.TCP_PORT)
     var mIsIDNotMatched = false
     private var mHandler: Handler? = null
     private var mThread: HandlerThread? = null
@@ -211,8 +206,12 @@ class DeviceManager(context: Context, device: Device) {
                 tcpClient.connect()
                 Log.d("DeviceManager", "[After] tcpClient.connect() tcpClient.isConnected(): "+ tcpClient.isConnected())
 
-                // Device is not connected after finishing tcpClient.connect()
-                mHandler?.post(mTask)
+                if (!mIsIDNotMatched) {
+                    // Device is not connected after finishing tcpClient.connect()
+                    mHandler?.post(mTask)
+                } else {
+                    mHandler?.postDelayed(mTask, 60000)
+                }
             }
             catch (e: Exception) {
                 Log.d("DeviceManager", "[Enter] Exception e.message: "+e.message)
@@ -305,6 +304,8 @@ class DeviceManager(context: Context, device: Device) {
                         mIsIDNotMatched = true;
                         tcpClient.close();
                         return true;
+                    } else {
+                        mIsIDNotMatched = false
                     }
                     if (settings?.IsFirstActivate == true) {
                         val isJustJoinedDevice = Service.shared.justJoinedDeviceIDList.contains(device.getID())
@@ -433,9 +434,9 @@ class DeviceManager(context: Context, device: Device) {
                 Log.d("DeviceManager", "[Enter] when() -> Action.notification")
 //                Log.d("DeviceManager", "responseString:　"+ responseString)
 
-                val itemType = object : TypeToken<Notification2>() {}.type
+                val itemType = object : TypeToken<Notification>() {}.type
                 try {
-                    val response = gson.fromJson<Notification2>(responseString, itemType)
+                    val response = gson.fromJson<Notification>(responseString, itemType)
                     if (mOnNotificationListener== null) {
                         Log.e(javaClass.name, "Error no listener of action "+action)
                     }
@@ -510,11 +511,11 @@ class DeviceManager(context: Context, device: Device) {
         device = d
     }
 
-    private fun doNotify(notification: Notification2) {
+    private fun doNotify(notification: Notification) {
         Log.d("DeviceManager", "[Enter] doNotify")
         val isNotificationEnabled = AppPreference(mContext.getSharedPreferences("app", Context.MODE_PRIVATE)).isFeverNotificationEnabled()
         if (isNotificationEnabled) {
-            val intent = Intent(mContext, NotificationActivity2::class.java)
+            val intent = Intent(mContext, NotificationActivity::class.java)
             intent.putExtra("notification", notification)
             NotificationCenter.shared.show2(mContext, intent, mContext.getString(R.string.title_alert_notification), notification)
         }

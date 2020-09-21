@@ -2,6 +2,7 @@ package com.ulsee.thermalapp.ui.notification
 
 import android.os.Bundle
 import android.util.Base64
+import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -16,6 +17,7 @@ class NotificationActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("NotificationActivity2", "[Enter] onCreate")
         setContentView(R.layout.activity_notification)
 
         if (!intent.hasExtra("notification")) {
@@ -34,19 +36,18 @@ class NotificationActivity : AppCompatActivity() {
         }
 
         val iv = findViewById<ImageView>(R.id.imageView)
-        if (notification.Image.isNullOrEmpty() == false) {
-            Glide.with(this).load(Base64.decode(notification.Image, Base64.DEFAULT)).into(iv);
+        if (notification.Data.isNullOrEmpty() == false) {
+            Glide.with(this).load(Base64.decode(notification.Data, Base64.DEFAULT)).into(iv);
         } else {
-            NotificationServiceTCP(deviceManager!!).getSingleNotification(notification.Name).subscribe{
-                notification.Image = it
+            NotificationServiceTCP(deviceManager!!).getSingleNotification(notification.ID).subscribe{
+                notification.Data = it
                 Glide.with(this).load(Base64.decode(it, Base64.DEFAULT)).into(iv);
             }
         }
 
-        findViewById<TextView>(R.id.textView_name).text = notification.peopleName
-        findViewById<TextView>(R.id.textView_temperature).text = notification.temprature + notification.tempratureUnit
-        findViewById<TextView>(R.id.textView_time).text = notification.createdAt.toString()
-        findViewById<TextView>(R.id.textView_mask).text = if(notification.hasMask) "Yes" else "No"
-
+        findViewById<TextView>(R.id.textView_name).text = notification.Name
+        findViewById<TextView>(R.id.textView_temperature).text = notification.TempValue.toString() + notification.tempratureUnitString
+        findViewById<TextView>(R.id.textView_time).text = notification.Time
+        findViewById<TextView>(R.id.textView_mask).text = if(notification.IsMask) "Yes" else "No"
     }
 }

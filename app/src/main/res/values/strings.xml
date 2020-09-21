@@ -45,4 +45,27 @@
     <string name="error_load_rgb_image">failed to load rgb image</string>
     <string name="error_load_thermal_image">failed to load thermal image</string>
 
+    <!-- record -->
+    <string name="record_filter_error_date">All fields in Datetime are necessary</string>
+    <string name="record_filter_error_temperature">Please check the input of temperature</string>
+    <string name="record_filter_picker">Choose a value :</string>
+    <string name="record_filter_toolbar_title">Record Filter</string>
+    <string name="record_filter_datetime">Datetime</string>
+    <string name="record_filter_start_time">start time</string>
+    <string name="record_filter_end_time">end time</string>
+    <string name="record_filter_face_mask">Face Mask</string>
+    <string name="record_filter_all">All</string>
+    <string name="record_filter_yes">Yes</string>
+    <string name="record_filter_no">No</string>
+    <string name="record_filter_celsius">°C</string>
+    <string name="record_filter_fahrenheit">°F</string>
+    <string name="record_filter_temperature">Temperature</string>
+    <string name="record_filter_to">to</string>
+    <string name="record_filter_max">Max</string>
+    <string name="record_filter_min">Min</string>
+    <string name="record_filter_apply">Apply</string>
+    <string name="record_filter_person_name">person name</string>
+    <string name="record_filter_date_range">date range</string>
+
+
 </resources>
