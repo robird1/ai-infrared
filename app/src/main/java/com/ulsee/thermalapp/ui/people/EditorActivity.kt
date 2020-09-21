@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.os.SystemClock
 import android.provider.MediaStore
 import android.util.Base64
 import android.util.Log
@@ -43,6 +44,7 @@ class EditorActivity : AppCompatActivity() {
         get() {
             return intent.getBooleanExtra("is_edit_mode", true)
         }
+    private var lastClickTime: Long = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG, "[Enter] onCreate")
@@ -110,6 +112,8 @@ class EditorActivity : AppCompatActivity() {
     }
 
     private fun save() {
+        if (preventDoubleClickBtn()) return
+
         if (isInputValid()) {
             if (isEditingMode)
                 editPeople()
@@ -118,6 +122,14 @@ class EditorActivity : AppCompatActivity() {
         } else {
             Toast.makeText(this, "Please check your input information", Toast.LENGTH_LONG).show()
         }
+    }
+
+    private fun preventDoubleClickBtn(): Boolean {
+        if (SystemClock.elapsedRealtime() - lastClickTime < 1000) {
+            return true;
+        }
+        lastClickTime = SystemClock.elapsedRealtime()
+        return false
     }
 
     private fun addPeople () {
