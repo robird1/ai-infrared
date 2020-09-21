@@ -39,17 +39,18 @@ class AddDeviceController(activity: Activity) {
     private lateinit var mTask: Runnable
 
     fun execute() {
-        AlertDialog.Builder(mActivity)
-            .setTitle(R.string.dialog_add_device)
-            .setItems(R.array.add_device) { _, which ->
-                when (which) {
-                    0 -> openScanner()
-                    1 -> searchHotspot ()
-                    2 -> searchLAN()
-                }
-            }
-            .create()
-            .show()
+//        AlertDialog.Builder(mActivity)
+//            .setTitle(R.string.dialog_add_device)
+//            .setItems(R.array.add_device) { _, which ->
+//                when (which) {
+//                    0 -> openScanner()
+//                    1 -> searchHotspot ()
+//                    2 -> searchLAN()
+//                }
+//            }
+//            .create()
+//            .show()
+        searchLAN()
     }
 
     private fun openScanner() {
