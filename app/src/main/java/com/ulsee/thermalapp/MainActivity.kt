@@ -15,7 +15,6 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.RealmDevice
-import com.ulsee.thermalapp.ui.tutorial.TutorialStep1Activity
 import io.realm.Realm
 import io.realm.RealmResults
 import io.realm.kotlin.where
@@ -56,7 +55,7 @@ class MainActivity : AppCompatActivity() {
         }
         registerReceiver(deviceChangedReceiver, IntentFilter("Device removed"))
 
-        keepCheckingTutorialDevice()
+//        keepCheckingTutorialDevice()
 
         Service.shared.isStarterActivity = false
     }
@@ -72,7 +71,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         timer = Timer()
-        keepCheckingTutorialDevice()
+//        keepCheckingTutorialDevice()
     }
 
     override fun onPause() {
@@ -91,16 +90,16 @@ class MainActivity : AppCompatActivity() {
         toolbar.findViewById<TextView>(R.id.textView_toolbar_title).setText(title)
     }
 
-    fun keepCheckingTutorialDevice () {
-        timer?.schedule(object: TimerTask() {
-            override fun run() {
-//                Log.i(javaClass.name, "Service.shared.tutorialDeviceID = "+Service.shared.tutorialDeviceID)
-                if (Service.shared.tutorialDeviceID != null) {
-                    startActivity(Intent(this@MainActivity, TutorialStep1Activity::class.java))
-                }
-            }
-        }, 1000, 1000)
-    }
+//    fun keepCheckingTutorialDevice () {
+//        timer?.schedule(object: TimerTask() {
+//            override fun run() {
+////                Log.i(javaClass.name, "Service.shared.tutorialDeviceID = "+Service.shared.tutorialDeviceID)
+//                if (Service.shared.tutorialDeviceID != null) {
+//                    startActivity(Intent(this@MainActivity, TutorialStep1Activity::class.java))
+//                }
+//            }
+//        }, 1000, 1000)
+//    }
 
     private fun containFRInvisible() : Boolean {
         val devices: RealmResults<RealmDevice> = Realm.getDefaultInstance().where<RealmDevice>().findAll()

@@ -54,18 +54,18 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
 //            menuBtn.bringToFront()
 
             mPopup = PopupMenu(itemView?.context, menuLayout)
-            mPopup.menu.add("a").setTitle("Calibration")
+//            mPopup.menu.add("a").setTitle("Calibration")
             mPopup.menu.add("b").setTitle("Device Setting")
             mPopup.menu.add("c").setTitle("Wi-Fi Setting")
             mPopup.menu.add("d").setTitle("Remove")
 
             mPopup.setOnMenuItemClickListener{ item: MenuItem? ->
                 when (item!!.title) {
-                    "Calibration" -> {
-                        val intent = Intent(itemView.context, CalibrationActivity::class.java)
-                        intent.putExtra("device", deviceID)
-                        itemView.context.startActivity(intent)
-                    }
+//                    "Calibration" -> {
+//                        val intent = Intent(itemView.context, CalibrationActivity::class.java)
+//                        intent.putExtra("device", deviceID)
+//                        itemView.context.startActivity(intent)
+//                    }
                     "Device Setting" -> {
                         val intent = Intent(itemView.context, SettingsActivity::class.java)
                         intent.putExtra("device", deviceID)
