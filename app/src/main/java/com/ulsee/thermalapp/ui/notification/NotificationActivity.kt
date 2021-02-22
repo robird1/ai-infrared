@@ -21,7 +21,7 @@ class NotificationActivity : AppCompatActivity() {
         setContentView(R.layout.activity_notification)
 
         if (!intent.hasExtra("notification")) {
-            Toast.makeText(this, "Error: no notification data", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.activity_notification_toast1, Toast.LENGTH_LONG).show()
             finish()
             return
         }
@@ -31,7 +31,7 @@ class NotificationActivity : AppCompatActivity() {
 
         val deviceManager = Service.shared.getFirstConnectedDeviceManager()
         if (deviceManager == null) {
-            Toast.makeText(this, "Error: no device connected", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.toast_no_connected_device, Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -48,6 +48,6 @@ class NotificationActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.textView_name).text = notification.Name
         findViewById<TextView>(R.id.textView_temperature).text = notification.TempValue.toString() + notification.tempratureUnitString
         findViewById<TextView>(R.id.textView_time).text = notification.Time
-        findViewById<TextView>(R.id.textView_mask).text = if(notification.IsMask) "Yes" else "No"
+        findViewById<TextView>(R.id.textView_mask).text = if(notification.IsMask) getString(R.string.record_filter_yes) else getString(R.string.record_filter_no)
     }
 }

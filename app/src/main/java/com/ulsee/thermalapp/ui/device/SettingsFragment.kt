@@ -5,7 +5,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
@@ -60,8 +59,8 @@ class SettingsFragment(deviceID: String, autoFinish: Boolean) : Fragment() {
         viewPager.adapter = settingsNumberPadAdapter
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             tab.text = when (position) {
-                0 -> "Alarm"
-                1 -> "Deviation"
+                0 -> getString(R.string.activity_device_settings_tab1)
+                1 -> getString(R.string.activity_device_settings_tab2)
                 else -> null
             }
         }.attach()

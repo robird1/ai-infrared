@@ -15,7 +15,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Fever Notification"></TextView>
+            android:text="@string/fragment_app_setting"></TextView>
 
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/switch_notification"

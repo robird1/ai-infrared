@@ -59,7 +59,7 @@ class LaunchActivity : AppCompatActivity() {
         } else if (isUserRequestNeverAskPermissionAgain()) {
             Toast.makeText(
                 this,
-                "Miss permission, but You require never ask permission again",
+                R.string.activity_launch_toast,
                 Toast.LENGTH_SHORT
             ).show()
             goPermissionSettings()

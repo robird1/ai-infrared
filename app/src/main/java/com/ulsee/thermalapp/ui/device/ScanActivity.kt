@@ -138,7 +138,7 @@ class ScanActivity : AppCompatActivity() {
     private fun initZxingScanner () {
         val integrator = IntentIntegrator(this)
         integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
-        integrator.setPrompt("Scan device QRCode");
+        integrator.setPrompt(getString(R.string.activity_scan_prompt));
         integrator.initiateScan()
         //IntentIntegrator(this).initiateScan()
     }
@@ -153,7 +153,7 @@ class ScanActivity : AppCompatActivity() {
             val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
             if (result != null) {
                 if (result.contents == null) {
-                    Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, R.string.activity_scan_cancelled, Toast.LENGTH_LONG).show()
                     finish()
                     //initZxingScanner()
                 } else {
@@ -260,7 +260,7 @@ class ScanActivity : AppCompatActivity() {
             .setTitle(ctx.getString(R.string.hint_input_device_name))
             .setMessage(message)
             .setView(input)
-            .setPositiveButton("Save"
+            .setPositiveButton(R.string.save
             ) { dialog, whichButton ->
                 val deviceName = input.text.toString()
                 if (deviceName.isEmpty()) {
@@ -270,7 +270,7 @@ class ScanActivity : AppCompatActivity() {
                     mAddDeviceController.save(device, isDuplicated)
                 }
             }
-            .setNegativeButton("Cancel"
+            .setNegativeButton(R.string.cancel
             ) { dialog, whichButton ->
                 mStatus = Status.scanningQRCode
 //                dialog.dismiss()

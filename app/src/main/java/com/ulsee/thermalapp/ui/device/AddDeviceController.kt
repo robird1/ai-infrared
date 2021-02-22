@@ -57,27 +57,27 @@ class AddDeviceController(activity: Activity) {
     }
 
     private fun searchLAN() {
-        mActivity.startActivity(Intent(mActivity, IPCListActivity::class.java))
+        mActivity.startActivity(Intent(mActivity, LanDevicesActivity::class.java))
     }
 
     private fun searchHotspot() {
         mActivity.startActivity(Intent(mActivity, HotspotActivity::class.java))
     }
 
-    private fun showConnectHotspotDialog() {
-        mConnectHotspotDialog = AlertDialog
-            .Builder(mActivity)
-            .setView(ProgressBar(mActivity))
-            .setMessage(R.string.dialog_connect_hotspot)
-            .setNegativeButton(mActivity.getString(R.string.cancel)) { dialog, _ ->
-                cancelTask()
-                dialog.dismiss()
-            }
-            .setCancelable(false)
-            .create()
-
-        mConnectHotspotDialog!!.show()
-    }
+//    private fun showConnectHotspotDialog() {
+//        mConnectHotspotDialog = AlertDialog
+//            .Builder(mActivity)
+//            .setView(ProgressBar(mActivity))
+//            .setMessage(R.string.dialog_connect_hotspot)
+//            .setNegativeButton(mActivity.getString(R.string.cancel)) { dialog, _ ->
+//                cancelTask()
+//                dialog.dismiss()
+//            }
+//            .setCancelable(false)
+//            .create()
+//
+//        mConnectHotspotDialog!!.show()
+//    }
 
     private fun initHandler() {
         mThread = HandlerThread("add_device_thread")

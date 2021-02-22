@@ -61,19 +61,19 @@ class StreamingActivity : AppCompatActivity() {
         setSupportActionBar(toolbar);
 
         if(!intent.hasExtra("device")) {
-            Toast.makeText(this, "Error: no specified device", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.activity_device_settings_toast1, Toast.LENGTH_LONG).show()
             finish()
             return
         }
         deviceID = intent.getStringExtra("device")
         val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
         if (deviceManager == null) {
-            Toast.makeText(this, "Error: device not found", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.activity_device_settings_toast2, Toast.LENGTH_LONG).show()
             finish()
             return
         }
         if (deviceManager.settings == null) {
-            Toast.makeText(this, "Error: device setting not found", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.activity_device_settings_toast3, Toast.LENGTH_LONG).show()
             finish()
             return
         }

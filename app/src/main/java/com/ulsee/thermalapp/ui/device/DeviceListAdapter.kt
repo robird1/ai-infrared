@@ -48,39 +48,40 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
         private lateinit var mPopup : PopupMenu
         var device : Device? = null
         var deviceID = ""
+        private val ctx = itemView.context
+
         init {
             val menuLayout = itemView?.findViewById<View>(R.id.layout_menu)
 //            val menuBtn = itemView?.findViewById<View>(R.id.btn_menu)
 //            menuBtn.bringToFront()
 
-            mPopup = PopupMenu(itemView?.context, menuLayout)
-//            mPopup.menu.add("a").setTitle("Calibration")
-            mPopup.menu.add("b").setTitle("Device Setting")
-            mPopup.menu.add("c").setTitle("Wi-Fi Setting")
-            mPopup.menu.add("d").setTitle("Remove")
+            mPopup = PopupMenu(ctx, menuLayout)
+            mPopup.menu.add(1, 0, 0, R.string.fragment_device_menu_setting)
+            mPopup.menu.add(1, 1, 1, R.string.fragment_device_menu_wifi)
+            mPopup.menu.add(1, 2, 2, R.string.fragment_device_menu_remove)
 
             mPopup.setOnMenuItemClickListener{ item: MenuItem? ->
-                when (item!!.title) {
-//                    "Calibration" -> {
-//                        val intent = Intent(itemView.context, CalibrationActivity::class.java)
-//                        intent.putExtra("device", deviceID)
-//                        itemView.context.startActivity(intent)
-//                    }
-                    "Device Setting" -> {
-                        val intent = Intent(itemView.context, SettingsActivity::class.java)
+                when (item!!.order) {
+                    0 -> {
+                        val intent = Intent(ctx, SettingsActivity::class.java)
                         intent.putExtra("device", deviceID)
-                        itemView.context.startActivity(intent)
+                        ctx.startActivity(intent)
                     }
-                    "Wi-Fi Setting" -> {
-                        val intent = Intent(itemView.context, WIFIListActivity::class.java)
-                        intent.putExtra("device", deviceID)
-                        itemView.context.startActivity(intent)
+                    1 -> {
+                        val deviceManager = Service.shared.getManagerOfDevice(device!!)
+                        deviceManager?.let {
+                            if (!it.tcpClient.isConnected()) {
+                                Toast.makeText(ctx, R.string.fragment_device_toast, Toast.LENGTH_SHORT).show()
+                            } else {
+                                val intent = Intent(ctx, WIFIListActivity::class.java)
+                                intent.putExtra("device", deviceID)
+                                ctx.startActivity(intent)
+                            }
+                        }
                     }
-                    "Remove" -> {
-                        val ctx = itemView.context
-
+                    2 -> {
                         if (device == null) {
-                            Toast.makeText(ctx, "Error: no device specified", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(ctx, R.string.toast_no_specified_device, Toast.LENGTH_SHORT).show()
                         } else {
                             AlertDialog.Builder(ctx)
                                 .setMessage(ctx.getString(R.string.confirm_remove_device))
@@ -97,7 +98,7 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
                                     intent.putExtra("device_id", device!!.getID())
                                     ctx.sendBroadcast(intent)
                                 }
-                                .setNegativeButton("Cancel"
+                                .setNegativeButton(R.string.cancel
                                 ) { dialog, whichButton ->
                                     dialog.dismiss()
                                 }
@@ -126,7 +127,7 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
             thumbLayout.setOnClickListener(object: View.OnClickListener{
                 override fun onClick(v: View?) {
                     if (device == null) {
-                        Toast.makeText(v?.context, "device null", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(v?.context, R.string.toast_no_specified_device, Toast.LENGTH_SHORT).show()
                         return
                     }
                     val deviceManager = Service.shared.getManagerOfDevice(device!!)
@@ -135,13 +136,13 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
                         return
                     }
                     if (!deviceManager.tcpClient.isConnected()){
-                        Toast.makeText(v?.context, "device not connected", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(v?.context, R.string.fragment_device_toast, Toast.LENGTH_SHORT).show()
                         return
                     }
 
-                    val intent = Intent(itemView.context, StreamingActivity::class.java)
+                    val intent = Intent(ctx, StreamingActivity::class.java)
                     intent.putExtra("device", deviceID)
-                    itemView.context.startActivity(intent)
+                    ctx.startActivity(intent)
                 }
             })
         }
@@ -164,7 +165,6 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
             connectedView.visibility = if(isConnected) View.VISIBLE else View.GONE
             notConnectedView.visibility = if(!isConnected) View.VISIBLE else View.GONE
 
-            val ctx = itemView.context
             hintTV.text = if(isConnected) ctx.getString(R.string.device_connected_click_to_watch_camera) else ctx.getString(R.string.device_not_connected_yet)
         }
     }

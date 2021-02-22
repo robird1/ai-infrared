@@ -60,10 +60,16 @@ class ListFragment : Fragment(), RecyclerItemTouchHelper.ItemTouchListener, Sear
         loadPeopleList()
 
         root.findViewById<View>(R.id.fab).setOnClickListener {
-            openEditor(Face(), false)
+
+            val selectedTCPClient = Service.shared.getFirstConnectedDeviceManager()
+            if (selectedTCPClient == null) {
+                Toast.makeText(context, R.string.toast_no_connected_device, Toast.LENGTH_LONG).show()
+            } else {
+                openEditor(Face(), false)
+            }
         }
 
-        (activity as MainActivity).setTitle("People Management")
+        (activity as MainActivity).setTitle(getString(R.string.title_people))
 
         return root
     }
@@ -116,7 +122,7 @@ class ListFragment : Fragment(), RecyclerItemTouchHelper.ItemTouchListener, Sear
         val selectedTCPClient = Service.shared.getFirstConnectedDeviceManager()
         if (selectedTCPClient == null) {
             swipeRefreshLayout?.isRefreshing = false
-            Toast.makeText(context, "no connected device", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, R.string.toast_no_connected_device, Toast.LENGTH_LONG).show()
             return true
         }
         Log.d(TAG, "[Enter]  PeopleServiceTCP(selectedTCPClient).search(query)")
@@ -158,7 +164,7 @@ class ListFragment : Fragment(), RecyclerItemTouchHelper.ItemTouchListener, Sear
         val selectedTCPClient = Service.shared.getFirstConnectedDeviceManager()
         if (selectedTCPClient == null) {
             swipeRefreshLayout.isRefreshing = false
-            Toast.makeText(context, "no connected device", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, R.string.toast_no_connected_device, Toast.LENGTH_LONG).show()
             return
         }
         PeopleServiceTCP(selectedTCPClient).getAll()
@@ -175,7 +181,7 @@ class ListFragment : Fragment(), RecyclerItemTouchHelper.ItemTouchListener, Sear
     fun deletePeople(face: Face, position: Int) {
         val selectedTCPClient = Service.shared.getFirstConnectedDeviceManager()
         if (selectedTCPClient == null) {
-            Toast.makeText(requireContext(), "no connected device", Toast.LENGTH_LONG).show()
+            Toast.makeText(requireContext(), R.string.toast_no_connected_device, Toast.LENGTH_LONG).show()
             return
         }
 

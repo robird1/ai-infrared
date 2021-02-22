@@ -24,7 +24,7 @@ class SettingsFragment  : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_settings, container, false)
-        (activity as MainActivity).setTitle("Settings")
+        (activity as MainActivity).setTitle(getString(R.string.title_settings))
 
         notificationSwitch = root.findViewById(R.id.switch_notification)
         notificationSwitch.isChecked = AppPreference(requireContext().getSharedPreferences("app", Context.MODE_PRIVATE)).isFeverNotificationEnabled()

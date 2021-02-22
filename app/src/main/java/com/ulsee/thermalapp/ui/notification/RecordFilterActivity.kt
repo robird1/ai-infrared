@@ -119,6 +119,9 @@ class RecordFilterActivity : AppCompatActivity() {
                 editTempMax.text.toString().isNotEmpty() || (faceMask != FaceMask.ALL.apiValue)
     }
 
+    /**
+     * 合法的輸入為下列任一者: 1. 所有的日期時間欄位均有填 2. 所有的日期時間欄位均沒填
+     */
     private fun checkDateInput(): Boolean {
         val condition1 = (startDate != -1L) && (endDate != -1L) && (startTime != -1L) && (endTime != -1L)
         val condition2 = (startDate == -1L) && (endDate == -1L) && (startTime == -1L) && (endTime == -1L)
