@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">AI Infrared</string>
     <string name="title_device">Device</string>
-    <string name="title_people">People Management</string>
+    <string name="title_people">ID Management</string>
     <string name="title_notification">Records</string>
     <string name="title_settings">Settings</string>
 
@@ -42,9 +42,6 @@
 <!--    <string name="confirm_remove_data">Are you sure to delete it?</string>-->
     <string name="title_alert_notification">Notification</string>
     <string name="qrcode_invalid">QRCode is invalid</string>
-    <!-- calibration -->
-<!--    <string name="error_load_rgb_image">failed to load rgb image</string>-->
-<!--    <string name="error_load_thermal_image">failed to load thermal image</string>-->
 
     <!-- record -->
     <string name="record_filter_error_date">All fields in Datetime are necessary</string>
@@ -125,7 +122,7 @@
     <string name="fragment_device_menu_wifi">Wi-Fi Setting</string>
     <string name="fragment_device_menu_remove">Remove</string>
     <string name="fragment_device_toast">device not connected</string>
-    <string name="fragment_app_setting">Fever Notification</string>
+    <string name="fragment_app_setting">Heat Notification</string>
 
 
     <!-- notification -->

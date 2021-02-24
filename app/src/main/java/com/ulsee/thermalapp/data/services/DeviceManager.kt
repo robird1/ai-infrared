@@ -9,11 +9,13 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.AppPreference
-import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Device
 import com.ulsee.thermalapp.data.model.Notification
 import com.ulsee.thermalapp.data.model.Settings
-import com.ulsee.thermalapp.data.response.*
+import com.ulsee.thermalapp.data.response.FaceList
+import com.ulsee.thermalapp.data.response.NotificationImage
+import com.ulsee.thermalapp.data.response.NotificationList
+import com.ulsee.thermalapp.data.response.VideoFrame
 import com.ulsee.thermalapp.ui.notification.NotificationActivity
 import com.ulsee.thermalapp.utils.NotificationCenter
 import io.reactivex.Observable
@@ -21,8 +23,6 @@ import io.reactivex.ObservableOnSubscribe
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import org.json.JSONObject
-import java.lang.StringBuilder
-import kotlin.collections.ArrayList
 
 class DeviceManager(context: Context, device: Device) {
 
@@ -32,30 +32,31 @@ class DeviceManager(context: Context, device: Device) {
     enum class Status(status: Int) {
         connecting(0), connected(1)
     }
-    enum class Action {
-        putSettings,
-        calibration,
-        updateFace,
-        requestTwoPicture,
-        requestStreaming,
-        requestFaceList,
-        settingsResponse,
-        faceListResponse,
-        pictureResponse,
-        streamResponse, // 9
-        requestFace,
-        faceResponse,
-        modifyWifi, // 12
-        modifyWifiACK,
-        requestNotificationList,
-        notificationListResponse,
-        requestNotificationImage,
-        notificationImageResponse,
-        notification,// 18
-        notifyActivated,
-//        requestFaceDB, // 20
-//        requestFaceList, // 21
-//        faceListResponse // 22
+    enum class Action(val id: Int) {
+        putSettings(0),         // Update device settings by user
+        calibration(1),
+        updateFace(2),
+        requestTwoPicture(3),   // 沒用到。For calibration.
+        requestStreaming(4),
+        requestFaceList(5),
+        settingsResponse(6),    // Receive device settings when TCP connection is established
+        faceListResponse(7),
+        pictureResponse(8),     // 沒用到。For calibration.
+        streamResponse(9),
+        requestFace(10),        // 沒用到。people face request
+        faceResponse(11),       // 沒用到。people face response
+        modifyWifi(12),
+        modifyWifiACK(13),
+        requestNotificationList(14),
+        notificationListResponse(15),
+        requestNotificationImage(16),
+        notificationImageResponse(17),
+        notification(18),
+        notifyActivated(19),
+        peopleSearch(20),
+        recordFilter(21),
+        requestDeviceSettings(22),     // Request device settings when user enters device setting page
+        deviceSettingsResponse(23)     // Obtain device settings after sending Action 22
     }
 
     private val mLock = Object()
@@ -69,15 +70,6 @@ class DeviceManager(context: Context, device: Device) {
         mOnGotFaceListListener = listener
     }
 
-    interface OnGotTwoPictureListener{
-        fun onGotTwoPicture(twoPicture: TwoPicture)
-    }
-    var mOnGotTwoPictureListener : OnGotTwoPictureListener? = null
-    fun setOnGotTwoPictureListener(listener: OnGotTwoPictureListener?) {
-        if(listener != null && mOnGotTwoPictureListener != null) Log.e(javaClass.name, "error set listener but already exists: setOnGotTwoPictureListener")
-        mOnGotTwoPictureListener = listener
-    }
-
     interface OnGotVideoFrameListener{
         fun onVideoFrame(frame: String)
     }
@@ -85,27 +77,6 @@ class DeviceManager(context: Context, device: Device) {
     fun setOnGotVideoFrameListener(listener: OnGotVideoFrameListener?) {
         if(listener != null && mOnGotVideoFrameListener != null) Log.e(javaClass.name, "error set listener but already exists: setOnGotVideoFrameListener")
         mOnGotVideoFrameListener = listener
-    }
-
-    interface OnGotFaceListener{
-        fun onFace(face: com.ulsee.thermalapp.data.model.Face) : Boolean
-    }
-    var mOnGotFaceListener : OnGotFaceListener? = null
-    fun setOnGotFaceListener(listener: OnGotFaceListener?) {
-        if(listener != null && mOnGotFaceListener != null) Log.e(javaClass.name, "error set listener but already exists: setOnGotFaceListener")
-        mOnGotFaceListener = listener
-    }
-
-    var mOnGotFaceListenerList = ArrayList<OnGotFaceListener>()
-    fun addOnGotFaceListener(listener: OnGotFaceListener) {
-        synchronized(mLock) {
-            mOnGotFaceListenerList.add(listener)
-        }
-    }
-    fun removeOnGotFaceListener(listener: OnGotFaceListener) {
-        synchronized(mLock) {
-            mOnGotFaceListenerList.remove(listener)
-        }
     }
 
     interface OnGotNotificationListListener{
@@ -132,16 +103,15 @@ class DeviceManager(context: Context, device: Device) {
         }
     }
 
-    interface OnNotificationListener{
-        fun onNotification(notification: Notification)
+    interface OnGotDeviceSettingsListener{
+        fun onSettings(settings: Settings)
     }
-    var mOnNotificationListener : OnNotificationListener? = null
-    fun setOnNotificationListener(listener: OnNotificationListener?) {
-        if(listener != null && mOnNotificationListener != null) Log.e(javaClass.name, "error set listener but already exists: setOnNotificationListener")
-        mOnNotificationListener = listener
+    var mOnGotSettingsListener : OnGotDeviceSettingsListener? = null
+    fun setOnGotSettingsListener(listener: OnGotDeviceSettingsListener?) {
+        if(listener != null && mOnGotSettingsListener != null) Log.e(javaClass.name, "error set listener but already exists: setOnGotSettingsListener")
+        mOnGotSettingsListener = listener
     }
-    val haveOnNotificationListener : Boolean
-        get() = mOnNotificationListener != null
+
 
     var device = device
     var settings : Settings? = null
@@ -184,20 +154,6 @@ class DeviceManager(context: Context, device: Device) {
     }
 
     fun keepConnection () {
-//        Thread(Runnable {
-////            Log.d("DeviceManager", "[Enter] connectUntilSuccess")
-//            connectUntilSuccess()
-//            while(true) {
-//                // log("isConnected: "+(if(tcpClient.isConnected())"Y" else "N"))
-//                if (!tcpClient.isConnected()) {
-//                    Log.d("DeviceManager", "[Enter] !tcpClient.isConnected() ip: ${tcpClient.ip}")
-////                    Log.d("DeviceManager", "[Enter] connectUntilSuccess")
-//                    connectUntilSuccess()
-//                }
-//                Thread.sleep(if (mIsIDNotMatched) 10000 else 1000)
-//            }
-//        }).start()
-
         initHandler()
 
         mTask = Runnable {
@@ -221,23 +177,6 @@ class DeviceManager(context: Context, device: Device) {
 
         mHandler?.post(mTask)
     }
-
-
-//    fun connectUntilSuccess () {
-//        while(true) {
-//            try {
-//                tcpClient.connect()
-//                log("device connected!!!:"+tcpClient.ip)
-////                Log.d("DeviceManager", "device connected!!!:"+tcpClient.ip)
-//                break;
-//            } catch(e:Exception) {
-////                Log.e(javaClass.name, "connectUntilSuccess error:"+tcpClient.ip)
-////                e.printStackTrace()
-////                Log.d("DeviceManager", "[Enter] Exception")
-//                Thread.sleep(1000)
-//            }
-//        }
-//    }
 
     fun processBuffer (stringBuilder: StringBuilder) : Boolean {
         var hasAtLeastOnePacket = false
@@ -282,15 +221,15 @@ class DeviceManager(context: Context, device: Device) {
 
         // 3. parse content
         when(action) {
-            Action.putSettings.ordinal -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
-            Action.calibration.ordinal -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
-            Action.updateFace.ordinal -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
-            Action.requestTwoPicture.ordinal -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
-            Action.requestStreaming.ordinal -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
-            Action.requestFaceList.ordinal -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
-            Action.requestFace.ordinal -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
-            Action.modifyWifi.ordinal -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
-            Action.settingsResponse.ordinal -> {
+            Action.putSettings.id -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
+            Action.calibration.id -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
+            Action.updateFace.id -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
+            Action.requestTwoPicture.id -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
+            Action.requestStreaming.id -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
+            Action.requestFaceList.id -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
+            Action.requestFace.id -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
+            Action.modifyWifi.id -> { Log.e(javaClass.name, "received unexpected Action (should not be sent by ipc): "+action) }
+            Action.settingsResponse.id -> {
                 Log.d("DeviceManager", "[Enter] when() -> Action.settingsResponse")
 
                 val itemType = object : TypeToken<Settings>() {}.type
@@ -307,20 +246,38 @@ class DeviceManager(context: Context, device: Device) {
                     } else {
                         mIsIDNotMatched = false
                     }
-                    if (settings?.IsFirstActivate == true) {
-                        val isJustJoinedDevice = Service.shared.justJoinedDeviceIDList.contains(device.getID())
-                        Log.i(javaClass.name, "find first settings device: "+device.getID()+", is just joined:"+isJustJoinedDevice)
-                        if (isJustJoinedDevice) {
-                            Service.shared.requestTutorial(device.getID())
-                            Service.shared.justJoinedDeviceIDList.remove(device.getID())
-                        }
-                    }
+
                 } catch(e: java.lang.Exception) {
                     Log.e(javaClass.name, "Error parse action "+action)
                     e.printStackTrace()
                 }
             }
-            Action.faceListResponse.ordinal -> {
+            Action.deviceSettingsResponse.id -> {
+                Log.d(TAG, "[Enter] when() -> Action.deviceSettingsResponse ")
+                val itemType = object : TypeToken<Settings>() {}.type
+                try {
+                    settings = gson.fromJson<Settings>(responseString, itemType)
+                    if (settings!!.Deviation > 10) settings?.Deviation = 0.0
+                    if (settings!!.Deviation < -10) settings?.Deviation = 0.0
+                    if (settings!!.ID != device.getID()) {
+                        Log.d(TAG, "device.getID(): "+ device.getID()+" settings.ID: "+ settings!!.ID)
+                        Log.w(javaClass.name, "device connected but id not match...")
+                        mIsIDNotMatched = true;
+                        tcpClient.close();
+                        return true;
+                    } else {
+                        mIsIDNotMatched = false
+                    }
+
+                } catch(e: java.lang.Exception) {
+                    Log.e(javaClass.name, "Error parse action "+action)
+                    e.printStackTrace()
+                }
+
+                mOnGotSettingsListener?.onSettings(settings!!)
+
+            }
+            Action.faceListResponse.id -> {
                 val itemType = object : TypeToken<FaceList>() {}.type
                 try {
                     val faceList = gson.fromJson<FaceList>(responseString, itemType)
@@ -334,20 +291,7 @@ class DeviceManager(context: Context, device: Device) {
                     e.printStackTrace()
                 }
             }
-            Action.pictureResponse.ordinal -> {
-                val itemType = object : TypeToken<TwoPicture>() {}.type
-                try {
-                    val twoPicture = gson.fromJson<TwoPicture>(responseString, itemType)
-                    if (mOnGotTwoPictureListener== null) {
-                        Log.e(javaClass.name, "Error no listener of action "+action)
-                    }
-                    mOnGotTwoPictureListener?.onGotTwoPicture(twoPicture)
-                } catch(e: java.lang.Exception) {
-                    Log.e(javaClass.name, "Error parse action "+action)
-                    e.printStackTrace()
-                }
-            }
-            Action.streamResponse.ordinal -> {
+            Action.streamResponse.id -> {
                 val itemType = object : TypeToken<VideoFrame>() {}.type
                 try {
                     val videoFrame = gson.fromJson<VideoFrame>(responseString, itemType)
@@ -361,33 +305,7 @@ class DeviceManager(context: Context, device: Device) {
                     e.printStackTrace()
                 }
             }
-            Action.faceResponse.ordinal -> {
-                val itemType = object : TypeToken<com.ulsee.thermalapp.data.model.Face>() {}.type
-                try {
-                    val response = gson.fromJson<com.ulsee.thermalapp.data.model.Face>(responseString, itemType)
-//                            if (mOnGotFaceListener== null) {
-//                                Log.e(javaClass.name, "Error no listener of action "+action)
-//                            }
-//                            mOnGotFaceListener?.onFace(response)
-                    if (mOnGotFaceListenerList.size == 0) {
-                        Log.e(javaClass.name, "Error no listener of action "+action)
-                    }
-                    synchronized(mLock) {
-                        var result = false
-                        for(i in mOnGotFaceListenerList.indices) {
-                            result = result || mOnGotFaceListenerList[i].onFace(response)
-                        }
-                        // for (listener in mOnGotFaceListenerList) result = result || listener.onFace(response)
-                        if (result == false) {
-                            Log.e(javaClass.name, "Error got face image of "+response.Name+", but no one handle")
-                        }
-                    }
-                } catch(e: java.lang.Exception) {
-                    Log.e(javaClass.name, "Error parse action "+action)
-                    e.printStackTrace()
-                }
-            }
-            Action.notificationListResponse.ordinal -> {
+            Action.notificationListResponse.id -> {
                 Log.d("DeviceManager", "[Enter] when() -> Action.notificationListResponse")
 
 //                responseString = createNotifyListString()
@@ -406,7 +324,7 @@ class DeviceManager(context: Context, device: Device) {
                     e.printStackTrace()
                 }
             }
-            Action.notificationImageResponse.ordinal -> {
+            Action.notificationImageResponse.id -> {
                 Log.d("DeviceManager", "[Enter] when() -> Action.notificationImageResponse")
 
                 val itemType = object : TypeToken<NotificationImage>() {}.type
@@ -430,17 +348,13 @@ class DeviceManager(context: Context, device: Device) {
                     e.printStackTrace()
                 }
             }
-            Action.notification.ordinal -> {
+            Action.notification.id -> {
                 Log.d("DeviceManager", "[Enter] when() -> Action.notification")
 //                Log.d("DeviceManager", "responseString:　"+ responseString)
 
                 val itemType = object : TypeToken<Notification>() {}.type
                 try {
                     val response = gson.fromJson<Notification>(responseString, itemType)
-                    if (mOnNotificationListener== null) {
-                        Log.e(javaClass.name, "Error no listener of action "+action)
-                    }
-//                    mOnNotificationListener?.onNotification(response)
                     doNotify(response)
                 } catch(e: java.lang.Exception) {
                     Log.e(javaClass.name, "Error parse action "+action)

@@ -16,6 +16,7 @@ import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Device
 import com.ulsee.thermalapp.data.model.RealmDevice
 import com.ulsee.thermalapp.data.services.DeviceManager
+import com.ulsee.thermalapp.data.services.SettingsServiceTCP
 import com.ulsee.thermalapp.ui.network.WIFIListActivity
 import io.reactivex.disposables.Disposable
 import io.realm.Realm
@@ -63,9 +64,18 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
             mPopup.setOnMenuItemClickListener{ item: MenuItem? ->
                 when (item!!.order) {
                     0 -> {
-                        val intent = Intent(ctx, SettingsActivity::class.java)
-                        intent.putExtra("device", deviceID)
-                        ctx.startActivity(intent)
+                        val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
+                        SettingsServiceTCP(deviceManager!!).getSettings()
+                            .subscribe({
+                                val intent = Intent(ctx, SettingsActivity::class.java)
+                                intent.putExtra("device", deviceID)
+                                ctx.startActivity(intent)
+
+                            }, { error: Throwable ->
+                                error.printStackTrace()
+                                Toast.makeText(ctx, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
+                            })
+
                     }
                     1 -> {
                         val deviceManager = Service.shared.getManagerOfDevice(device!!)

@@ -4,7 +4,7 @@ open class Settings {
     var TempUnit = 0
     var TempAlarmValue : Double = 0.0
     var Deviation : Double = 0.0
-    var IsFirstActivate: Boolean = false
+    var IsFirstActivate: Boolean = false           // always false
     var ID = ""
     var IsFR: Boolean = false
     var IsFlip: Boolean = false

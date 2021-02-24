@@ -5,7 +5,6 @@ import com.google.gson.Gson
 import com.ulsee.thermalapp.data.model.Settings
 import com.ulsee.thermalapp.data.model.WIFIInfo
 import com.ulsee.thermalapp.data.request.*
-import com.ulsee.thermalapp.data.response.TwoPicture
 import io.reactivex.Completable
 import io.reactivex.CompletableOnSubscribe
 import io.reactivex.Observable
@@ -13,8 +12,6 @@ import io.reactivex.ObservableOnSubscribe
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import java.lang.Exception
-import java.lang.StringBuilder
-import kotlin.math.max
 import kotlin.math.min
 
 class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
@@ -38,34 +35,22 @@ class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
-    override fun getTwoPicture(): Observable<TwoPicture> {
-        val handler: ObservableOnSubscribe<TwoPicture> = ObservableOnSubscribe<TwoPicture> { emitter ->
+    fun getSettings(): Observable<Settings> {
+        val handler: ObservableOnSubscribe<Settings> = ObservableOnSubscribe { emitter ->
             if (apiClient == null) throw Exception("error: target not specified")
-            if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
-//            if (apiClient?.isConnected() != true) apiClient?.reconnect()
+            if (apiClient?.isConnected() != true) throw Exception("error: target not connected")
 
-            deviceManager.setOnGotTwoPictureListener(object: DeviceManager.OnGotTwoPictureListener{
-                override fun onGotTwoPicture(twoPicture: TwoPicture) {
-                    deviceManager.setOnGotTwoPictureListener(null)
-                    emitter.onNext(twoPicture)
+            deviceManager.setOnGotSettingsListener(object: DeviceManager.OnGotDeviceSettingsListener {
+                override fun onSettings(settings: Settings) {
+                    deviceManager.setOnGotSettingsListener(null)
+                    emitter.onNext(settings)
                     emitter.onComplete()
                 }
             })
-            apiClient?.send(gson.toJson(GetTwoPicture()))
-        }
 
+            apiClient?.send(gson.toJson(GetSettings()))
+        }
         return Observable.create(handler).subscribeOn(Schedulers.newThread())
-            .observeOn(AndroidSchedulers.mainThread())
-    }
-
-    override fun calibration(calibration: UpdateCalibration): Completable {
-        val handler: CompletableOnSubscribe = CompletableOnSubscribe { emitter ->
-            if (apiClient == null) throw Exception("error: target not specified")
-            if (apiClient?.isConnected() != true) throw Exception("error: target not connected")
-            apiClient?.send(gson.toJson(calibration))
-            emitter.onComplete()
-        }
-        return Completable.create(handler).subscribeOn(Schedulers.newThread())
             .observeOn(AndroidSchedulers.mainThread())
     }
 
