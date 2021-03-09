@@ -66,10 +66,10 @@ class PeopleEditorAdapter(private val context: Context, private val isEditingMod
         val textInputLayout = itemView.findViewById<TextInputLayout>(R.id.textInputLayout_name)
 
         fun bind(position: Int) {
-            textInputLayout.hint = AttributeType.fromPosition(position).fieldName
+            textInputLayout.hint = itemView.context.getString(AttributeType.fromPosition(position).fieldName)
 
             if (position == AttributeType.NAME.position) {
-                textInputLayout.helperText = "*Required"
+                textInputLayout.helperText = itemView.context.getString(R.string.activity_editor_required)
 
             } else if (position == AttributeType.BIRTHDAY.position) {
                 textInputLayout.editText?.isCursorVisible = false
@@ -108,7 +108,7 @@ class PeopleEditorAdapter(private val context: Context, private val isEditingMod
 
                     } else if (position == AttributeType.AGE.position) {
                         if (!isAgeValid()) {
-                            textInputLayout.error = "Error: Invalid Age"
+                            textInputLayout.error = itemView.context.getString(R.string.activity_editor_invalid_age)
                             AttributeType.fromPosition(position).isInputValid = false
 
                         } else {
@@ -202,7 +202,7 @@ class PeopleEditorAdapter(private val context: Context, private val isEditingMod
         }
 
         private fun setGenderAdapter() {
-            val items = listOf("Male", "Female")
+            val items = listOf(itemView.context.getString(R.string.activity_editor_male), itemView.context.getString(R.string.activity_editor_female))
             val adapter = ArrayAdapter(context, R.layout.list_item_sex, items)
             (textInputLayout.editText as? AutoCompleteTextView)?.setAdapter(adapter)
         }

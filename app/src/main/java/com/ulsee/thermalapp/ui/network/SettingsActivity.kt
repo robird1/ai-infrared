@@ -1,9 +1,6 @@
 package com.ulsee.thermalapp.ui.network
 
 import android.app.Activity
-import android.content.Context
-import android.net.wifi.WifiConfiguration
-import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -26,17 +23,17 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_network_settings)
 
         if (!intent.hasExtra("wifi")) {
-            Toast.makeText(this, "Error: no Wi-Fi specified", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.activity_network_settings_toast1, Toast.LENGTH_LONG).show()
             finish()
             return
         }
         if (!intent.hasExtra("device")) {
-            Toast.makeText(this, "Error: no device specified", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.toast_no_specified_device, Toast.LENGTH_LONG).show()
             finish()
             return
         }
         if (!intent.hasExtra("old_ip")) {
-            Toast.makeText(this, "Error: no old ip specified", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.activity_network_settings_toast3, Toast.LENGTH_LONG).show()
             finish()
             return
         }
@@ -121,7 +118,7 @@ class SettingsActivity : AppCompatActivity() {
             }).start()
         } else {
             Log.d(TAG, "wifiManager.getConfiguredNetworks() is empty.")
-            Toast.makeText(this, "Error to switch to Wi-Fi", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.activity_wifi_list_toast1, Toast.LENGTH_LONG).show()
             finish()
         }
     }
@@ -155,7 +152,7 @@ class SettingsActivity : AppCompatActivity() {
     fun endWithSuccess () {
         this.runOnUiThread {
             setResult(RESULT_OK)
-            Toast.makeText(this, "Succeed switch Wi-Fi!!", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.activity_network_settings_toast5, Toast.LENGTH_LONG).show()
             Log.d(TAG, "Succeed switch Wi-Fi!!")
             finish()
         }
@@ -166,10 +163,10 @@ class SettingsActivity : AppCompatActivity() {
         exception?.printStackTrace()
         runOnUiThread{
             if (exception != null) {
-                Toast.makeText(this, "Error to switch to Wi-Fi (ACK): "+exception!!.message, Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "${getString(R.string.activity_network_settings_toast6)}: ${exception!!.message}", Toast.LENGTH_LONG).show()
                 Log.d(TAG, "Error to switch to Wi-Fi (ACK): "+exception!!.message)
             } else {
-                Toast.makeText(this, "Error to switch to Wi-Fi (ACK) ", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, R.string.activity_network_settings_toast6, Toast.LENGTH_LONG).show()
                 Log.d(TAG, "Error to switch to Wi-Fi (ACK) ")
             }
             finish()

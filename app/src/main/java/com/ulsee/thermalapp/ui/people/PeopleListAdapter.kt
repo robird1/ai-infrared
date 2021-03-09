@@ -76,7 +76,7 @@ class PeopleListAdapter(private val fragment: ListFragment): RecyclerView.Adapte
 
             val deviceManager = Service.shared.getFirstConnectedDeviceManager()
             if (deviceManager == null) {
-                Toast.makeText(itemView.context, "Error: no device connected", Toast.LENGTH_SHORT).show()
+                Toast.makeText(itemView.context, R.string.toast_no_connected_device, Toast.LENGTH_SHORT).show()
                 return
             }
         }

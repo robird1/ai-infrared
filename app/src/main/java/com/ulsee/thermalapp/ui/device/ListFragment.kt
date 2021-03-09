@@ -39,7 +39,7 @@ class ListFragment : Fragment() {
             AddDeviceController(requireActivity()).execute()
         }
 
-        (activity as MainActivity).setTitle("Device")
+        (activity as MainActivity).setTitle(getString(R.string.title_device))
 
         val intentFilter = IntentFilter("Device removed")
         deviceChangedReceiver = initDeviceChangedReceiver()

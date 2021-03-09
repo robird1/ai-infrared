@@ -58,11 +58,17 @@ class AddDeviceController(activity: Activity) {
     }
 
     private fun searchLAN() {
-        mActivity.startActivity(Intent(mActivity, IPCListActivity::class.java))
+        mActivity.startActivity(Intent(mActivity, LanDevicesActivity::class.java))
     }
 
+//    private fun searchHotspot() {
+//        mActivity.startActivity(Intent(mActivity, HotspotActivity::class.java))
+//    }
+
     private fun searchHotspot() {
-        mActivity.startActivity(Intent(mActivity, HotspotActivity::class.java))
+        initHandler()
+        showConnectHotspotDialog()
+        connectToAPTCP()
     }
 
     private fun showConnectHotspotDialog() {
@@ -104,10 +110,8 @@ class AddDeviceController(activity: Activity) {
         return String.format("%s.%s.%s.1",arr[0],arr[1],arr[2])
     }
 
-    fun connectToAPTCP () {
+    private fun connectToAPTCP () {
         Log.d("AddDeviceController", "[Enter] connectToAPTCP")
-        initHandler()
-
         val gson = Gson()
         var mAPTCPSocket: Socket? = null
         var retryCounter = 0

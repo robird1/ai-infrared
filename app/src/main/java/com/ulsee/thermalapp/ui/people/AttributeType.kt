@@ -3,15 +3,15 @@ package com.ulsee.thermalapp.ui.people
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.model.Face
 
-enum class AttributeType(val fieldName: String, val position: Int, val viewType: Int, var inputValue: String, var isInputValid: Boolean) {
+enum class AttributeType(val fieldName: Int, val position: Int, val viewType: Int, var inputValue: String, var isInputValid: Boolean) {
 
 //    FACE("Face", 0, R.layout.item_list_people_face, "", true),
-    NAME("Name", 0, R.layout.item_list_people_text, "", false),
-    AGE("Age", 1, R.layout.item_list_people_text, "", true),
-    GENDER("Gender", 2, R.layout.item_list_people_gender, "", true),
-    EMPLOYEE_ID("Employee ID", 3, R.layout.item_list_people_text, "", true),
-    BIRTHDAY("Birthday", 4, R.layout.item_list_people_text, "", true),
-    REMARK("Remark", 5, R.layout.item_list_people_text, "", true);
+    NAME(R.string.activity_editor_name, 0, R.layout.item_list_people_text, "", false),
+    AGE(R.string.activity_editor_age, 1, R.layout.item_list_people_text, "", true),
+    GENDER(R.string.activity_editor_gender, 2, R.layout.item_list_people_gender, "", true),
+    EMPLOYEE_ID(R.string.activity_editor_id, 3, R.layout.item_list_people_text, "", true),
+    BIRTHDAY(R.string.activity_editor_birthday, 4, R.layout.item_list_people_text, "", true),
+    REMARK(R.string.activity_editor_remark, 5, R.layout.item_list_people_text, "", true);
 
     companion object {
         var id: String = ""

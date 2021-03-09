@@ -1,25 +1,12 @@
 package com.ulsee.thermalapp.ui.device
 
-import android.content.Context
-import android.graphics.BitmapFactory
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
 import android.os.Bundle
-import android.util.Base64
 import android.util.Log
-import android.view.SurfaceHolder
-import android.view.SurfaceView
-import android.view.View
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.appcompat.widget.Toolbar
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentTransaction
-import com.bumptech.glide.Glide
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.services.SettingsServiceTCP
@@ -42,17 +29,12 @@ class StreamingActivity : AppCompatActivity() {
         setContentView(R.layout.activity_device_streaming)
 
         thermalSwitch = findViewById(R.id.switch_thermal)
-        val isCalledFromTutorial = intent.getBooleanExtra("is_tutorial", false)
-        if (!isCalledFromTutorial) {
-            thermalSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
-                if (isChecked) {
-                    switchToThermalStreaming()
-                } else {
-                    switchToRGBStreaming()
-                }
+        thermalSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
+            if (isChecked) {
+                switchToThermalStreaming()
+            } else {
+                switchToRGBStreaming()
             }
-        } else {
-            thermalSwitch.visibility = View.GONE
         }
 
         surfaceView =  findViewById<StreamingSurfaceView>(R.id.surfaceView) as StreamingSurfaceView
@@ -61,41 +43,29 @@ class StreamingActivity : AppCompatActivity() {
         setSupportActionBar(toolbar);
 
         if(!intent.hasExtra("device")) {
-            Toast.makeText(this, "Error: no specified device", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.activity_device_settings_toast1, Toast.LENGTH_LONG).show()
             finish()
             return
         }
         deviceID = intent.getStringExtra("device")
         val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
         if (deviceManager == null) {
-            Toast.makeText(this, "Error: device not found", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.activity_device_settings_toast2, Toast.LENGTH_LONG).show()
             finish()
             return
         }
         if (deviceManager.settings == null) {
-            Toast.makeText(this, "Error: device setting not found", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.activity_device_settings_toast3, Toast.LENGTH_LONG).show()
             finish()
             return
         }
 
         findViewById<TextView>(R.id.textView_toolbar_title).text = deviceManager.device.getName()
 
-        if (Service.shared.tutorialDeviceID != null) {
-            findViewById<View>(R.id.button_next).visibility = View.VISIBLE
-            findViewById<View>(R.id.button_next).setOnClickListener{setResult(RESULT_OK);finish()}
-            if (!isCalledFromTutorial) {
-                thermalSwitch.isChecked = true
-            }
-        }
-
-        if (isCalledFromTutorial) {
+        if (thermalSwitch.isChecked) {
             startThermalStreaming()
         } else {
-            if (thermalSwitch.isChecked) {
-                startThermalStreaming()
-            } else {
-                startRGBStreaming()
-            }
+            startRGBStreaming()
         }
 
 //        val fragment = SettingsFragment(deviceID, false)

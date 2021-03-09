@@ -13,45 +13,60 @@
 
     <TableLayout
         android:id="@+id/tableLayout"
-        app:layout_constraintBottom_toBottomOf="parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp">
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
         <TableRow android:layout_marginTop="12dp">
+
             <TextView
                 android:layout_width="120dp"
                 android:layout_height="match_parent"
-                android:text="Name:"></TextView>
+                android:text="@string/activity_notification_name"></TextView>
+
             <TextView
                 android:id="@+id/textView_name"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"></TextView>
         </TableRow>
+
         <TableRow android:layout_marginTop="12dp">
+
             <TextView
                 android:layout_width="120dp"
                 android:layout_height="match_parent"
-                android:text="Temperature:"></TextView>
+                android:text="@string/activity_notification_temperature"></TextView>
+
             <TextView
                 android:id="@+id/textView_temperature"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"></TextView>
         </TableRow>
+
         <TableRow android:layout_marginTop="12dp">
+
             <TextView
                 android:layout_width="120dp"
                 android:layout_height="match_parent"
-                android:text="Time:"></TextView>
+                android:text="@string/activity_notification_time"></TextView>
+
             <TextView
                 android:id="@+id/textView_time"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"></TextView>
         </TableRow>
+
         <TableRow android:layout_marginTop="12dp">
+
             <TextView
                 android:layout_width="120dp"
                 android:layout_height="match_parent"
-                android:text="Mask:"></TextView>
+                android:text="@string/activity_notification_mask"></TextView>
+
             <TextView
                 android:id="@+id/textView_mask"
                 android:layout_width="wrap_content"

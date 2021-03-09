@@ -53,13 +53,13 @@ class NotificationListAdapter: RecyclerView.Adapter<NotificationListAdapter.View
             nameTV?.text =
 //                notification.Time + " "+ notification.TempValue + notification.tempratureUnitString+
 //                    " "+ notification.isMaskString+ " "+ notification.displayName
-                notification.Time + " Abnormal temperature detected. ("+ notification.displayName+ notification.TempValue + notification.tempratureUnitString+ ")"
+                notification.Time + " ${itemView.context.getString(R.string.notification_center_text)} ("+ notification.displayName+ notification.TempValue + notification.tempratureUnitString+ ")"
 
 //            Glide.with(itemView.context).load(people.AvatarURL).into(iv);
 
             val deviceManager = Service.shared.getFirstConnectedDeviceManager()
             if (deviceManager == null) {
-                Toast.makeText(itemView.context, "Error: no device connected", Toast.LENGTH_SHORT).show()
+                Toast.makeText(itemView.context, R.string.toast_no_connected_device, Toast.LENGTH_SHORT).show()
                 return
             }
 

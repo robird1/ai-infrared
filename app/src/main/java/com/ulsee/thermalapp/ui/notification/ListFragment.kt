@@ -51,7 +51,7 @@ class ListFragment  : Fragment() {
 
         loadNotifications()
 
-        (activity as MainActivity).setTitle("Records")
+        (activity as MainActivity).setTitle(getString(R.string.title_notification))
 
         return root
     }
@@ -70,14 +70,6 @@ class ListFragment  : Fragment() {
         if (requestCode == REQUEST_CODE_FILTER) {
             if (resultCode == Activity.RESULT_OK) {
                 val item = data?.getParcelableExtra(KEY_INTENT_FILTER) as FilteredRecord
-//                Log.d(TAG, "DateTimeStart:　"+ item.DateTimeStart)
-//                Log.d(TAG, "DateTimeEnd:　"+ item.DateTimeEnd)
-//                Log.d(TAG, "TempUnit:　"+ item.TempUnit)
-//                Log.d(TAG, "TempMin:　"+ item.TempMin)
-//                Log.d(TAG, "TempMax:　"+ item.TempMax)
-//                Log.d(TAG, "Name:　"+ item.Name)
-//                Log.d(TAG, "Mask:　"+ item.Mask)
-//                Log.d(TAG, "gson.toJson(data):　"+  Gson().toJson(item))
 
                 loadFilteredRecords(item)
             }
@@ -89,7 +81,7 @@ class ListFragment  : Fragment() {
         val deviceManager = Service.shared.getFirstConnectedDeviceManager()
         if (deviceManager == null) {
             swipeRefreshLayout.isRefreshing = false
-            Toast.makeText(context, "no connected device", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, R.string.toast_no_connected_device, Toast.LENGTH_LONG).show()
             return
         }
         Log.i(javaClass.name, "call list")
@@ -98,7 +90,7 @@ class ListFragment  : Fragment() {
                 Log.d("ListFragment", "[Enter] OnNext()")
 
                 if (activity != null) {
-                    (activity as MainActivity).setTitle("Records(" + notificationList.size + ")")
+                    (activity as MainActivity).setTitle("${getString(R.string.title_notification)}(${notificationList.size})")
                 }
                 Log.i(javaClass.name, "got list")
                 val sortedList = notificationList.sortedByDescending {
@@ -123,13 +115,13 @@ class ListFragment  : Fragment() {
         val deviceManager = Service.shared.getFirstConnectedDeviceManager()
         if (deviceManager == null) {
             swipeRefreshLayout.isRefreshing = false
-            Toast.makeText(context, "no connected device", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, R.string.toast_no_connected_device, Toast.LENGTH_LONG).show()
             return
         }
 
         NotificationServiceTCP(deviceManager).getFilteredRecord(data)
             .subscribe({ notificationList: List<Notification> ->
-                (activity as MainActivity).setTitle("Records("+notificationList.size+")")
+                (activity as MainActivity).setTitle("${getString(R.string.title_notification)}(${notificationList.size})")
                 val sortedList = notificationList.sortedByDescending {
                     it.timeDate.time
                 }

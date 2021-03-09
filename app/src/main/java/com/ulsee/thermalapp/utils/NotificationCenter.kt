@@ -96,7 +96,7 @@ class NotificationCenter {
             .setSmallIcon(R.mipmap.ic_launcher)
             .setColor(ctx.getResources().getColor(R.color.colorPrimary))
             .setContentTitle(title)
-            .setContentText(getContentText(notification!!))
+            .setContentText(getContentText(ctx, notification!!))
             .setAutoCancel(true)
             .setSound(defaultSoundUri)
             .setContentIntent(pendingIntent)
@@ -146,8 +146,8 @@ class NotificationCenter {
         return bitImage
     }
 
-    private fun getContentText(notification: Notification) : String {
-        return notification.Time + " Abnormal temperature detected. ("+ notification.displayName+ notification.TempValue + notification.tempratureUnitString+ ")"
+    private fun getContentText(ctx: Context, notification: Notification) : String {
+        return notification.Time + " ${ctx.getString(R.string.notification_center_text)} ("+ notification.displayName+ notification.TempValue + notification.tempratureUnitString+ ")"
     }
 
 }

@@ -2,7 +2,7 @@
 <resources>
     <string-array name="add_device">
         <item>Scan QR Code</item>
-        <item>Search Hotspot</item>
+        <item>Connect Hotspot</item>
         <item>Search LAN</item>
     </string-array>
 

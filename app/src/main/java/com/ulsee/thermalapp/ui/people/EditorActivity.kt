@@ -80,7 +80,7 @@ class EditorActivity : AppCompatActivity() {
                 val initResult = Service.shared.ULSeeFaceVerificationManager?.init("==============$$$================")
                 runOnUiThread {
                     if (initResult != 0) {
-                        Toast.makeText(this, "failed to init sdk", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, R.string.activity_editor_toast1, Toast.LENGTH_LONG).show()
                         finish()
                     }
                     mProgressView.visibility = View.INVISIBLE
@@ -120,7 +120,7 @@ class EditorActivity : AppCompatActivity() {
             else
                 addPeople()
         } else {
-            Toast.makeText(this, "Please check your input information", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.activity_editor_toast2, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -135,7 +135,7 @@ class EditorActivity : AppCompatActivity() {
     private fun addPeople () {
         val selectedTCPClient = Service.shared.getFirstConnectedDeviceManager()
         if (selectedTCPClient == null) {
-            Toast.makeText(this, "no connected device", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.toast_no_connected_device, Toast.LENGTH_LONG).show()
             return
         }
 
@@ -145,7 +145,7 @@ class EditorActivity : AppCompatActivity() {
         if (mImageBase64?.isEmpty() == false) {
             val facecode = imageBase64TOFaceCodeBase64(mImageBase64!!)
             if (facecode == null) {
-                Toast.makeText(this, "no face detected", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, R.string.activity_editor_toast4, Toast.LENGTH_LONG).show()
                 return
             }
             face.Data = facecode!!
@@ -166,7 +166,7 @@ class EditorActivity : AppCompatActivity() {
     private fun editPeople () {
         val selectedTCPClient = Service.shared.getFirstConnectedDeviceManager()
         if (selectedTCPClient == null) {
-            Toast.makeText(this, "no connected device", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.toast_no_connected_device, Toast.LENGTH_LONG).show()
             return
         }
 
@@ -176,7 +176,7 @@ class EditorActivity : AppCompatActivity() {
         if (mImageBase64?.isEmpty() == false) {
             val facecode = imageBase64TOFaceCodeBase64(mImageBase64!!)
             if (facecode == null) {
-                Toast.makeText(this, "no face detected", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, R.string.activity_editor_toast4, Toast.LENGTH_LONG).show()
                 return
             }
             face.Data = facecode!!
@@ -226,7 +226,7 @@ class EditorActivity : AppCompatActivity() {
                 mAddFaceBtn.setImageBitmap(bm)
                 isPhotoTaken = true
             } else {
-                Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, R.string.activity_scan_cancelled, Toast.LENGTH_LONG).show()
             }
         } else if (requestCode == REAQUEST_CODE_PICK_IMAGE) {
             if (resultCode != RESULT_OK) return;

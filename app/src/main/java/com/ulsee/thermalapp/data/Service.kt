@@ -41,10 +41,6 @@ class Service {
 
 
     // tutorial
-    fun requestTutorial(deviceID: String) {
-        tutorialDeviceID = deviceID
-    }
-    var tutorialDeviceID : String? = null
     var justJoinedDeviceIDList = ArrayList<String>()
 
     init {

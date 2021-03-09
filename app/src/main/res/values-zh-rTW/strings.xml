@@ -1,0 +1,133 @@
+<resources>
+    <string name="app_name">智能熱像儀</string>
+    <string name="title_device">裝置</string>
+    <string name="title_people">身份管理</string>
+    <string name="title_notification">通知</string>
+    <string name="title_settings">設定</string>
+
+    <string name="name">姓名</string>
+    <string name="save">儲存</string>
+    <string name="next">下一步</string>
+    <string name="cancel">取消</string>
+    <string name="remove">移除</string>
+    <string name="submit">提交</string>
+
+    <string name="update_successfully">更新成功</string>
+    <string name="create_successfully">新增成功</string>
+    <string name="remove_successfully">移除成功</string>
+
+    <string name="number_error">數字格式錯誤</string>
+    <!-- device -->
+    <string name="hint_input_device_name">請輸入裝置名稱</string>
+    <string name="hint_device_overwrite">裝置已配對過，將覆蓋先前的設定</string>
+    <string name="unable_to_connect_to_device">無法連上裝置</string>
+    <string name="add_first_device">新增您的第一台裝置</string>
+    <string name="device_connected_click_to_watch_camera">裝置已連線</string>
+    <string name="device_not_connected_yet">裝置未連上線</string>
+    <string name="confirm_remove_device">確認要移除裝置?</string>
+    <string name="dialog_add_device">新增裝置</string>
+    <string name="dialog_connect_hotspot">連線到熱點...</string>
+
+    <!-- device relative -->
+    <!-- wifi -->
+    <string name="switch_to_hotspot_successfully">成功切換到熱點模式</string>
+    <string name="hint_input_wifi_password">請輸入Wi-Fi密碼</string>
+    <string name="reset_to_hotspot">重設回熱點模式</string>
+
+<!--    <string name="error_load_image">failed to load image</string>-->
+<!--    <string name="please_select_image">please select image</string>-->
+<!--    <string name="please_enter_name">please enter name</string>-->
+<!--    <string name="please_not_enter_special_characters">please not enter special characters:-->
+<!--        .{}</string>-->
+<!--    <string name="confirm_remove_data">Are you sure to delete it?</string>-->
+    <string name="title_alert_notification">警示</string>
+    <string name="qrcode_invalid">無效的QR碼</string>
+
+    <!-- record -->
+    <string name="record_filter_error_date">日期時間的所有欄位均為必填</string>
+    <string name="record_filter_error_temperature">請確認溫度的輸入範圍</string>
+    <string name="record_filter_picker">選擇一個數值 :</string>
+    <string name="record_filter_toolbar_title">通知篩選器</string>
+    <string name="record_filter_datetime">日期時間</string>
+    <string name="record_filter_start_time">開始時間</string>
+    <string name="record_filter_end_time">結束時間</string>
+    <string name="record_filter_face_mask">口罩</string>
+    <string name="record_filter_all">所有</string>
+    <string name="record_filter_yes">有戴</string>
+    <string name="record_filter_no">沒戴</string>
+    <string name="record_filter_celsius">°C</string>
+    <string name="record_filter_fahrenheit">°F</string>
+    <string name="record_filter_temperature">體溫</string>
+    <string name="record_filter_to">至</string>
+    <string name="record_filter_max">最大值</string>
+    <string name="record_filter_min">最小值</string>
+    <string name="record_filter_apply">套用</string>
+    <string name="record_filter_person_name">人員姓名</string>
+    <string name="record_filter_date_range">日期範圍</string>
+
+    <!-- activity -->
+    <string name="activity_hotspot_title">熱點裝置</string>
+    <string name="activity_hotspot_scan_wifi_failed">掃瞄Wi-Fi信號失敗</string>
+    <string name="activity_hotspot_no_wifi_scanned">沒有搜尋到Wi-Fi信號</string>
+    <string name="activity_lan_devices_title">已連上的裝置</string>
+    <string name="activity_scan_prompt">掃瞄裝置QR碼</string>
+    <string name="activity_scan_cancelled">已取消</string>
+    <string name="activity_device_settings_toast1">錯誤: 沒有指定的裝置</string>
+    <string name="activity_device_settings_toast2">錯誤: 裝置未發現</string>
+    <string name="activity_device_settings_toast3">錯誤: 裝置設定未發現</string>
+    <string name="activity_device_settings_tab1">警報</string>
+    <string name="activity_device_settings_tab2">誤差</string>
+    <string name="activity_device_settings_item1">臉部辨識</string>
+    <string name="activity_device_settings_item2">影像翻轉</string>
+    <string name="activity_device_settings_item3">只有ROI區域</string>
+    <string name="activity_device_settings_title">裝置設定</string>
+    <string name="activity_streaming_thermal">熱像儀</string>
+    <string name="activity_editor_toast1">SDK初始化失敗</string>
+    <string name="activity_editor_toast2">請確認輸入的資訊</string>
+    <string name="toast_no_connected_device">沒有任何已連線裝置</string>
+    <string name="activity_editor_toast4">沒有偵測到人臉</string>
+    <string name="activity_wifi_list_toast1">切換Wi-Fi失敗</string>
+    <string name="activity_wifi_list_toast2">錯誤: 切換Wi-Fi失敗</string>
+    <string name="activity_wifi_list_toast3">錯誤: 切換Wi-Fi失敗</string>                                            // check if this string is necessary
+    <string name="activity_network_settings_toast1">錯誤: 沒有指定的Wi-fi</string>
+    <string name="toast_no_specified_device">錯誤: 沒有指定的裝置</string>
+    <string name="activity_network_settings_toast3">錯誤: 沒有指定的舊IP</string>
+    <string name="activity_network_settings_toast5">切換Wi-Fi成功!</string>
+    <string name="activity_network_settings_toast6">錯誤: 切換Wi-Fi失敗(ACK)</string>
+    <string name="activity_notification_toast1">錯誤: 沒有通知的資料</string>
+    <string name="activity_notification_name">姓名:</string>
+    <string name="activity_notification_temperature">體溫:</string>
+    <string name="activity_notification_time">時間:</string>
+    <string name="activity_notification_mask">口罩:</string>
+    <string name="activity_launch_toast">缺少所需的權限, 但您要求不再詢問並提供權限</string>
+    <string name="activity_editor_name">姓名</string>
+    <string name="activity_editor_age">年齡</string>
+    <string name="activity_editor_gender">性別</string>
+    <string name="activity_editor_id">員工編號</string>
+    <string name="activity_editor_birthday">生日</string>
+    <string name="activity_editor_remark">備註</string>
+    <string name="activity_editor_required">*必填</string>
+    <string name="activity_editor_invalid_age">錯誤: 無效的輸入</string>
+    <string name="activity_editor_male">男性</string>
+    <string name="activity_editor_female">女性</string>
+    <string name="activity_editor_title">新增人員</string>
+    <string name="activity_people_list_name">姓名:</string>
+    <string name="activity_people_list_age">年齡:</string>
+    <string name="activity_people_list_gender">性別:</string>
+
+
+    <!-- fragment -->
+    <string name="fragment_device_more">更多</string>
+    <string name="fragment_device_menu_setting">裝置設定</string>
+    <string name="fragment_device_menu_wifi">Wi-Fi設定</string>
+    <string name="fragment_device_menu_remove">移除當前裝置</string>
+    <string name="fragment_device_toast">裝置尚未連上線</string>
+    <string name="fragment_app_setting">高溫通知</string>
+
+
+    <!-- notification -->
+    <string name="notification_center_text">偵測到異常溫度.</string>
+
+
+
+</resources>

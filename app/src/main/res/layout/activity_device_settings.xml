@@ -26,7 +26,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:text="Device Settings"
+                android:text="@string/activity_device_settings_title"
                 android:textColor="#FF40C4F6"
                 android:textSize="24sp">
             </TextView>

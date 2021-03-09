@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">AI Infrared</string>
     <string name="title_device">Device</string>
-    <string name="title_people">People Management</string>
+    <string name="title_people">ID Management</string>
     <string name="title_notification">Records</string>
     <string name="title_settings">Settings</string>
 
@@ -10,6 +10,7 @@
     <string name="next">Next</string>
     <string name="cancel">Cancel</string>
     <string name="remove">Remove</string>
+    <string name="submit">Submit</string>
 
     <string name="update_successfully">Update Successful</string>
     <string name="create_successfully">create successfully</string>
@@ -33,17 +34,14 @@
     <string name="hint_input_wifi_password">please enter Wi-Fi password</string>
     <string name="reset_to_hotspot">Reset to hotspot</string>
 
-    <string name="error_load_image">failed to load image</string>
-    <string name="please_select_image">please select image</string>
-    <string name="please_enter_name">please enter name</string>
-    <string name="please_not_enter_special_characters">please not enter special characters:
-        .{}</string>
-    <string name="confirm_remove_data">Are you sure to delete it?</string>
+<!--    <string name="error_load_image">failed to load image</string>-->
+<!--    <string name="please_select_image">please select image</string>-->
+<!--    <string name="please_enter_name">please enter name</string>-->
+<!--    <string name="please_not_enter_special_characters">please not enter special characters:-->
+<!--        .{}</string>-->
+<!--    <string name="confirm_remove_data">Are you sure to delete it?</string>-->
     <string name="title_alert_notification">Notification</string>
     <string name="qrcode_invalid">QRCode is invalid</string>
-    <!-- calibration -->
-    <string name="error_load_rgb_image">failed to load rgb image</string>
-    <string name="error_load_thermal_image">failed to load thermal image</string>
 
     <!-- record -->
     <string name="record_filter_error_date">All fields in Datetime are necessary</string>
@@ -67,5 +65,67 @@
     <string name="record_filter_person_name">person name</string>
     <string name="record_filter_date_range">date range</string>
 
+    <!-- activity -->
+    <string name="activity_hotspot_title">Hotspots</string>
+    <string name="activity_hotspot_scan_wifi_failed">Failed to scan Wi-Fi</string>
+    <string name="activity_hotspot_no_wifi_scanned">There is no Wi-Fi scanned</string>
+    <string name="activity_lan_devices_title">Connected Devices</string>
+    <string name="activity_scan_prompt">Scan device QRCode</string>
+    <string name="activity_scan_cancelled">Cancelled</string>
+    <string name="activity_device_settings_toast1">Error: no specified device</string>
+    <string name="activity_device_settings_toast2">Error: device not found</string>
+    <string name="activity_device_settings_toast3">Error: device setting not found</string>
+    <string name="activity_device_settings_tab1">Alarm</string>
+    <string name="activity_device_settings_tab2">Deviation</string>
+    <string name="activity_device_settings_item1">Face Recognition</string>
+    <string name="activity_device_settings_item2">Flip Image</string>
+    <string name="activity_device_settings_item3">Only ROI</string>
+    <string name="activity_device_settings_title">Device Settings</string>
+    <string name="activity_streaming_thermal">Thermal</string>
+    <string name="activity_editor_toast1">failed to init sdk</string>
+    <string name="activity_editor_toast2">Please check your input information</string>
+    <string name="toast_no_connected_device">no connected device</string>
+    <string name="activity_editor_toast4">no face detected</string>
+    <string name="activity_wifi_list_toast1">Error to switch to Wi-Fi</string>
+    <string name="activity_wifi_list_toast2">Error: failed to switch to specified Wi-Fi</string>
+    <string name="activity_wifi_list_toast3">Error: failed to set specified Wi-Fi</string>
+    <string name="activity_network_settings_toast1">Error: no Wi-Fi specified</string>
+    <string name="toast_no_specified_device">Error: no device specified</string>
+    <string name="activity_network_settings_toast3">Error: no old ip specified</string>
+    <string name="activity_network_settings_toast5">Succeed switch Wi-Fi!</string>
+    <string name="activity_network_settings_toast6">Error to switch to Wi-Fi (ACK)</string>
+    <string name="activity_notification_toast1">Error: no notification data</string>
+    <string name="activity_notification_name">Name:</string>
+    <string name="activity_notification_temperature">Temperature:</string>
+    <string name="activity_notification_time">Time:</string>
+    <string name="activity_notification_mask">Mask:</string>
+    <string name="activity_launch_toast">Miss permission, but You require never ask permission again</string>
+    <string name="activity_editor_name">Name</string>
+    <string name="activity_editor_age">Age</string>
+    <string name="activity_editor_gender">Gender</string>
+    <string name="activity_editor_id">Employee ID</string>
+    <string name="activity_editor_birthday">Birthday</string>
+    <string name="activity_editor_remark">Remark</string>
+    <string name="activity_editor_required">*Required</string>
+    <string name="activity_editor_invalid_age">Error: Invalid Age</string>
+    <string name="activity_editor_male">Male</string>
+    <string name="activity_editor_female">Female</string>
+    <string name="activity_editor_title">Add People</string>
+    <string name="activity_people_list_name">Name:</string>
+    <string name="activity_people_list_age">Age:</string>
+    <string name="activity_people_list_gender">Gender:</string>
+
+
+    <!-- fragment -->
+    <string name="fragment_device_more">More</string>
+    <string name="fragment_device_menu_setting">Device Setting</string>
+    <string name="fragment_device_menu_wifi">Wi-Fi Setting</string>
+    <string name="fragment_device_menu_remove">Remove</string>
+    <string name="fragment_device_toast">device not connected</string>
+    <string name="fragment_app_setting">Heat Notification</string>
+
+
+    <!-- notification -->
+    <string name="notification_center_text">Abnormal temperature detected.</string>
 
 </resources>

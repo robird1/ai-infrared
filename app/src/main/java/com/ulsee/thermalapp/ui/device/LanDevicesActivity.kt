@@ -16,9 +16,9 @@ import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Device
 import com.ulsee.thermalapp.utils.RecyclerViewItemClickSupport
 
-private val TAG = "IPCListActivity"
+private val TAG = "LanDevicesActivity"
 
-class IPCListActivity : AppCompatActivity() {
+class LanDevicesActivity : AppCompatActivity() {
 
     lateinit var recyclerView: RecyclerView
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout

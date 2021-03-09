@@ -38,7 +38,7 @@ class HotspotActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_device_ipclist)
         val title = findViewById<TextView>(R.id.textView_toolbar_title)
-        title.text = "Hotspots"
+        title.text = getString(R.string.activity_hotspot_title)
         initRecyclerView()
         registerWIFIBroadcast ()
 //        loadWIFIList()
@@ -109,7 +109,7 @@ class HotspotActivity : AppCompatActivity() {
         if (!success) {
             swipeRefreshLayout.isRefreshing = false
             mProgressView.visibility = View.INVISIBLE
-            Toast.makeText(this, "Failed to scan Wi-Fi", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.activity_hotspot_scan_wifi_failed, Toast.LENGTH_LONG).show()
             Log.d("WIFIListActivity", "[loadWIFIList] Failed to scan Wi-Fi")
         }
     }
@@ -147,11 +147,11 @@ class HotspotActivity : AppCompatActivity() {
 
                 if (results.size == 0) {
                     Log.d(TAG, "[wifiScanReceiver.onReceive] There is no Wi-Fi scanned")
-                    Toast.makeText(this@HotspotActivity, "There is no Wi-Fi scanned", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@HotspotActivity, R.string.activity_hotspot_no_wifi_scanned, Toast.LENGTH_SHORT).show()
                 }
             } else {
                 Log.d(TAG, "[wifiScanReceiver.onReceive] Failed to scan Wi-Fi")
-                Toast.makeText(this@HotspotActivity, "Failed to scan Wi-Fi", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@HotspotActivity, R.string.activity_hotspot_scan_wifi_failed, Toast.LENGTH_LONG).show()
             }
 
             mProgressView.visibility = View.INVISIBLE

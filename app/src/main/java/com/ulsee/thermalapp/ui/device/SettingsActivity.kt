@@ -1,7 +1,6 @@
 package com.ulsee.thermalapp.ui.device
 
 import android.os.Bundle
-import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentManager
@@ -19,19 +18,19 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_device_settings)
 
         if(!intent.hasExtra("device")) {
-            Toast.makeText(this, "Error: no specified device", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.activity_device_settings_toast1, Toast.LENGTH_LONG).show()
             finish()
             return
         }
         deviceID = intent.getStringExtra("device")
         val deviceManager = Service.shared.getManagerOfDeviceID(deviceID)
         if (deviceManager == null) {
-            Toast.makeText(this, "Error: device not found", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.activity_device_settings_toast2, Toast.LENGTH_LONG).show()
             finish()
             return
         }
         if (deviceManager.settings == null) {
-            Toast.makeText(this, "Error: device setting not found", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.activity_device_settings_toast3, Toast.LENGTH_LONG).show()
             finish()
             return
         }
