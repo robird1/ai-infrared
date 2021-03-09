@@ -1,11 +1,7 @@
 package com.ulsee.thermalapp.ui.device
 
-import android.app.Activity
 import android.content.*
-import android.net.wifi.WifiConfiguration
-import android.net.wifi.WifiManager
 import android.os.Bundle
-import android.text.format.Formatter
 import android.util.Log
 import android.view.SurfaceHolder
 import android.view.SurfaceView
@@ -15,7 +11,6 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.gms.vision.CameraSource
 import com.google.android.gms.vision.Detector
 import com.google.android.gms.vision.barcode.Barcode
@@ -27,14 +22,9 @@ import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Device
 import com.ulsee.thermalapp.data.model.Settings
-import com.ulsee.thermalapp.data.model.WIFIInfo
 import com.ulsee.thermalapp.data.services.DeviceManager
-import com.ulsee.thermalapp.ui.network.NetworkController
-import com.ulsee.thermalapp.ui.network.NetworkUtils
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.net.InetAddress
-import java.net.InetSocketAddress
 import java.net.Socket
 import java.net.SocketException
 
@@ -52,9 +42,6 @@ class ScanActivity : AppCompatActivity() {
     var mAPSettings : Settings? = null
     var mAPDevice : Device? = null
     private lateinit var mAddDeviceController: AddDeviceController
-    private var mWifiList: ArrayList<WIFIInfo>?= null
-    private lateinit var mProgressView: ConstraintLayout
-    var wifiScanReceiver: BroadcastReceiver?= null
 
     enum class Status {
         scanningQRCode, searchingDevice, askingName
@@ -65,17 +52,10 @@ class ScanActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_device_scan)
 
-        val isLocationOn = NetworkUtils.isLocationEnabled(this)
-        Log.d(TAG, "isLocationOn: "+ isLocationOn)
-        if (isLocationOn) {
-            doInit()
-        } else {
-            NetworkUtils.checkLocationSetting(this)
-        }
+        doInit()
     }
 
     private fun doInit() {
-        mProgressView = findViewById(R.id.progress_view)
         mSearchingDeviceProgressDialog = AlertDialog
             .Builder(this)
             .setView(ProgressBar(this))
@@ -92,8 +72,6 @@ class ScanActivity : AppCompatActivity() {
             }
             .create()
 
-        registerWIFIBroadcast()
-
         initZxingScanner()
         // initQRCodeScanner()
 
@@ -103,7 +81,6 @@ class ScanActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        unregisterWIFIBroadcast()
         Service.shared.mDeviceSearchedListener = null
         super.onDestroy()
     }
@@ -162,12 +139,8 @@ class ScanActivity : AppCompatActivity() {
             } else {
                 super.onActivityResult(requestCode, resultCode, data)
             }
-        } else if (requestCode == NetworkUtils.REQUEST_LOCATION_SETTINGS) {
-            if (resultCode == RESULT_OK) {
-                doInit()
-            } else {
-                finish()
-            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
         }
     }
 
@@ -234,11 +207,9 @@ class ScanActivity : AppCompatActivity() {
             mStatus = Status.askingName
             this@ScanActivity.runOnUiThread { askDeviceName(mScannedDeviceList[idx]) }
         } else {
+            this@ScanActivity.runOnUiThread { mSearchingDeviceProgressDialog.show() }
             mSearchingDeviceID = deviceID
             mStatus = Status.searchingDevice
-
-            mProgressView.visibility = View.VISIBLE
-            loadWIFIList()
         }
     }
 
@@ -368,95 +339,6 @@ class ScanActivity : AppCompatActivity() {
                 }
             }
         }).start()
-    }
-
-    private fun loadWIFIList() {
-        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        val success = wifiManager.startScan()
-        if (!success) {
-            mProgressView.visibility = View.INVISIBLE
-            this@ScanActivity.runOnUiThread { mSearchingDeviceProgressDialog.show() }
-            Log.d(TAG, "[Failed] wifiManager.startScan()")
-        } else {
-            Log.d(TAG, "[Success] wifiManager.startScan()")
-        }
-    }
-
-    private fun isHotspotExist(): Boolean {
-        for (i in mWifiList!!) {
-            if (i.ssid.equals(mSearchingDeviceID)) {
-                return true
-            }
-        }
-        return false
-    }
-
-    private fun switchWifi(): Boolean {
-        for (i in mWifiList!!) {
-            if (i.ssid.equals(mSearchingDeviceID)) {
-                i.password = "ulsee168"
-                mIsConnectedToAPTCP = false
-                return NetworkController(this).requestWifi(i)
-            }
-        }
-        return false
-    }
-
-    private fun registerWIFIBroadcast () {
-        wifiScanReceiver = initWifiReceiver()
-        val intentFilter = IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
-        registerReceiver(wifiScanReceiver, intentFilter)
-    }
-
-    private fun unregisterWIFIBroadcast () {
-        if (wifiScanReceiver != null)
-            unregisterReceiver(wifiScanReceiver)
-    }
-
-    private fun initWifiReceiver(): BroadcastReceiver {
-        return object: BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                var isSwitchSuccess = false
-                val success = intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false)
-                if (success) {
-                    val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-                    val results = wifiManager.scanResults
-                    mWifiList = ArrayList<WIFIInfo>()
-                    for (result in results) {
-                        if(result.SSID.isNullOrEmpty()) continue
-                        var wifiInfo = WIFIInfo()
-                        wifiInfo.ssid = result.SSID
-                        wifiInfo.bssid = result.BSSID
-                        wifiInfo.capabilities = result.capabilities
-                        mWifiList!!.add(wifiInfo)
-//                    Log.d(TAG, String.format("got Wi-Fi, ssid=%s, bssid=%s, capabilities=%s", result.SSID, result.BSSID, result.capabilities))
-                    }
-
-                    if (results.size == 0) {
-                        Log.d(TAG, "[wifiScanReceiver.onReceive] There is no Wi-Fi scanned")
-                    } else {
-                        if (isHotspotExist()) {
-                            if (switchWifi()) {
-                                Log.d(TAG, "[Success] switchWifi()")
-                                isSwitchSuccess = true
-                            } else {
-                                Log.d(TAG, "[Failed] switchWifi()")
-                            }
-                        } else {
-                            Log.d(TAG, "Hotspot is not existing.")
-                        }
-                    }
-                } else {
-                    Log.d(TAG, "[wifiScanReceiver.onReceive] Failed to scan Wi-Fi")
-                    this@ScanActivity.runOnUiThread { mSearchingDeviceProgressDialog.show() }
-                }
-
-                mProgressView.visibility = View.INVISIBLE
-                if (!isSwitchSuccess) {
-                    this@ScanActivity.runOnUiThread { mSearchingDeviceProgressDialog.show() }
-                }
-            }
-        }
     }
 
 }

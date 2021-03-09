@@ -58,8 +58,8 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
 
             mPopup = PopupMenu(ctx, menuLayout)
             mPopup.menu.add(1, 0, 0, R.string.fragment_device_menu_setting)
-            mPopup.menu.add(1, 1, 1, R.string.fragment_device_menu_wifi)
-            mPopup.menu.add(1, 2, 2, R.string.fragment_device_menu_remove)
+//            mPopup.menu.add(1, 1, 1, R.string.fragment_device_menu_wifi)
+            mPopup.menu.add(1, 1, 1, R.string.fragment_device_menu_remove)
 
             mPopup.setOnMenuItemClickListener{ item: MenuItem? ->
                 when (item!!.order) {
@@ -77,19 +77,19 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
                             })
 
                     }
+//                    1 -> {
+//                        val deviceManager = Service.shared.getManagerOfDevice(device!!)
+//                        deviceManager?.let {
+//                            if (!it.tcpClient.isConnected()) {
+//                                Toast.makeText(ctx, R.string.fragment_device_toast, Toast.LENGTH_SHORT).show()
+//                            } else {
+//                                val intent = Intent(ctx, WIFIListActivity::class.java)
+//                                intent.putExtra("device", deviceID)
+//                                ctx.startActivity(intent)
+//                            }
+//                        }
+//                    }
                     1 -> {
-                        val deviceManager = Service.shared.getManagerOfDevice(device!!)
-                        deviceManager?.let {
-                            if (!it.tcpClient.isConnected()) {
-                                Toast.makeText(ctx, R.string.fragment_device_toast, Toast.LENGTH_SHORT).show()
-                            } else {
-                                val intent = Intent(ctx, WIFIListActivity::class.java)
-                                intent.putExtra("device", deviceID)
-                                ctx.startActivity(intent)
-                            }
-                        }
-                    }
-                    2 -> {
                         if (device == null) {
                             Toast.makeText(ctx, R.string.toast_no_specified_device, Toast.LENGTH_SHORT).show()
                         } else {

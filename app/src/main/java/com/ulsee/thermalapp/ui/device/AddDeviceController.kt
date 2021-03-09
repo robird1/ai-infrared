@@ -60,24 +60,30 @@ class AddDeviceController(activity: Activity) {
         mActivity.startActivity(Intent(mActivity, LanDevicesActivity::class.java))
     }
 
+//    private fun searchHotspot() {
+//        mActivity.startActivity(Intent(mActivity, HotspotActivity::class.java))
+//    }
+
     private fun searchHotspot() {
-        mActivity.startActivity(Intent(mActivity, HotspotActivity::class.java))
+        initHandler()
+        showConnectHotspotDialog()
+        connectToAPTCP()
     }
 
-//    private fun showConnectHotspotDialog() {
-//        mConnectHotspotDialog = AlertDialog
-//            .Builder(mActivity)
-//            .setView(ProgressBar(mActivity))
-//            .setMessage(R.string.dialog_connect_hotspot)
-//            .setNegativeButton(mActivity.getString(R.string.cancel)) { dialog, _ ->
-//                cancelTask()
-//                dialog.dismiss()
-//            }
-//            .setCancelable(false)
-//            .create()
-//
-//        mConnectHotspotDialog!!.show()
-//    }
+    private fun showConnectHotspotDialog() {
+        mConnectHotspotDialog = AlertDialog
+            .Builder(mActivity)
+            .setView(ProgressBar(mActivity))
+            .setMessage(R.string.dialog_connect_hotspot)
+            .setNegativeButton(mActivity.getString(R.string.cancel)) { dialog, _ ->
+                cancelTask()
+                dialog.dismiss()
+            }
+            .setCancelable(false)
+            .create()
+
+        mConnectHotspotDialog!!.show()
+    }
 
     private fun initHandler() {
         mThread = HandlerThread("add_device_thread")
@@ -103,10 +109,8 @@ class AddDeviceController(activity: Activity) {
         return String.format("%s.%s.%s.1",arr[0],arr[1],arr[2])
     }
 
-    fun connectToAPTCP () {
+    private fun connectToAPTCP () {
         Log.d("AddDeviceController", "[Enter] connectToAPTCP")
-        initHandler()
-
         val gson = Gson()
         var mAPTCPSocket: Socket? = null
         var retryCounter = 0
