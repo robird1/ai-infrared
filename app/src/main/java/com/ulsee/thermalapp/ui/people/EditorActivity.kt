@@ -38,7 +38,7 @@ class EditorActivity : AppCompatActivity() {
     private lateinit var mAddFaceBtn: ImageView
     private lateinit var mProgressView: ConstraintLayout
     lateinit var takePhotoIntentUri: Uri
-    private var isPhotoTaken: Boolean = false
+    private var isPhotoTakenOrSelected: Boolean = false
     private var mImageBase64: String? = null
     private val isEditingMode : Boolean
         get() {
@@ -195,7 +195,7 @@ class EditorActivity : AppCompatActivity() {
 
     private fun isInputValid(): Boolean {
         if (!isEditingMode) {
-            if (!isPhotoTaken)
+            if (!isPhotoTakenOrSelected)
                 return false
         }
 
@@ -224,7 +224,7 @@ class EditorActivity : AppCompatActivity() {
                 mImageBase64 = imageBase64
 
                 mAddFaceBtn.setImageBitmap(bm)
-                isPhotoTaken = true
+                isPhotoTakenOrSelected = true
             } else {
                 Toast.makeText(this, R.string.activity_scan_cancelled, Toast.LENGTH_LONG).show()
             }
@@ -257,7 +257,10 @@ class EditorActivity : AppCompatActivity() {
                     stringBuilder.append("=")
                 }
 
+                mImageBase64 = stringBuilder.toString()
+
                 Glide.with(this).load("data:image/jpg;base64,"+stringBuilder.toString()).into(mAddFaceBtn)
+                isPhotoTakenOrSelected = true
             }
         }
         super.onActivityResult(requestCode, resultCode, data)
