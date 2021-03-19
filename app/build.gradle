@@ -93,5 +93,5 @@ dependencies {
 //    implementation project(':libTracker')
     implementation(name: 'libFaceRecognition-release', ext: 'aar')
     implementation(name: 'libTracker-release', ext: 'aar')
-    implementation(name: 'openCVLibrary34', ext: 'aar')
+    implementation(name: 'openCVLibrary3.4.3', ext: 'aar')
 }
