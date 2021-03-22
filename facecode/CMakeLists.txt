@@ -17,8 +17,11 @@ include_directories("${CMAKE_CURRENT_LIST_DIR}/src/main/cpp/facecode_sh")
 include_directories("${CMAKE_CURRENT_LIST_DIR}/src/main/cpp")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -DSHOWLOG")
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fopenmp -static-openmp")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11  -fopenmp -static-openmp")
 file(GLOB native_srcs
         "src/main/cpp/zstd/decompress/*.c"
         "src/main/cpp/zstd/compress/*.c"

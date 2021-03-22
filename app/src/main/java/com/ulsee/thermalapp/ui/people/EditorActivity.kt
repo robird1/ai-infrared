@@ -1,11 +1,9 @@
 package com.ulsee.thermalapp.ui.people
 
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.os.SystemClock
 import android.provider.MediaStore
 import android.util.Base64
@@ -17,7 +15,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -25,9 +22,6 @@ import com.ulsee.facecode.Facecode
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.services.PeopleServiceTCP
-import com.ulsee.thermalapp.utils.FilePickerHelper
-import java.io.ByteArrayOutputStream
-import java.io.File
 import java.io.InputStream
 
 private val TAG = "EditorActivity"
@@ -37,7 +31,6 @@ class EditorActivity : AppCompatActivity() {
     lateinit var toolbar: Toolbar
     private lateinit var mAddFaceBtn: ImageView
     private lateinit var mProgressView: ConstraintLayout
-    lateinit var takePhotoIntentUri: Uri
     private var isPhotoTakenOrSelected: Boolean = false
     private var mImageBase64: String? = null
     private val isEditingMode : Boolean
@@ -61,14 +54,13 @@ class EditorActivity : AppCompatActivity() {
         mAddFaceBtn = findViewById(R.id.add_image)
 
         mAddFaceBtn.setOnClickListener {
-//            pickImageFromTakePhoto()
             pickImageFromAlbum()
         }
 
         findViewById<View>(R.id.save_btn).setOnClickListener { save() }
 
         if (isEditingMode) {
-            findViewById<TextView>(R.id.textView_toolbar_title).text = "Edit People"
+            findViewById<TextView>(R.id.textView_toolbar_title).text = "Edit Profile"
             mAddFaceBtn.setImageResource(R.drawable.face_code_image)
         }
 
@@ -210,25 +202,7 @@ class EditorActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Log.d(TAG, "[Enter] onActivityResult")
 
-        if (requestCode == REQUEST_TAKE_PHOTO) {
-            if (resultCode == RESULT_OK) {
-                val file = FilePickerHelper.shared().putPickedFile(this, takePhotoIntentUri);
-
-                val bm = BitmapFactory.decodeFile(file.path)
-                val bOut = ByteArrayOutputStream()
-                bm.compress(Bitmap.CompressFormat.JPEG, 100, bOut)
-                val imageBase64 = Base64.encodeToString(
-                    bOut.toByteArray(),
-                    Base64.DEFAULT
-                )
-                mImageBase64 = imageBase64
-
-                mAddFaceBtn.setImageBitmap(bm)
-                isPhotoTakenOrSelected = true
-            } else {
-                Toast.makeText(this, R.string.activity_scan_cancelled, Toast.LENGTH_LONG).show()
-            }
-        } else if (requestCode == REAQUEST_CODE_PICK_IMAGE) {
+        if (requestCode == REQUEST_CODE_PICK_IMAGE) {
             if (resultCode != RESULT_OK) return;
             var uri : Uri? = data?.data
             if (uri == null) {
@@ -266,28 +240,7 @@ class EditorActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
-    fun pickImageFromTakePhoto () {
-
-        val imageFileName = "take_photo" //make a better file name
-
-        val storageDir: File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-        val image: File = File.createTempFile(
-            imageFileName,
-            ".jpg",
-            storageDir
-        )
-
-        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        //takePhotoIntentUri = Uri.fromFile(image);
-        takePhotoIntentUri = FileProvider.getUriForFile(
-            this,
-            getPackageName() + ".fileprovider",
-            image);
-        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, takePhotoIntentUri);
-        startActivityForResult(cameraIntent, REQUEST_TAKE_PHOTO)
-    }
-
-    fun pickImageFromAlbum () {
+    private fun pickImageFromAlbum () {
         val getIntent = Intent(Intent.ACTION_GET_CONTENT)
         getIntent.type = "image/*"
         val pickIntent = Intent(
@@ -297,12 +250,11 @@ class EditorActivity : AppCompatActivity() {
         pickIntent.type = "image/*"
         val chooserIntent = Intent.createChooser(getIntent, "Select Image")
         chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(pickIntent))
-        startActivityForResult(chooserIntent, REAQUEST_CODE_PICK_IMAGE)
+        startActivityForResult(chooserIntent, REQUEST_CODE_PICK_IMAGE)
     }
 
     companion object {
-        const val REQUEST_TAKE_PHOTO = 1235
-        const val REAQUEST_CODE_PICK_IMAGE = 1236
+        const val REQUEST_CODE_PICK_IMAGE = 1236
     }
 
 }

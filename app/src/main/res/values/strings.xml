@@ -110,7 +110,7 @@
     <string name="activity_editor_invalid_age">Error: Invalid Age</string>
     <string name="activity_editor_male">Male</string>
     <string name="activity_editor_female">Female</string>
-    <string name="activity_editor_title">Add People</string>
+    <string name="activity_editor_title">Add Profile</string>
     <string name="activity_people_list_name">Name:</string>
     <string name="activity_people_list_age">Age:</string>
     <string name="activity_people_list_gender">Gender:</string>
@@ -126,6 +126,6 @@
 
 
     <!-- notification -->
-    <string name="notification_center_text">Abnormal temperature detected.</string>
+    <string name="notification_center_text">Heat detected.</string>
 
 </resources>
