@@ -1,5 +1,6 @@
 package com.ulsee.thermalapp.ui.people
 
+import android.Manifest
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -25,6 +26,7 @@ import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.services.PeopleServiceTCP
 import com.ulsee.thermalapp.utils.FilePickerHelper
+import com.ulsee.thermalapp.utils.PermissionController
 import java.io.ByteArrayOutputStream
 import java.io.File
 
@@ -59,13 +61,14 @@ class EditorActivity : AppCompatActivity() {
         mAddFaceBtn = findViewById(R.id.add_image)
 
         mAddFaceBtn.setOnClickListener {
-            pickImageFromTakePhoto()
+//            pickImageFromTakePhoto()
+            PermissionController().requestPermission(this@EditorActivity, Manifest.permission.CAMERA)
         }
 
         findViewById<View>(R.id.save_btn).setOnClickListener { save() }
 
         if (isEditingMode) {
-            findViewById<TextView>(R.id.textView_toolbar_title).text = "Edit People"
+            findViewById<TextView>(R.id.textView_toolbar_title).text = "Edit Profile"
             mAddFaceBtn.setImageResource(R.drawable.face_code_image)
         }
 
@@ -84,6 +87,18 @@ class EditorActivity : AppCompatActivity() {
                 }
             }).start()
         }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String?>,
+        grantResults: IntArray
+    ) {
+        Log.d(TAG, "[Enter] onRequestPermissionsResult")
+        val lambda = {
+            pickImageFromTakePhoto()
+        }
+        PermissionController().onRequestPermissionsResult(requestCode, permissions, grantResults, this, lambda)
     }
 
     override fun onDestroy() {
@@ -229,11 +244,13 @@ class EditorActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
-    fun pickImageFromTakePhoto () {
+    private fun pickImageFromTakePhoto () {
 
         val imageFileName = "take_photo" //make a better file name
 
-        val storageDir: File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+//        val storageDir: File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+        val storageDir: File = this.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
+
         val image: File = File.createTempFile(
             imageFileName,
             ".jpg",
