@@ -25,9 +25,9 @@ class PeopleServiceTCP(deviceManager: DeviceManager) : IPeopleService {
 //            if (apiClient?.isConnected() != true) apiClient?.reconnect()
 
             deviceManager.setOnGotFaceListListener(object: DeviceManager.OnGotFaceListListener{
-                override fun onGotFaceList(falceList: List<com.ulsee.thermalapp.data.model.Face>) {
+                override fun onGotFaceList(faceList: List<com.ulsee.thermalapp.data.model.Face>) {
                     deviceManager.setOnGotFaceListListener(null)
-                    emitter.onNext(falceList)
+                    emitter.onNext(faceList)
                     emitter.onComplete()
                 }
             })
@@ -79,9 +79,9 @@ class PeopleServiceTCP(deviceManager: DeviceManager) : IPeopleService {
             if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
 
             deviceManager.setOnGotFaceListListener(object: DeviceManager.OnGotFaceListListener{
-                override fun onGotFaceList(falceList: List<Face>) {
+                override fun onGotFaceList(faceList: List<Face>) {
                     deviceManager.setOnGotFaceListListener(null)
-                    emitter.onNext(falceList)
+                    emitter.onNext(faceList)
                     emitter.onComplete()
                 }
             })

@@ -3,20 +3,20 @@ package com.ulsee.thermalapp.ui.notification
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ulsee.thermalapp.MainActivity
-import com.ulsee.thermalapp.MainActivityTag
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.FilteredRecord
 import com.ulsee.thermalapp.data.model.Notification
-import com.ulsee.thermalapp.data.services.NotificationServiceTCP
+import com.ulsee.thermalapp.data.services.DeviceManager
 import com.ulsee.thermalapp.utils.RecyclerViewItemClickSupport
 import java.io.Serializable
 
@@ -26,6 +26,7 @@ class ListFragment  : Fragment() {
 
     lateinit var recyclerView : RecyclerView
     lateinit var swipeRefreshLayout: SwipeRefreshLayout
+    private val args: ListFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,7 +39,7 @@ class ListFragment  : Fragment() {
         swipeRefreshLayout.setOnRefreshListener { loadNotifications() }
 
         recyclerView = root.findViewById<RecyclerView>(R.id.recyclerView)
-        recyclerView.adapter = NotificationListAdapter()
+        recyclerView.adapter = NotificationListAdapter(args, requireActivity())
         recyclerView.layoutManager = LinearLayoutManager(context)
 
         val support: RecyclerViewItemClickSupport = RecyclerViewItemClickSupport.addTo(recyclerView)
@@ -62,7 +63,15 @@ class ListFragment  : Fragment() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        startActivityForResult(Intent(requireContext(), RecordFilterActivity::class.java), REQUEST_CODE_FILTER)
+        when (item.itemId) {
+            android.R.id.home -> {
+                findNavController().popBackStack()
+                return true
+            }
+            R.id.filter -> {
+                startActivityForResult(Intent(requireContext(), RecordFilterActivity::class.java), REQUEST_CODE_FILTER)
+            }
+        }
         return super.onOptionsItemSelected(item)
     }
 
@@ -78,61 +87,61 @@ class ListFragment  : Fragment() {
     }
 
     private fun loadNotifications() {
-        val deviceManager = Service.shared.getFirstConnectedDeviceManager()
-        if (deviceManager == null) {
+        val deviceManager = Service.shared.getManagerOfDeviceID(args.deviceID)
+        if (deviceManager != null) {
+            registerCallback(deviceManager)
+            try {
+                deviceManager.getAllNotifications()
+
+            } catch (e: Exception) {
+                swipeRefreshLayout.isRefreshing = false
+                showToast(e.localizedMessage!!)
+            }
+
+        } else {
             swipeRefreshLayout.isRefreshing = false
-            Toast.makeText(context, R.string.toast_no_connected_device, Toast.LENGTH_LONG).show()
-            return
+            showToast(R.string.toast_no_connected_device)
         }
-        Log.i(javaClass.name, "call list")
-        NotificationServiceTCP(deviceManager).getAll()
-            .subscribe({ notificationList: List<Notification> ->
-                Log.d("ListFragment", "[Enter] OnNext()")
-
-                if (activity != null) {
-                    (activity as MainActivity).setTitle("${getString(R.string.title_notification)}(${notificationList.size})")
-                }
-                Log.i(javaClass.name, "got list")
-                val sortedList = notificationList.sortedByDescending {
-                    it.timeDate.time
-                }
-                Log.i(javaClass.name, "sort list")
-                (recyclerView.adapter as NotificationListAdapter).setList(sortedList)
-                swipeRefreshLayout.isRefreshing = false
-                Log.i(javaClass.name, "set list")
-            }, { error: Throwable ->
-                Log.d("ListFragment", "[Enter] OnError()")
-
-                Log.d(MainActivityTag, error.localizedMessage)
-                if (context != null) {
-                    Toast.makeText(context, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
-                }
-                swipeRefreshLayout.isRefreshing = false
-            })
     }
 
     private fun loadFilteredRecords(data: FilteredRecord) {
-        val deviceManager = Service.shared.getFirstConnectedDeviceManager()
-        if (deviceManager == null) {
+        val deviceManager = Service.shared.getManagerOfDeviceID(args.deviceID)
+        if (deviceManager != null) {
+            registerCallback(deviceManager)
+            try {
+                deviceManager.loadFilteredRecords(data)
+
+            } catch (e: Exception) {
+                swipeRefreshLayout.isRefreshing = false
+                showToast(e.localizedMessage!!)
+            }
+
+        } else {
             swipeRefreshLayout.isRefreshing = false
-            Toast.makeText(context, R.string.toast_no_connected_device, Toast.LENGTH_LONG).show()
-            return
+            showToast(R.string.toast_no_connected_device)
         }
 
-        NotificationServiceTCP(deviceManager).getFilteredRecord(data)
-            .subscribe({ notificationList: List<Notification> ->
-                (activity as MainActivity).setTitle("${getString(R.string.title_notification)}(${notificationList.size})")
-                val sortedList = notificationList.sortedByDescending {
-                    it.timeDate.time
-                }
-                (recyclerView.adapter as NotificationListAdapter).setList(sortedList)
-                swipeRefreshLayout.isRefreshing = false
-            }, { error: Throwable ->
-                Log.d("ListFragment", "[Enter] OnError()")
-                Toast.makeText(context, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
-                swipeRefreshLayout.isRefreshing = false
-            })
+    }
 
+    private fun registerCallback(deviceManager: DeviceManager) {
+        deviceManager.setOnGotNotificationListListener(object :
+            DeviceManager.OnGotNotificationListListener {
+            override fun onGotNotificationList(faceList: List<Notification>) {
+                activity?.runOnUiThread {
+                    if (activity != null) {
+                        (activity as MainActivity).setTitle("${getString(R.string.title_notification)}(${faceList.size})")
+                    }
+
+                    val sortedList = faceList.sortedByDescending {
+                        it.timeDate.time
+                    }
+                    (recyclerView.adapter as NotificationListAdapter).setList(sortedList)
+                    swipeRefreshLayout.isRefreshing = false
+
+                    deviceManager.setOnGotNotificationListListener(null)
+                }
+            }
+        })
     }
 
     private fun show(notification: Notification) {
@@ -140,8 +149,18 @@ class ListFragment  : Fragment() {
         if (notification != null) {
             intent.putExtra("notification", notification as Serializable)
         }
+        intent.putExtra("device_id", args.deviceID)
         startActivity(intent)
     }
+
+    private fun showToast(msg: String) {
+        Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
+    }
+
+    private fun showToast(resId: Int) {
+        Toast.makeText(requireContext(), getString(resId), Toast.LENGTH_LONG).show()
+    }
+
 
     companion object {
         const val REQUEST_CODE_FILTER = 777

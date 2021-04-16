@@ -6,9 +6,9 @@ import android.view.KeyEvent
 import android.view.MenuItem
 import androidx.appcompat.widget.SearchView
 
-private val TAG = "PeopleSearchView"
+private val TAG = ProfileSearchView::class.java.simpleName
 
-class PeopleSearchView(context: Context?) : SearchView(context), MenuItem.OnActionExpandListener {
+class ProfileSearchView(context: Context?) : SearchView(context), MenuItem.OnActionExpandListener {
     override fun dispatchKeyEventPreIme(event: KeyEvent): Boolean {
         Log.d(TAG, "[Enter] dispatchKeyEventPreIme")
 

@@ -103,6 +103,7 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
                                     val rows = realm.where(RealmDevice::class.java).equalTo("mID", device!!.getID()).findAll()
                                     rows.deleteAllFromRealm()
                                     realm.commitTransaction()
+                                    realm.close()
                                     // 2. broadcast
                                     val intent = Intent("Device removed")
                                     intent.putExtra("device_id", device!!.getID())

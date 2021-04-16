@@ -17,9 +17,9 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-private val TAG = "PeopleEditorAdapter"
+private val TAG = EditorAdapter::class.java.simpleName
 
-class PeopleEditorAdapter(private val context: Context, private val isEditingMode: Boolean): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class EditorAdapter(private val context: Context, private val isEditingMode: Boolean): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val holder: RecyclerView.ViewHolder

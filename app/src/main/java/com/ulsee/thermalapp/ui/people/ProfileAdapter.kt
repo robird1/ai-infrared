@@ -6,16 +6,13 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import com.ulsee.thermalapp.R
-import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.Face
-import io.reactivex.disposables.Disposable
 
+private val TAG = ProfileAdapter::class.java.simpleName
 
-class PeopleListAdapter(private val fragment: ListFragment): RecyclerView.Adapter<PeopleListAdapter.ViewHolder>() {
+class ProfileAdapter(private val fragment: ProfileFragment): RecyclerView.Adapter<ProfileAdapter.ViewHolder>() {
 
     var faceList: MutableList<Face> = ArrayList()
 
@@ -56,7 +53,6 @@ class PeopleListAdapter(private val fragment: ListFragment): RecyclerView.Adapte
         private val nameTV = itemView.findViewById<TextView>(R.id.textView_peopleName)
         private val ageTV = itemView.findViewById<TextView>(R.id.textView_age)
         private val genderTV = itemView.findViewById<TextView>(R.id.textView_gender)
-        private var disposable: Disposable? = null
         private var mFace: Face? = null
 //        private val deleteButton = itemView.findViewById<ImageView>(R.id.delete_icon)
         val viewForeground: RelativeLayout = itemView.findViewById(R.id.view_foreground)
@@ -64,7 +60,6 @@ class PeopleListAdapter(private val fragment: ListFragment): RecyclerView.Adapte
 
         fun bind(face: Face) {
             mFace = face
-            disposable?.dispose()
 
             nameTV?.text = face.Name
             ageTV.text = getAgeText(face)
@@ -74,11 +69,6 @@ class PeopleListAdapter(private val fragment: ListFragment): RecyclerView.Adapte
 //                confirmDelete(face)
 //            }
 
-            val deviceManager = Service.shared.getFirstConnectedDeviceManager()
-            if (deviceManager == null) {
-                Toast.makeText(itemView.context, R.string.toast_no_connected_device, Toast.LENGTH_SHORT).show()
-                return
-            }
         }
 
         private fun getAgeText(face: Face): String {
