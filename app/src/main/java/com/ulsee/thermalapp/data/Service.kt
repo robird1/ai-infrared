@@ -127,23 +127,23 @@ class Service {
     }
 
     fun keepSearchingDevice () {
-        var isAnyDeviceNotConnected: Boolean
-        Thread(Runnable {
-            while (true) {
-                try {
-                    isAnyDeviceNotConnected =
-                        deviceManagerList.indexOfFirst { !it.tcpClient.isConnected() } >= 0
-                    udpBroadcastService.shouldBroadcasting = isAnyDeviceNotConnected || isScanning || isStarterActivity
-
-//                    Log.d(TAG, "udpBroadcastService.shouldBroadcasting: "+ udpBroadcastService.shouldBroadcasting)
-
-                    Thread.sleep(1000)
-                } catch (e: Exception) {
-                    Log.e(javaClass.name, "Error: Service keepSearchingDevice:")
-                    e.printStackTrace()
-                }
-            }
-        }).start()
+//        var isAnyDeviceNotConnected: Boolean
+//        Thread(Runnable {
+//            while (true) {
+//                try {
+//                    isAnyDeviceNotConnected =
+//                        deviceManagerList.indexOfFirst { !it.tcpClient.isConnected() } >= 0
+//                    udpBroadcastService.shouldBroadcasting = isAnyDeviceNotConnected || isScanning || isStarterActivity
+//
+////                    Log.d(TAG, "udpBroadcastService.shouldBroadcasting: "+ udpBroadcastService.shouldBroadcasting)
+//
+//                    Thread.sleep(1000)
+//                } catch (e: Exception) {
+//                    Log.e(javaClass.name, "Error: Service keepSearchingDevice:")
+//                    e.printStackTrace()
+//                }
+//            }
+//        }).start()
     }
 
     fun getFirstConnectedDeviceManager(): DeviceManager? {

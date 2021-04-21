@@ -7,7 +7,6 @@ import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -20,13 +19,11 @@ import com.ulsee.thermalapp.data.services.DeviceManager
 import com.ulsee.thermalapp.utils.RecyclerViewItemClickSupport
 import java.io.Serializable
 
-private val TAG = ListFragment::class.java.simpleName
-
 class ListFragment  : Fragment() {
 
     lateinit var recyclerView : RecyclerView
     lateinit var swipeRefreshLayout: SwipeRefreshLayout
-    private val args: ListFragmentArgs by navArgs()
+//    private val args: ListFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,11 +32,11 @@ class ListFragment  : Fragment() {
     ): View? {
         val root = inflater.inflate(R.layout.fragment_notification_list, container, false)
 
-        swipeRefreshLayout = root.findViewById<SwipeRefreshLayout>(R.id.swipeRefreshLayout)
+        swipeRefreshLayout = root.findViewById(R.id.swipeRefreshLayout)
         swipeRefreshLayout.setOnRefreshListener { loadNotifications() }
 
-        recyclerView = root.findViewById<RecyclerView>(R.id.recyclerView)
-        recyclerView.adapter = NotificationListAdapter(args, requireActivity())
+        recyclerView = root.findViewById(R.id.recyclerView)
+        recyclerView.adapter = NotificationListAdapter(requireActivity())
         recyclerView.layoutManager = LinearLayoutManager(context)
 
         val support: RecyclerViewItemClickSupport = RecyclerViewItemClickSupport.addTo(recyclerView)
@@ -87,7 +84,8 @@ class ListFragment  : Fragment() {
     }
 
     private fun loadNotifications() {
-        val deviceManager = Service.shared.getManagerOfDeviceID(args.deviceID)
+//        val deviceManager = Service.shared.getManagerOfDeviceID(args.deviceID)
+        val deviceManager = Service.shared.getFirstConnectedDeviceManager()
         if (deviceManager != null) {
             registerCallback(deviceManager)
             try {
@@ -105,7 +103,8 @@ class ListFragment  : Fragment() {
     }
 
     private fun loadFilteredRecords(data: FilteredRecord) {
-        val deviceManager = Service.shared.getManagerOfDeviceID(args.deviceID)
+//        val deviceManager = Service.shared.getManagerOfDeviceID(args.deviceID)
+        val deviceManager = Service.shared.getFirstConnectedDeviceManager()
         if (deviceManager != null) {
             registerCallback(deviceManager)
             try {
@@ -149,7 +148,7 @@ class ListFragment  : Fragment() {
         if (notification != null) {
             intent.putExtra("notification", notification as Serializable)
         }
-        intent.putExtra("device_id", args.deviceID)
+//        intent.putExtra("device_id", args.deviceID)
         startActivity(intent)
     }
 

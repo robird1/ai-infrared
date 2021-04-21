@@ -13,22 +13,22 @@
 
     <fragment
         android:id="@+id/navigation_people"
-        android:name="com.ulsee.thermalapp.ui.people.DeviceFragment"
+        android:name="com.ulsee.thermalapp.ui.people.ProfileFragment"
         android:label="@string/title_people"
-        tools:layout="@layout/fragment_profile_devices" >
-        <action
-            android:id="@+id/action_to_navigation_people_list"
-            app:destination="@id/navigation_people_list" />
+        tools:layout="@layout/fragment_people_list" >
+<!--        <action-->
+<!--            android:id="@+id/action_to_navigation_people_list"-->
+<!--            app:destination="@id/navigation_people_list" />-->
     </fragment>
 
     <fragment
         android:id="@+id/navigation_notification"
-        android:name="com.ulsee.thermalapp.ui.notification.DeviceFragment"
+        android:name="com.ulsee.thermalapp.ui.notification.ListFragment"
         android:label="@string/title_notification"
         tools:layout="@layout/fragment_notification_list" >
-        <action
-            android:id="@+id/action_to_navigation_record_list"
-            app:destination="@id/navigation_record_list" />
+<!--        <action-->
+<!--            android:id="@+id/action_to_navigation_record_list"-->
+<!--            app:destination="@id/navigation_record_list" />-->
     </fragment>
 
     <fragment
@@ -37,34 +37,34 @@
         android:label="@string/title_settings"
         tools:layout="@layout/fragment_settings" />
 
-    <fragment
-        android:id="@+id/navigation_people_list"
-        android:name="com.ulsee.thermalapp.ui.people.ProfileFragment"
-        android:label="@string/title_people"
-        tools:layout="@layout/fragment_people_list" >
-        <argument
-            android:name="deviceID"
-            app:argType="string"
-            android:defaultValue="" />
-        <argument
-            android:name="deviceName"
-            app:argType="string"
-            android:defaultValue="" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/navigation_record_list"
-        android:name="com.ulsee.thermalapp.ui.notification.ListFragment"
-        android:label="@string/title_notification"
-        tools:layout="@layout/fragment_notification_list" >
-        <argument
-            android:name="deviceID"
-            app:argType="string"
-            android:defaultValue="" />
-        <argument
-            android:name="deviceName"
-            app:argType="string"
-            android:defaultValue="" />
-    </fragment>
+<!--    <fragment-->
+<!--        android:id="@+id/navigation_people_list"-->
+<!--        android:name="com.ulsee.thermalapp.ui.people.ProfileFragment"-->
+<!--        android:label="@string/title_people"-->
+<!--        tools:layout="@layout/fragment_people_list" >-->
+<!--        <argument-->
+<!--            android:name="deviceID"-->
+<!--            app:argType="string"-->
+<!--            android:defaultValue="" />-->
+<!--        <argument-->
+<!--            android:name="deviceName"-->
+<!--            app:argType="string"-->
+<!--            android:defaultValue="" />-->
+<!--    </fragment>-->
+<!---->
+<!--    <fragment-->
+<!--        android:id="@+id/navigation_record_list"-->
+<!--        android:name="com.ulsee.thermalapp.ui.notification.ListFragment"-->
+<!--        android:label="@string/title_notification"-->
+<!--        tools:layout="@layout/fragment_notification_list" >-->
+<!--        <argument-->
+<!--            android:name="deviceID"-->
+<!--            app:argType="string"-->
+<!--            android:defaultValue="" />-->
+<!--        <argument-->
+<!--            android:name="deviceName"-->
+<!--            app:argType="string"-->
+<!--            android:defaultValue="" />-->
+<!--    </fragment>-->
 
 </navigation>

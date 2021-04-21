@@ -9,7 +9,7 @@ import kotlinx.coroutines.*
 private val TAG = DeviceViewModel::class.java.simpleName
 const val POLLING_INTERVAL = 3000L
 
-class DeviceViewModel(private val repo: DeviceSyncRepository): ViewModel() {
+open class DeviceViewModel(private val repo: DeviceSyncRepository): ViewModel() {
     private var _deviceList = MutableLiveData<List<Device>>()
     val deviceList : LiveData<List<Device>>
         get() = _deviceList
@@ -39,10 +39,10 @@ class DeviceViewModel(private val repo: DeviceSyncRepository): ViewModel() {
                     val isOnline = deviceManager!!.tcpClient.isConnected()
                     if (isOnline) {
                         _deviceStatus.value = DeviceStatus(device.getID(), true)
-//                        Log.d(TAG, "MAC: ${deviceInfo.data.mac} isConnected: true")
+//                        Log.d(TAG, "deviceId: ${device.getID()} isConnected: true")
                     } else {
                         _deviceStatus.value = DeviceStatus(device.getID(), false)
-//                        Log.d(TAG, "MAC: ${device.getMAC()} isConnected: false")
+//                        Log.d(TAG, "deviceId: ${device.getID()} isConnected: false")
                     }
 
                 } catch (e: Exception) {

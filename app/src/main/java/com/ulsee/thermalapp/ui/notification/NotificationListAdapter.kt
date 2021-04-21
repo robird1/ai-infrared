@@ -16,12 +16,12 @@ import com.ulsee.thermalapp.data.model.Notification
 import com.ulsee.thermalapp.data.response.NotificationImage
 import com.ulsee.thermalapp.data.services.DeviceManager
 
-private val TAG = NotificationListAdapter::class.java.simpleName
-
-class NotificationListAdapter(private val args: ListFragmentArgs, private val activity: Activity): RecyclerView.Adapter<NotificationListAdapter.ViewHolder>() {
+//class NotificationListAdapter(private val args: ListFragmentArgs, private val activity: Activity): RecyclerView.Adapter<NotificationListAdapter.ViewHolder>() {
+class NotificationListAdapter(private val activity: Activity): RecyclerView.Adapter<NotificationListAdapter.ViewHolder>() {
 
     private val deviceManager: DeviceManager? by lazy {
-        Service.shared.getManagerOfDeviceID(args.deviceID)
+//        Service.shared.getManagerOfDeviceID(args.deviceID)
+        Service.shared.getFirstConnectedDeviceManager()
     }
 
     private var notificationList: List<Notification> = ArrayList()

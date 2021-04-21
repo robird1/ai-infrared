@@ -12,26 +12,93 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 
+
 class UDPBroadcastService {
 
-    val UDP_BROADCAST_MOBILE_MESSAGE = "ULSee search"
-    val UDP_BROADCAST_MOBILE_SEND_PORT = 2020
-    val UDP_BROADCAST_IPC_MESSAGE_PREFIX = "ULSee:"
-    val UDP_BROADCAST_IPC_MESSAGE_PORT = 2021
-
-    var mUDPSocket = DatagramSocket()
-    var mUDPServerSocket = DatagramSocket(UDP_BROADCAST_IPC_MESSAGE_PORT)
-    var mBroadcaseSendCounter = 1 // 數到0就送出
-    var mBroadcaseSendInterval = 1 // 數幾下才送出，平常是3，已經掃到有效的QRCode時是1
-
-    var shouldBroadcasting = false
-
-    val isDebug = false
-    private fun log (str: String) {
-        if (isDebug) Log.i(javaClass.name, str)
+    companion object {
+        const val UDP_BROADCAST_MOBILE_MESSAGE = "ULSee search"
+        const val UDP_BROADCAST_OLD_PORT = 2020
+        const val UDP_BROADCAST_IPC_MESSAGE_PREFIX = "ULSee:"
+        const val UDP_BROADCAST_PORT = 2021
     }
 
-    fun getBroadcastAddress(ctx: Context): InetAddress? {
+    var mUDPSocket = DatagramSocket(UDP_BROADCAST_PORT)
+//    var mUDPServerSocket = DatagramSocket(UDP_BROADCAST_IPC_MESSAGE_PORT)
+
+//    var mBroadcaseSendCounter = 1 // 數到0就送出
+//    var mBroadcaseSendInterval = 1 // 數幾下才送出，平常是3，已經掃到有效的QRCode時是1
+
+//    var shouldBroadcasting = false
+
+
+    fun initialize(ctx: Context) {
+        mUDPSocket.broadcast = true
+
+        Thread {
+            listenResponse()
+        }.start()
+
+        Thread {
+            sendUDPBroadcast(initPacket(ctx), initPacketOld(ctx))
+        }.start()
+    }
+
+    private fun initPacket(ctx: Context): DatagramPacket {
+        val sendData = UDP_BROADCAST_MOBILE_MESSAGE.toByteArray()
+        return DatagramPacket(
+            sendData,
+            sendData.size,
+            getBroadcastAddress(ctx),
+            UDP_BROADCAST_PORT
+        )
+    }
+
+    private fun initPacketOld(ctx: Context): DatagramPacket {
+        val sendData = UDP_BROADCAST_MOBILE_MESSAGE.toByteArray()
+        return DatagramPacket(
+            sendData,
+            sendData.size,
+            getBroadcastAddress(ctx),
+            UDP_BROADCAST_OLD_PORT
+        )
+    }
+
+    private fun listenResponse() {
+        val lMsg = ByteArray(4096)
+        val dp = DatagramPacket(lMsg, lMsg.size)
+        try {
+            while (!mUDPSocket.isClosed) {
+                mUDPSocket.receive(dp)
+                val receivedMessage = String(lMsg, 0, dp.length)
+                Log.i(javaClass.name, "got: " + receivedMessage + ", from " + dp.address.hostAddress)
+
+                checkResponse(receivedMessage, dp)
+            }
+            Log.w(javaClass.name, "UDP Broadcast closed")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Log.d(javaClass.name, e.message)
+        }
+    }
+
+    private fun sendUDPBroadcast(sendPacket: DatagramPacket, sendPacketOld: DatagramPacket) {
+        while (!mUDPSocket.isClosed) {
+            try {
+//                if(shouldBroadcasting && --mBroadcaseSendCounter==0) {
+                mUDPSocket.send(sendPacket)
+                mUDPSocket.send(sendPacketOld)
+//                }
+//                log("sent: "+String(sendData))
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                Thread.sleep(2000)
+//                if (mBroadcaseSendCounter <= 0) mBroadcaseSendCounter = mBroadcaseSendInterval
+            }
+        }
+    }
+
+    private fun getBroadcastAddress(ctx: Context): InetAddress? {
 //        val wifi = ctx.getSystemService(Context.WIFI_SERVICE) as WifiManager
 //        val dhcp = wifi.dhcpInfo
 //        // handle null somehow
@@ -41,73 +108,30 @@ class UDPBroadcastService {
 //        val inetAddr = InetAddress.getByAddress(quads)
 //        Log.d("UDPBroadcastService", "inetAddr: $inetAddr")
 //        Log.d("UDPBroadcastService", "inetAddr.hostAddress: ${inetAddr.hostAddress}")
-        val inetAddr = InetAddress.getByName("255.255.255.255")
-        return inetAddr
+        return InetAddress.getByName("255.255.255.255")
     }
 
-    // 每3秒傳送廣播，如果掃到qrcode,無法匹配，跳出progress表示無法連線，並改為每1秒傳送
-    fun initialize(ctx: Context) {
-
-        mUDPServerSocket.broadcast = true
-        // 2. keep recv
-        Thread(Runnable {
-            val lMsg = ByteArray(4096)
-            val dp = DatagramPacket(lMsg, lMsg.size)
-            try {
-                while (!mUDPServerSocket.isClosed) {
-                    mUDPServerSocket.receive(dp);
-                    val receivedMessage = String(lMsg, 0, dp.length)
-                    Log.i(javaClass.name, "got: "+receivedMessage+", from "+dp.address.hostAddress)
-
-                    val isValidDeviceResponse = receivedMessage.startsWith(UDP_BROADCAST_IPC_MESSAGE_PREFIX)
-                    if (isValidDeviceResponse) {
-                        val deviceID = receivedMessage.substring(UDP_BROADCAST_IPC_MESSAGE_PREFIX.length)
-                        Log.i(javaClass.name, "parsed id: "+deviceID)
-                        val device = Device()
-                        device.setID(deviceID)
-                        device.setIP(dp.address.hostAddress)
-                        device.setCreatedAt(System.currentTimeMillis())
-                        if (mEmitter != null) mEmitter?.onNext(device)
-                        else Log.e(javaClass.name, "Error: UDP received device, but no listener")
-                    }
-                }
-                Log.w(javaClass.name, "UDP Broadcast closed")
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }).start()
-
-        mUDPSocket.broadcast = true
-        val sendData: ByteArray = UDP_BROADCAST_MOBILE_MESSAGE.toByteArray()
-        val sendPacket = DatagramPacket(
-            sendData,
-            sendData.size,
-            getBroadcastAddress(ctx),
-            UDP_BROADCAST_MOBILE_SEND_PORT
+    private fun checkResponse(receivedMessage: String, dp: DatagramPacket) {
+        val isValidDeviceResponse = receivedMessage.startsWith(
+            UDP_BROADCAST_IPC_MESSAGE_PREFIX
         )
-
-        // 1. keep send
-        Thread(Runnable {
-            while (!mUDPSocket.isClosed) {
-                try {
-//                    if(shouldBroadcasting && --mBroadcaseSendCounter==0) {
-                        mUDPSocket.send(sendPacket)
-//                    }
-//                    log("sent: "+String(sendData))
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                } finally {
-                    Thread.sleep(1000)
-                    if(mBroadcaseSendCounter<=0)mBroadcaseSendCounter = mBroadcaseSendInterval
-                }
-            }
-        }).start()
+        if (isValidDeviceResponse) {
+            val deviceID =
+                receivedMessage.substring(UDP_BROADCAST_IPC_MESSAGE_PREFIX.length)
+            Log.i(javaClass.name, "parsed id: $deviceID")
+            val device = Device()
+            device.setID(deviceID)
+            device.setIP(dp.address.hostAddress)
+            device.setCreatedAt(System.currentTimeMillis())
+            if (mEmitter != null) mEmitter?.onNext(device)
+            else Log.e(javaClass.name, "Error: UDP received device, but no listener")
+        }
     }
 
-    fun deinit () {
-        if (!mUDPSocket.isClosed)mUDPSocket.close()
-        if (!mUDPServerSocket.isClosed)mUDPServerSocket.close()
-    }
+//    fun deinit () {
+//        if (!mUDPSocket.isClosed)mUDPSocket.close()
+//        if (!mUDPServerSocket.isClosed)mUDPServerSocket.close()
+//    }
 
     var mEmitter : Emitter<Device>? = null
 

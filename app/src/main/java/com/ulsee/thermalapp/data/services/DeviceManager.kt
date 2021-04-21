@@ -238,7 +238,7 @@ class DeviceManager(context: Context, device: Device) {
                     if (settings!!.Deviation > 10) settings?.Deviation = 0.0
                     if (settings!!.Deviation < -10) settings?.Deviation = 0.0
                     if (settings!!.ID != device.getID()) {
-                        Log.d(TAG, "device.getID(): "+ device.getID()+" settings.ID: "+ settings!!.ID)
+                        Log.d(javaClass.name, "device.getID(): "+ device.getID()+" settings.ID: "+ settings!!.ID)
                         Log.w(javaClass.name, "device connected but id not match...")
                         mIsIDNotMatched = true;
                         tcpClient.close();
@@ -253,14 +253,14 @@ class DeviceManager(context: Context, device: Device) {
                 }
             }
             Action.deviceSettingsResponse.id -> {
-                Log.d(TAG, "[Enter] when() -> Action.deviceSettingsResponse ")
+                Log.d(javaClass.name, "[Enter] when() -> Action.deviceSettingsResponse ")
                 val itemType = object : TypeToken<Settings>() {}.type
                 try {
                     settings = gson.fromJson<Settings>(responseString, itemType)
                     if (settings!!.Deviation > 10) settings?.Deviation = 0.0
                     if (settings!!.Deviation < -10) settings?.Deviation = 0.0
                     if (settings!!.ID != device.getID()) {
-                        Log.d(TAG, "device.getID(): "+ device.getID()+" settings.ID: "+ settings!!.ID)
+                        Log.d(javaClass.name, "device.getID(): "+ device.getID()+" settings.ID: "+ settings!!.ID)
                         Log.w(javaClass.name, "device connected but id not match...")
                         mIsIDNotMatched = true;
                         tcpClient.close();

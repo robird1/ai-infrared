@@ -13,7 +13,8 @@ import java.lang.Exception
 import java.net.InetSocketAddress
 import java.net.Socket
 
-val TAG ="TCPClient"
+private val TAG ="TCPClient"
+
 class TCPClient(device: Device, port: Int) {
 
     val id = device.getID()

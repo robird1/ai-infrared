@@ -14,17 +14,17 @@ import io.reactivex.schedulers.Schedulers
 import java.lang.Exception
 import kotlin.math.min
 
-class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
+class SettingsServiceTCP(deviceManager: DeviceManager) {
 
     val deviceManager = deviceManager
     var apiClient : TCPClient? = deviceManager.tcpClient
     val gson = Gson()
 
-    override fun get(): Observable<Settings> {
+    fun get(): Observable<Settings> {
         TODO("Not yet implemented")
     }
 
-    override fun update(settings: Settings): Completable {
+    fun update(settings: Settings): Completable {
         val handler: CompletableOnSubscribe = CompletableOnSubscribe { emitter ->
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true) throw Exception("error: target not connected")
@@ -61,12 +61,12 @@ class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
             fps = (20 - min(19, (sentCount-recvCount)*3)).toLong()
         }
 
-        Log.i(javaClass.name, String.format("%d sent, %d recv, new fps = %d", sentCount, recvCount, fps))
+//        Log.i(javaClass.name, String.format("%d sent, %d recv, new fps = %d", sentCount, recvCount, fps))
 
         return fps
     }
 
-    override fun openRGBStream(): Observable<String> {
+    fun openRGBStream(): Observable<String> {
         val handler: ObservableOnSubscribe<String> = ObservableOnSubscribe<String> { emitter ->
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
@@ -110,7 +110,56 @@ class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
             .observeOn(AndroidSchedulers.mainThread())
     }
 
-    override fun closeRGBStream(): Completable {
+    fun openRGBStream2(): Observable<Pair<String, String>> {
+//        Log.d("SettingsServiceTCP", "[Enter] openRGBStream2() deviceId: ${deviceManager.device.getID()}")
+
+        val handler: ObservableOnSubscribe<Pair<String, String>> = ObservableOnSubscribe<Pair<String, String>> { emitter ->
+            if (apiClient == null) throw Exception("error: target not specified")
+            if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
+//            if (apiClient?.isConnected() != true) apiClient?.reconnect()
+
+            var fps = 20L
+            var interval = 50L
+            var sentCount = 0
+            var recvCount = 0
+            var i = 0L
+
+            deviceManager.setOnGotVideoFrameListener(object: DeviceManager.OnGotVideoFrameListener{
+                override fun onVideoFrame(frame: String) {
+                    val newFPS = calculateFPS(sentCount, ++recvCount)
+                    if (newFPS != fps) {
+                        fps = newFPS
+                    }
+                    Log.d(javaClass.name, "[Enter] onVideoFrame() deviceID: ${deviceManager.device.getID()}")
+                    emitter.onNext(Pair(frame, deviceManager.device.getID()))
+                }
+            })
+            try {
+                while(!emitter.isDisposed) {
+                    i ++
+                    i %= 20
+                    if (i % (20L/fps) == 0L) {
+                        apiClient?.send(gson.toJson(SetVideo(SetVideo.VideoStatus.openRGB)))
+                        val newFPS = calculateFPS(++sentCount, recvCount)
+                        if (newFPS != fps) {
+                            fps = newFPS
+                        }
+                    }
+//                    Log.d("SettingsServiceTCP", "[Enter] Thread.sleep()")
+                    Thread.sleep(interval)
+                }
+                Log.d("SettingsServiceTCP", "end send loop deviceId: ${deviceManager.device.getID()}")
+            } catch(e: Exception) {
+                Log.d("SettingsServiceTCP", "[Exception] deviceId: ${deviceManager.device.getID()} e.message: ${e.message}")
+                if (!emitter.isDisposed) emitter.onError(e)
+            }
+        }
+
+        return Observable.create(handler).subscribeOn(Schedulers.newThread())
+            .observeOn(AndroidSchedulers.mainThread())
+    }
+
+    fun closeRGBStream(): Completable {
         val handler: CompletableOnSubscribe = CompletableOnSubscribe {
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
@@ -124,7 +173,7 @@ class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
             .observeOn(AndroidSchedulers.mainThread())
     }
 
-    override fun openThermaltream(): Observable<String> {
+    fun openThermaltream(): Observable<String> {
         val handler: ObservableOnSubscribe<String> = ObservableOnSubscribe<String> { emitter ->
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
@@ -155,7 +204,7 @@ class SettingsServiceTCP(deviceManager: DeviceManager) : ISettingsService {
             .observeOn(AndroidSchedulers.mainThread())
     }
 
-    override fun closeThermaltream(): Completable {
+    fun closeThermaltream(): Completable {
         val handler: CompletableOnSubscribe = CompletableOnSubscribe {
             if (apiClient == null) throw Exception("error: target not specified")
             if (apiClient?.isConnected() != true)throw Exception("error: target not connected")

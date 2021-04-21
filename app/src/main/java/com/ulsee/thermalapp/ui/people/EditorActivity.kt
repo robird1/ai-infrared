@@ -43,10 +43,10 @@ class EditorActivity : AppCompatActivity() {
         get() {
             return intent.getBooleanExtra("is_edit_mode", true)
         }
-    private val deviceId: String
-        get() {
-            return intent.getStringExtra("device_id")!!
-        }
+//    private val deviceId: String
+//        get() {
+//            return intent.getStringExtra("device_id")!!
+//        }
     private var lastClickTime: Long = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -178,7 +178,8 @@ class EditorActivity : AppCompatActivity() {
     }
 
     private fun editPeople () {
-        val deviceManager = Service.shared.getManagerOfDeviceID(deviceId)
+//        val deviceManager = Service.shared.getManagerOfDeviceID(deviceId)
+        val deviceManager = Service.shared.getFirstConnectedDeviceManager()
         if (deviceManager != null) {
             mProgressView.visibility = View.VISIBLE
             try {

@@ -16,9 +16,10 @@ import com.ulsee.thermalapp.data.services.DeviceManager
 
 class NotificationActivity : AppCompatActivity() {
     private val deviceManager: DeviceManager? by lazy {
-        intent.getStringExtra("device_id")?.let {
-            Service.shared.getManagerOfDeviceID(it)
-        }
+//        intent.getStringExtra("device_id")?.let {
+//            Service.shared.getManagerOfDeviceID(it)
+//        }
+        Service.shared.getFirstConnectedDeviceManager()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

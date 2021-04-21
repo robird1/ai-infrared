@@ -10,7 +10,6 @@ import androidx.appcompat.widget.SearchView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -32,7 +31,7 @@ class ProfileFragment : Fragment(), RecyclerItemTouchHelper.ItemTouchListener, S
     private lateinit var mMenuSearchItem: MenuItem
 //    private lateinit var mSearchView: PeopleSearchView
     private lateinit var mProgressView: ConstraintLayout
-    private val args: ProfileFragmentArgs by navArgs()
+//    private val args: ProfileFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,7 +50,7 @@ class ProfileFragment : Fragment(), RecyclerItemTouchHelper.ItemTouchListener, S
         loadPeopleList()
         configFabListener(root)
 
-        (activity as MainActivity).setTitle(getTitleText())
+        (activity as MainActivity).setTitle("ID Management")
 
         return root
     }
@@ -121,12 +120,13 @@ class ProfileFragment : Fragment(), RecyclerItemTouchHelper.ItemTouchListener, S
     override fun onQueryTextSubmit(query: String?): Boolean {
         if (query.isNullOrEmpty()) return true
 
-        val deviceManager = Service.shared.getManagerOfDeviceID(args.deviceID)
+//        val deviceManager = Service.shared.getManagerOfDeviceID(args.deviceID)
+        val deviceManager = Service.shared.getFirstConnectedDeviceManager()
         if (deviceManager != null) {
             deviceManager.setOnGotFaceListListener(object: DeviceManager.OnGotFaceListListener{
                 override fun onGotFaceList(faceList: List<Face>) {
                     activity?.runOnUiThread {
-                        Log.d(TAG, "[Enter] onGotFaceList() faceList.size: ${faceList.size}")
+//                        Log.d(TAG, "[Enter] onGotFaceList() faceList.size: ${faceList.size}")
                         (recyclerView.adapter as ProfileAdapter).setList(faceList)
                         swipeRefreshLayout.isRefreshing = false
 
@@ -157,17 +157,20 @@ class ProfileFragment : Fragment(), RecyclerItemTouchHelper.ItemTouchListener, S
             }
             AttributeType.setAttributeData(face)
             intent.putExtra("is_edit_mode", isEditMode)
-            intent.putExtra("device_id", args.deviceID)
+//            intent.putExtra("device_id", args.deviceID)
         }
         startActivityForResult(intent, REQUEST_ACTIVITY_EDITOR)
     }
 
     private fun loadPeopleList () {
-        Log.d(TAG,"[Enter] loadPeopleList() deviceID: ${args.deviceID}")
-        val deviceManager = Service.shared.getManagerOfDeviceID(args.deviceID)
+//        Log.d(TAG,"[Enter] loadPeopleList() deviceID: ${args.deviceID}")
+//        val deviceManager = Service.shared.getManagerOfDeviceID(args.deviceID)
+        val deviceManager = Service.shared.getFirstConnectedDeviceManager()
         if (deviceManager != null) {
             deviceManager.setOnGotFaceListListener(object: DeviceManager.OnGotFaceListListener{
                 override fun onGotFaceList(faceList: List<Face>) {
+//                    Log.d(TAG,"[Enter] onGotFaceList() faceList.size: ${faceList.size}")
+
                     activity?.runOnUiThread {
                         (recyclerView.adapter as ProfileAdapter).setList(faceList)
                         swipeRefreshLayout.isRefreshing = false
@@ -179,6 +182,7 @@ class ProfileFragment : Fragment(), RecyclerItemTouchHelper.ItemTouchListener, S
 
             try {
                 deviceManager.getAllProfiles()
+//                Log.d(TAG,"[Enter] deviceManager.getAllProfiles()")
 
             } catch (e: Exception) {
                 swipeRefreshLayout.isRefreshing = false
@@ -192,7 +196,8 @@ class ProfileFragment : Fragment(), RecyclerItemTouchHelper.ItemTouchListener, S
     }
 
     private fun deletePeople(face: Face, position: Int) {
-        val deviceManager = Service.shared.getManagerOfDeviceID(args.deviceID)
+//        val deviceManager = Service.shared.getManagerOfDeviceID(args.deviceID)
+        val deviceManager = Service.shared.getFirstConnectedDeviceManager()
         if (deviceManager != null) {
             mProgressView.visibility = View.VISIBLE
             try {
@@ -226,7 +231,7 @@ class ProfileFragment : Fragment(), RecyclerItemTouchHelper.ItemTouchListener, S
         Toast.makeText(requireContext(), getString(resId), Toast.LENGTH_LONG).show()
     }
 
-    private fun getTitleText() = "${getString(R.string.profile_fragment_title)} (${args.deviceName})"
+//    private fun getTitleText() = "${getString(R.string.profile_fragment_title)} (${args.deviceName})"
 
     companion object {
         const val REQUEST_ACTIVITY_EDITOR = 1234

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/deviceName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        app:layout_constraintBottom_toBottomOf="@+id/frame_connect_status"
+        app:layout_constraintStart_toEndOf="@+id/frame_connect_status"
+        app:layout_constraintTop_toTopOf="@+id/frame_connect_status" />
+
+    <FrameLayout
+        android:id="@+id/frame_connect_status"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_alignParentRight="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/streamingSurfaceView">
+
+        <View
+            android:id="@+id/view_not_connected"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="5dp"
+            android:background="@android:color/holo_red_dark" />
+
+        <View
+            android:id="@+id/view_connected"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="5dp"
+            android:background="@android:color/holo_green_light"
+            android:visibility="gone" />
+    </FrameLayout>
+
+
+    <com.ulsee.thermalapp.ui.device.StreamingSurfaceView
+        android:id="@+id/streamingSurfaceView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginEnd="2dp"
+        app:layout_constraintDimensionRatio="1.3333"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>
