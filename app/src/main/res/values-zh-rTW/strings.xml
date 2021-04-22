@@ -119,6 +119,7 @@
     <string name="activity_people_list_age">年齡:</string>
     <string name="activity_people_list_gender">性別:</string>
     <string name="profile_fragment_title">裝置</string>
+    <string name="activity_live_view">即時取景</string>
 
     <!-- fragment -->
     <string name="fragment_device_more">更多</string>

@@ -119,6 +119,7 @@
     <string name="activity_people_list_age">Age:</string>
     <string name="activity_people_list_gender">Gender:</string>
     <string name="profile_fragment_title">Device</string>
+    <string name="activity_live_view">Live View</string>
 
 
     <!-- fragment -->

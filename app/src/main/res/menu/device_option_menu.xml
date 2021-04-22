@@ -3,7 +3,6 @@
 
     <item
         android:id="@+id/view_all"
-        android:title="View All"
-        app:showAsAction="always" />
+        android:title="@string/activity_live_view" />
 
 </menu>
