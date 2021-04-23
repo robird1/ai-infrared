@@ -146,34 +146,31 @@ class EditorActivity : AppCompatActivity() {
     }
 
     private fun addPeople () {
-        val selectedTCPClient = Service.shared.getFirstConnectedDeviceManager()
-        if (selectedTCPClient == null) {
-            Toast.makeText(this, R.string.toast_no_connected_device, Toast.LENGTH_LONG).show()
-            return
-        }
-
-        mProgressView.visibility = View.VISIBLE
-
-        val face = AttributeType.getAttributeData()
-        if (mImageBase64?.isEmpty() == false) {
-            val facecode = imageBase64TOFaceCodeBase64(mImageBase64!!)
-            if (facecode == null) {
-                Toast.makeText(this, R.string.activity_editor_toast4, Toast.LENGTH_LONG).show()
-                return
+//        val isFaceExisting = imageToFaceCode()
+//        if (isFaceExisting) {
+//            startActivityForResult(Intent(this, DeviceSyncActivity::class.java), REQUEST_SYNC_PROFILE)
+//        }
+        val deviceManager = Service.shared.getFirstConnectedDeviceManager()
+        if (deviceManager != null) {
+            mProgressView.visibility = View.VISIBLE
+            try {
+                val isFaceExisting = imageToFaceCode()
+                if (isFaceExisting) {
+                    deviceManager.createProfile(AttributeType.getAttributeData())
+                    showToast(R.string.create_successfully)
+                    setResult(RESULT_OK)
+                    finish()
+                } else {
+                    // no face warning was handled in imageToFaceCode()
+                }
+            } catch (e: Exception) {
+                showToast(e.localizedMessage!!)
             }
-            face.Data = facecode!!
-        }
+            mProgressView.visibility = View.INVISIBLE
 
-        PeopleServiceTCP(selectedTCPClient).create(face)
-            .subscribe({ newPeople ->
-                Toast.makeText(this, getString(R.string.create_successfully), Toast.LENGTH_LONG).show()
-                setResult(RESULT_OK)
-                finish()
-                mProgressView.visibility = View.INVISIBLE
-            }, { error: Throwable ->
-                Toast.makeText(this, "Error ${error.localizedMessage}", Toast.LENGTH_LONG).show()
-                mProgressView.visibility = View.INVISIBLE
-            })
+        } else {
+            showToast(R.string.toast_no_connected_device)
+        }
     }
 
     private fun editPeople () {
@@ -188,6 +185,8 @@ class EditorActivity : AppCompatActivity() {
                     showToast(R.string.update_successfully)
                     setResult(RESULT_OK)
                     finish()
+                } else {
+                    // no face warning was handled in imageToFaceCode()
                 }
             } catch (e: Exception) {
                 showToast(e.localizedMessage!!)
