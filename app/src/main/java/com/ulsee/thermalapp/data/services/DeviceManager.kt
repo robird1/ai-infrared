@@ -9,9 +9,8 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.AppPreference
-import com.ulsee.thermalapp.data.model.Device
-import com.ulsee.thermalapp.data.model.Notification
-import com.ulsee.thermalapp.data.model.Settings
+import com.ulsee.thermalapp.data.model.*
+import com.ulsee.thermalapp.data.request.*
 import com.ulsee.thermalapp.data.response.FaceList
 import com.ulsee.thermalapp.data.response.NotificationImage
 import com.ulsee.thermalapp.data.response.NotificationList
@@ -62,7 +61,7 @@ class DeviceManager(context: Context, device: Device) {
     private val mLock = Object()
 
     interface OnGotFaceListListener{
-        fun onGotFaceList(falceList: List<com.ulsee.thermalapp.data.model.Face>)
+        fun onGotFaceList(faceList: List<com.ulsee.thermalapp.data.model.Face>)
     }
     var mOnGotFaceListListener : OnGotFaceListListener? = null
     fun setOnGotFaceListListener(listener: OnGotFaceListListener?) {
@@ -80,7 +79,7 @@ class DeviceManager(context: Context, device: Device) {
     }
 
     interface OnGotNotificationListListener{
-        fun onGotNotificationList(falceList: List<com.ulsee.thermalapp.data.model.Notification>)
+        fun onGotNotificationList(faceList: List<com.ulsee.thermalapp.data.model.Notification>)
     }
     var mOnGotNotificationListListener : OnGotNotificationListListener? = null
     fun setOnGotNotificationListListener(listener: OnGotNotificationListListener?) {
@@ -121,6 +120,7 @@ class DeviceManager(context: Context, device: Device) {
     private var mThread: HandlerThread? = null
     private lateinit var mTask: Runnable
     val mContext = context
+    val gson = Gson()
 
     init {
         listenData()
@@ -238,7 +238,7 @@ class DeviceManager(context: Context, device: Device) {
                     if (settings!!.Deviation > 10) settings?.Deviation = 0.0
                     if (settings!!.Deviation < -10) settings?.Deviation = 0.0
                     if (settings!!.ID != device.getID()) {
-                        Log.d(TAG, "device.getID(): "+ device.getID()+" settings.ID: "+ settings!!.ID)
+                        Log.d(javaClass.name, "device.getID(): "+ device.getID()+" settings.ID: "+ settings!!.ID)
                         Log.w(javaClass.name, "device connected but id not match...")
                         mIsIDNotMatched = true;
                         tcpClient.close();
@@ -253,14 +253,14 @@ class DeviceManager(context: Context, device: Device) {
                 }
             }
             Action.deviceSettingsResponse.id -> {
-                Log.d(TAG, "[Enter] when() -> Action.deviceSettingsResponse ")
+                Log.d(javaClass.name, "[Enter] when() -> Action.deviceSettingsResponse ")
                 val itemType = object : TypeToken<Settings>() {}.type
                 try {
                     settings = gson.fromJson<Settings>(responseString, itemType)
                     if (settings!!.Deviation > 10) settings?.Deviation = 0.0
                     if (settings!!.Deviation < -10) settings?.Deviation = 0.0
                     if (settings!!.ID != device.getID()) {
-                        Log.d(TAG, "device.getID(): "+ device.getID()+" settings.ID: "+ settings!!.ID)
+                        Log.d(javaClass.name, "device.getID(): "+ device.getID()+" settings.ID: "+ settings!!.ID)
                         Log.w(javaClass.name, "device connected but id not match...")
                         mIsIDNotMatched = true;
                         tcpClient.close();
@@ -431,8 +431,52 @@ class DeviceManager(context: Context, device: Device) {
         if (isNotificationEnabled) {
             val intent = Intent(mContext, NotificationActivity::class.java)
             intent.putExtra("notification", notification)
+            intent.putExtra("device_id", device.getID())
             NotificationCenter.shared.show2(mContext, intent, mContext.getString(R.string.title_alert_notification), notification)
         }
     }
+
+    fun createProfile(face: Face) {
+        sendRequest(ChangePeople(face, ChangePeople.ChangeType.create))
+    }
+
+    fun deleteProfile(face: Face) {
+        sendRequest(ChangePeople(face, ChangePeople.ChangeType.delete))
+    }
+
+    fun updateProfile(face: Face) {
+        sendRequest(ChangePeople(face, ChangePeople.ChangeType.update))
+    }
+
+    fun getAllProfiles() {
+        sendRequest(GetFaceList())
+    }
+
+    fun searchProfile(keyword: String) {
+        sendRequest(GetSearchList(keyword))
+    }
+
+    fun getAllNotifications() {
+        sendRequest(GetNotificationList())
+    }
+
+    fun loadFilteredRecords(data: FilteredRecord) {
+        sendRequest(data)
+    }
+
+    fun getSingleNotification(id: String) {
+        sendRequest(GetNotificationImage(id))
+    }
+
+    private fun sendRequest(data: Any) {
+        if (!tcpClient.isConnected())
+            throw Exception("error: target not connected")
+
+        Thread {
+            tcpClient.send(gson.toJson(data))
+        }.start()
+
+    }
+
 
 }

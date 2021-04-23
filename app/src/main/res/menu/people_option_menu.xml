@@ -6,7 +6,7 @@
         android:title="Search"
         android:icon="@drawable/ic_toolbar_search_gray"
         app:showAsAction="always|collapseActionView"
-        app:actionViewClass="com.ulsee.thermalapp.ui.people.PeopleSearchView" />
+        app:actionViewClass="com.ulsee.thermalapp.ui.people.ProfileSearchView" />
 
 <!--    <item-->
 <!--        android:id="@+id/people_delete"-->

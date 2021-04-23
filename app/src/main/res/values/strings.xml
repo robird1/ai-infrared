@@ -11,6 +11,7 @@
     <string name="cancel">Cancel</string>
     <string name="remove">Remove</string>
     <string name="submit">Submit</string>
+    <string name="ok">OK</string>
 
     <string name="update_successfully">Update Successful</string>
     <string name="create_successfully">create successfully</string>
@@ -27,6 +28,9 @@
     <string name="confirm_remove_device">Confirm Device Removal?</string>
     <string name="dialog_add_device">Add Device</string>
     <string name="dialog_connect_hotspot">Connect to Hotspot...</string>
+    <string name="dialog_sync_device_title">Add profile</string>
+    <string name="dialog_sync_device_message">Can not add the profile to the following devices:\n</string>
+    <string name="device_offline">Device is offline</string>
 
     <!-- device relative -->
     <!-- wifi -->
@@ -114,6 +118,8 @@
     <string name="activity_people_list_name">Name:</string>
     <string name="activity_people_list_age">Age:</string>
     <string name="activity_people_list_gender">Gender:</string>
+    <string name="profile_fragment_title">Device</string>
+    <string name="activity_live_view">Live View</string>
 
 
     <!-- fragment -->

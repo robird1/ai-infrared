@@ -1,10 +1,7 @@
 package com.ulsee.thermalapp.ui.device
 
 import android.content.Context
-import android.graphics.BitmapFactory
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Rect
+import android.graphics.*
 import android.util.AttributeSet
 import android.util.Base64
 import android.util.Log
@@ -16,6 +13,11 @@ class StreamingSurfaceView @JvmOverloads constructor(context: Context, attrs: At
     var lastBase64ImageString : String? = null
     fun draw(base64Image: String) {
         lastBase64ImageString = base64Image
+        invalidate()
+    }
+
+    fun clear() {
+        lastBase64ImageString = null
         invalidate()
     }
 
@@ -61,6 +63,8 @@ class StreamingSurfaceView @JvmOverloads constructor(context: Context, attrs: At
             val canvasRect = Rect(0, 0, canvas!!.width, bitmap.height * canvas!!.width / bitmap.width)
             canvas?.drawBitmap(bitmap, bitmapRect, canvasRect, Paint())
             lastBase64ImageString = null
+        } else {
+            canvas?.drawColor(Color.BLACK)
         }
     }
 

@@ -7,10 +7,9 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ulsee.thermalapp.MainActivity
@@ -39,6 +38,8 @@ class ListFragment : Fragment() {
             AddDeviceController(requireActivity()).execute()
         }
 
+        setHasOptionsMenu(true)
+
         (activity as MainActivity).setTitle(getString(R.string.title_device))
 
         val intentFilter = IntentFilter("Device removed")
@@ -54,6 +55,18 @@ class ListFragment : Fragment() {
             deviceChangedReceiver = null
         }
         super.onDestroy()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.device_option_menu, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.view_all) {
+            startActivity(Intent(requireActivity(), MultiDeviceActivity::class.java))
+            return true
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     private fun unregisterDeviceHandler(intent: Intent?) {

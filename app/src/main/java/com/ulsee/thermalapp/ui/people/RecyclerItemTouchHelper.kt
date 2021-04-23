@@ -24,7 +24,7 @@ class RecyclerItemTouchHelper(dragDirs: Int, swipeDirs: Int, private val listene
 
     override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
         if (viewHolder != null) {
-            val foregroundView: View = (viewHolder as PeopleListAdapter.ViewHolder).viewForeground
+            val foregroundView: View = (viewHolder as ProfileAdapter.ViewHolder).viewForeground
             getDefaultUIUtil().onSelected(foregroundView)
         }
     }
@@ -38,7 +38,7 @@ class RecyclerItemTouchHelper(dragDirs: Int, swipeDirs: Int, private val listene
         actionState: Int,
         isCurrentlyActive: Boolean
     ) {
-        val foregroundView: View = (viewHolder as PeopleListAdapter.ViewHolder).viewForeground
+        val foregroundView: View = (viewHolder as ProfileAdapter.ViewHolder).viewForeground
         getDefaultUIUtil().onDrawOver(
             c, recyclerView, foregroundView, dX, dY,
             actionState, isCurrentlyActive
@@ -49,8 +49,8 @@ class RecyclerItemTouchHelper(dragDirs: Int, swipeDirs: Int, private val listene
         recyclerView: RecyclerView,
         viewHolder: RecyclerView.ViewHolder
     ) {
-        val foregroundView: View = (viewHolder as PeopleListAdapter.ViewHolder).viewForeground
-        val deleteIconRight: View = (viewHolder as PeopleListAdapter.ViewHolder).deleteIconRight
+        val foregroundView: View = (viewHolder as ProfileAdapter.ViewHolder).viewForeground
+        val deleteIconRight: View = (viewHolder as ProfileAdapter.ViewHolder).deleteIconRight
         getDefaultUIUtil().clearView(foregroundView)
         getDefaultUIUtil().clearView(deleteIconRight)
 
@@ -65,7 +65,7 @@ class RecyclerItemTouchHelper(dragDirs: Int, swipeDirs: Int, private val listene
         actionState: Int,
         isCurrentlyActive: Boolean
     ) {
-        val foregroundView: View = (viewHolder as PeopleListAdapter.ViewHolder).viewForeground
+        val foregroundView: View = (viewHolder as ProfileAdapter.ViewHolder).viewForeground
         getDefaultUIUtil().onDraw(
             c, recyclerView, foregroundView, dX, dY,
             actionState, isCurrentlyActive

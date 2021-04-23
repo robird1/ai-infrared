@@ -26,11 +26,11 @@ class NotificationServiceTCP(deviceManager: DeviceManager) {
 //            if (apiClient?.isConnected() != true) apiClient?.reconnect()
 
             deviceManager.setOnGotNotificationListListener(object: DeviceManager.OnGotNotificationListListener{
-                override fun onGotNotificationList(falceList: List<Notification>) {
+                override fun onGotNotificationList(faceList: List<Notification>) {
                     Log.d("NotificationServiceTCP", "[Enter] onGotNotificationList")
 
                     deviceManager.setOnGotNotificationListListener(null)
-                    emitter.onNext(falceList)
+                    emitter.onNext(faceList)
                     emitter.onComplete()
                 }
             })
@@ -48,9 +48,9 @@ class NotificationServiceTCP(deviceManager: DeviceManager) {
             if (apiClient?.isConnected() != true)throw Exception("error: target not connected")
 
             deviceManager.setOnGotNotificationListListener(object: DeviceManager.OnGotNotificationListListener{
-                override fun onGotNotificationList(falceList: List<Notification>) {
+                override fun onGotNotificationList(faceList: List<Notification>) {
                     deviceManager.setOnGotNotificationListListener(null)
-                    emitter.onNext(falceList)
+                    emitter.onNext(faceList)
                     emitter.onComplete()
                 }
             })
