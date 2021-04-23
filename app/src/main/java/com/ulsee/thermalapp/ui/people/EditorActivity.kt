@@ -171,9 +171,30 @@ class EditorActivity : AppCompatActivity() {
     }
 
     private fun addPeople () {
-        val isFaceExisting = imageToFaceCode()
-        if (isFaceExisting) {
-            startActivityForResult(Intent(this, DeviceSyncActivity::class.java), REQUEST_SYNC_PROFILE)
+//        val isFaceExisting = imageToFaceCode()
+//        if (isFaceExisting) {
+//            startActivityForResult(Intent(this, DeviceSyncActivity::class.java), REQUEST_SYNC_PROFILE)
+//        }
+        val deviceManager = Service.shared.getFirstConnectedDeviceManager()
+        if (deviceManager != null) {
+            mProgressView.visibility = View.VISIBLE
+            try {
+                val isFaceExisting = imageToFaceCode()
+                if (isFaceExisting) {
+                    deviceManager.createProfile(AttributeType.getAttributeData())
+                    showToast(R.string.create_successfully)
+                    setResult(RESULT_OK)
+                    finish()
+                } else {
+                    // no face warning was handled in imageToFaceCode()
+                }
+            } catch (e: Exception) {
+                showToast(e.localizedMessage!!)
+            }
+            mProgressView.visibility = View.INVISIBLE
+
+        } else {
+            showToast(R.string.toast_no_connected_device)
         }
     }
 
@@ -189,6 +210,8 @@ class EditorActivity : AppCompatActivity() {
                     showToast(R.string.update_successfully)
                     setResult(RESULT_OK)
                     finish()
+                } else {
+                    // no face warning was handled in imageToFaceCode()
                 }
             } catch (e: Exception) {
                 showToast(e.localizedMessage!!)
