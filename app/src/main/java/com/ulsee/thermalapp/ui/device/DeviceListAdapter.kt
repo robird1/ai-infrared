@@ -60,6 +60,7 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
             mPopup.menu.add(1, 0, 0, R.string.fragment_device_menu_setting)
 //            mPopup.menu.add(1, 1, 1, R.string.fragment_device_menu_wifi)
             mPopup.menu.add(1, 1, 1, R.string.fragment_device_menu_remove)
+            mPopup.menu.add(1, 2, 2, R.string.calibration)
 
             mPopup.setOnMenuItemClickListener{ item: MenuItem? ->
                 when (item!!.order) {
@@ -116,6 +117,11 @@ class DeviceListAdapter : RecyclerView.Adapter<DeviceListAdapter.ViewHolder>() {
                                 .create()
                                 .show()
                         }
+                    }
+                    2 -> {
+                        val intent = Intent(itemView.context, CalibrationActivity::class.java)
+                        intent.putExtra("device", deviceID)
+                        itemView.context.startActivity(intent)
                     }
                 }
                 true

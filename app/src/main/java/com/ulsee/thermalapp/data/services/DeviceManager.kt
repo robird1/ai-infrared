@@ -9,12 +9,12 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.ulsee.thermalapp.R
 import com.ulsee.thermalapp.data.AppPreference
+import com.ulsee.thermalapp.data.Service
 import com.ulsee.thermalapp.data.model.*
+import com.ulsee.thermalapp.data.model.Face
+import com.ulsee.thermalapp.data.model.Settings
 import com.ulsee.thermalapp.data.request.*
-import com.ulsee.thermalapp.data.response.FaceList
-import com.ulsee.thermalapp.data.response.NotificationImage
-import com.ulsee.thermalapp.data.response.NotificationList
-import com.ulsee.thermalapp.data.response.VideoFrame
+import com.ulsee.thermalapp.data.response.*
 import com.ulsee.thermalapp.ui.notification.NotificationActivity
 import com.ulsee.thermalapp.utils.NotificationCenter
 import io.reactivex.Observable
@@ -67,6 +67,15 @@ class DeviceManager(context: Context, device: Device) {
     fun setOnGotFaceListListener(listener: OnGotFaceListListener?) {
         if(listener != null && mOnGotFaceListListener != null) Log.e(javaClass.name, "error set listener but already exists: setOnGotFaceListListener")
         mOnGotFaceListListener = listener
+    }
+
+    interface OnGotTwoPictureListener{
+        fun onGotTwoPicture(twoPicture: TwoPicture)
+    }
+    var mOnGotTwoPictureListener : OnGotTwoPictureListener? = null
+    fun setOnGotTwoPictureListener(listener: OnGotTwoPictureListener?) {
+        if(listener != null && mOnGotTwoPictureListener != null) Log.e(javaClass.name, "error set listener but already exists: setOnGotTwoPictureListener")
+        mOnGotTwoPictureListener = listener
     }
 
     interface OnGotVideoFrameListener{
@@ -247,6 +256,14 @@ class DeviceManager(context: Context, device: Device) {
                         mIsIDNotMatched = false
                     }
 
+                    if (settings?.IsFirstActivate == true) {
+                        val isJustJoinedDevice = Service.shared.justJoinedDeviceIDList.contains(device.getID())
+                        Log.i(javaClass.name, "find first settings device: "+device.getID()+", is just joined:"+isJustJoinedDevice)
+                        if (isJustJoinedDevice) {
+                            Service.shared.requestTutorial(device.getID())
+                            Service.shared.justJoinedDeviceIDList.remove(device.getID())
+                        }
+                    }
                 } catch(e: java.lang.Exception) {
                     Log.e(javaClass.name, "Error parse action "+action)
                     e.printStackTrace()
@@ -286,6 +303,19 @@ class DeviceManager(context: Context, device: Device) {
                         Log.e(javaClass.name, "Error no listener of action "+action)
                     }
                     mOnGotFaceListListener?.onGotFaceList(faceList.FaceList)
+                } catch(e: java.lang.Exception) {
+                    Log.e(javaClass.name, "Error parse action "+action)
+                    e.printStackTrace()
+                }
+            }
+            Action.pictureResponse.id -> {
+                val itemType = object : TypeToken<TwoPicture>() {}.type
+                try {
+                    val twoPicture = gson.fromJson<TwoPicture>(responseString, itemType)
+                    if (mOnGotTwoPictureListener== null) {
+                        Log.e(javaClass.name, "Error no listener of action "+action)
+                    }
+                    mOnGotTwoPictureListener?.onGotTwoPicture(twoPicture)
                 } catch(e: java.lang.Exception) {
                     Log.e(javaClass.name, "Error parse action "+action)
                     e.printStackTrace()

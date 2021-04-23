@@ -47,6 +47,12 @@
     <string name="title_alert_notification">Notification</string>
     <string name="qrcode_invalid">QRCode is invalid</string>
 
+    <!-- calibration -->
+    <string name="error_load_rgb_image">failed to load rgb image</string>
+    <string name="error_load_thermal_image">failed to load thermal image</string>
+    <string name="error_load_image">failed to load image</string>
+    <string name="calibration">Calibration</string>
+
     <!-- record -->
     <string name="record_filter_error_date">All fields in Datetime are necessary</string>
     <string name="record_filter_error_temperature">Please check the input of temperature</string>

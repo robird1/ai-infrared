@@ -47,6 +47,12 @@
     <string name="title_alert_notification">警示</string>
     <string name="qrcode_invalid">無效的QR碼</string>
 
+    <!-- calibration -->
+    <string name="error_load_rgb_image">讀取RGB影像失敗</string>
+    <string name="error_load_thermal_image">讀取熱像失敗</string>
+    <string name="error_load_image">讀取影像失敗</string>
+    <string name="calibration">校準</string>
+
     <!-- record -->
     <string name="record_filter_error_date">日期時間的所有欄位均為必填</string>
     <string name="record_filter_error_temperature">請確認溫度的輸入範圍</string>
