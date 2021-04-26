@@ -2,6 +2,7 @@ package com.ulsee.thermalapp.ui.device
 
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -29,12 +30,24 @@ class StreamingActivity : AppCompatActivity() {
         setContentView(R.layout.activity_device_streaming)
 
         thermalSwitch = findViewById(R.id.switch_thermal)
-        thermalSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
-            if (isChecked) {
-                switchToThermalStreaming()
-            } else {
-                switchToRGBStreaming()
+//        thermalSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
+//            if (isChecked) {
+//                switchToThermalStreaming()
+//            } else {
+//                switchToRGBStreaming()
+//            }
+//        }
+        val isCalledFromTutorial = intent.getBooleanExtra("is_tutorial", false)
+        if (!isCalledFromTutorial) {
+            thermalSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
+                if (isChecked) {
+                    switchToThermalStreaming()
+                } else {
+                    switchToRGBStreaming()
+                }
             }
+        } else {
+            thermalSwitch.visibility = View.GONE
         }
 
         surfaceView =  findViewById<StreamingSurfaceView>(R.id.surfaceView) as StreamingSurfaceView
@@ -62,10 +75,27 @@ class StreamingActivity : AppCompatActivity() {
 
         findViewById<TextView>(R.id.textView_toolbar_title).text = deviceManager.device.getName()
 
-        if (thermalSwitch.isChecked) {
+//        if (thermalSwitch.isChecked) {
+//            startThermalStreaming()
+//        } else {
+//            startRGBStreaming()
+//        }
+        if (Service.shared.tutorialDeviceID != null) {
+            findViewById<View>(R.id.button_next).visibility = View.VISIBLE
+            findViewById<View>(R.id.button_next).setOnClickListener{setResult(RESULT_OK);finish()}
+            if (!isCalledFromTutorial) {
+                thermalSwitch.isChecked = true
+            }
+        }
+
+        if (isCalledFromTutorial) {
             startThermalStreaming()
         } else {
-            startRGBStreaming()
+            if (thermalSwitch.isChecked) {
+                startThermalStreaming()
+            } else {
+                startRGBStreaming()
+            }
         }
 
 //        val fragment = SettingsFragment(deviceID, false)

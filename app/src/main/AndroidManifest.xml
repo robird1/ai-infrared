@@ -99,6 +99,19 @@
             tools:ignore="LockedOrientationActivity"
             tools:replace="screenOrientation"></activity>
 
+        <activity
+            android:name=".ui.tutorial.TutorialStep1Activity"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity"></activity>
+        <activity
+            android:name=".ui.tutorial.TutorialStep2Activity"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity"></activity>
+        <activity
+            android:name=".ui.device.CalibrationActivity"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity"></activity>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
